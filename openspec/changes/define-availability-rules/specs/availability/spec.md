@@ -4,6 +4,8 @@
 
 ### Requirement: Availability SHALL be modeled as rules + exceptions, not pre-generated slots
 
+The schema SHALL contain `availability_rules` (recurring local-time bands) and `availability_exceptions` (one-off `block`/`extra` windows) and MUST NOT contain any pre-materialized `availability_slots` table — slots are computed on read by `compute_available_slots`.
+
 #### Scenario: schema shape
 - **GIVEN** the database schema
 - **WHEN** queried for the existence of `availability_slots`
@@ -12,6 +14,8 @@
 
 ### Requirement: A rule SHALL describe a recurring local-time window
 
+Each `availability_rules` row SHALL store `day_of_week`, `start_time`, and `end_time` as `time without time zone` in the tenant's IANA timezone, and `compute_available_slots` MUST combine them with the tenant TZ at compute time so DST transitions are honored.
+
 #### Scenario: weekly opening hours
 - **GIVEN** a tenant in timezone `Europe/Berlin`
 - **WHEN** a rule with `day_of_week = 1` (Monday), `start_time = '09:00'`, `end_time = '17:00'` is inserted
@@ -19,6 +23,8 @@
 - **AND** subsequent slot computation produces slots starting at 09:00 Berlin local time on every Monday in the requested range
 
 ### Requirement: Exceptions SHALL adjust the computed availability
+
+`availability_exceptions` of `kind = 'block'` SHALL subtract their `tstzrange` from the candidate intervals produced by the rules, and rows of `kind = 'extra'` MUST add intervals outside the weekly grid.
 
 #### Scenario: blocking a window
 - **GIVEN** an `extra` exception is unset and a `block` exception covers `2026-12-25 00:00 — 2026-12-26 00:00 UTC` for a tenant
@@ -32,6 +38,8 @@
 - **THEN** the computation produces slots inside that Saturday window
 
 ### Requirement: `compute_available_slots` SHALL respect service constraints
+
+The function SHALL tile each available interval into `service.duration_minutes` slots honoring `buffer_before_min`/`buffer_after_min`, filter to `now() + min_notice_min ≤ slot_start ≤ now() + max_advance_days`, and MUST cap returned slots per tenant-TZ day when `daily_cap` is set.
 
 #### Scenario: minimum notice
 - **GIVEN** a service with `min_notice_min = 60`
@@ -58,6 +66,8 @@
 
 ### Requirement: `compute_available_slots` SHALL exclude slots overlapping live appointments
 
+The function SHALL subtract any slot whose `tstzrange` overlaps a non-cancelled, non-no-show `appointments` row for the same `(tenant_id, service_id)`, and MUST re-offer slots that overlap only cancelled or no-show appointments.
+
 #### Scenario: existing appointment blocks its slot
 - **GIVEN** a `confirmed` appointment from 10:00 to 10:30
 - **WHEN** `compute_available_slots` runs over a range that includes 10:00
@@ -69,6 +79,8 @@
 - **THEN** the slot is offered again
 
 ### Requirement: Rules SHALL be visible to anonymous clients via RLS
+
+`compute_available_slots` SHALL be `SECURITY DEFINER` and callable with the public anon key so the public booking flow MUST be able to fetch slots for a tenant slug without authentication.
 
 #### Scenario: anonymous availability fetch
 - **GIVEN** an anonymous client (anon key)

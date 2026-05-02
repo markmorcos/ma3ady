@@ -4,6 +4,8 @@
 
 ### Requirement: Appointments SHALL belong to either an authenticated user OR a guest contact, never both
 
+A check constraint on `appointments` SHALL enforce that exactly one of `user_id` or `guest_contact_id` is non-null — every appointment MUST have an identity, but never two.
+
 #### Scenario: authenticated booking
 - **GIVEN** an `appointments` row with `user_id` set and `guest_contact_id = null`
 - **THEN** the check constraint passes
@@ -22,6 +24,8 @@
 
 ### Requirement: Two non-cancelled appointments SHALL NEVER overlap for the same service in the same tenant
 
+The `appointments` table SHALL carry a Postgres `EXCLUDE USING gist` constraint on `(tenant_id, service_id, tstzrange(starts_at, ends_at))` predicated on `status NOT IN ('cancelled', 'no_show')`, so concurrent inserts for the same range MUST resolve at the database level with the loser receiving a constraint violation.
+
 #### Scenario: race condition resolved by EXCLUDE constraint
 - **GIVEN** two concurrent transactions inserting appointments for the same `(tenant_id, service_id)` and overlapping `tstzrange`
 - **WHEN** both call commit
@@ -35,6 +39,8 @@
 - **THEN** the EXCLUDE constraint allows it (predicate excludes cancelled/no_show rows)
 
 ### Requirement: Booking SHALL go through the `book_appointment` function, not direct INSERT
+
+RLS on `appointments` SHALL deny INSERT for all roles, and the `book_appointment` SECURITY DEFINER function MUST be the only path that creates rows — returning a plaintext `manage_token` while persisting only `sha256(manage_token)` in `manage_token_hash`.
 
 #### Scenario: direct insert blocked
 - **GIVEN** an authenticated user (any role)
@@ -52,6 +58,8 @@
 
 ### Requirement: Anonymous booking SHALL upsert into `guest_contacts` by `(tenant_id, email)`
 
+`book_appointment` SHALL upsert the guest into `guest_contacts` keyed by `(tenant_id, email)` so repeat bookings from the same email MUST refresh the existing row rather than creating duplicates.
+
 #### Scenario: same email, second booking
 - **GIVEN** a guest contact `(tenant=acme, email=jane@example.com)` already exists
 - **WHEN** a new `book_appointment` call uses the same tenant and email with a different name
@@ -60,6 +68,8 @@
 
 ### Requirement: Appointments SHALL NEVER be hard-deleted
 
+RLS on `appointments` SHALL deny DELETE for every role; cancellation MUST be modeled as a `status = 'cancelled'` update so business records remain intact.
+
 #### Scenario: delete attempt
 - **GIVEN** any role attempting `delete from appointments where id = '<x>'`
 - **WHEN** the operation runs
@@ -67,6 +77,8 @@
 - **AND** the only way to "remove" an appointment is to set `status = 'cancelled'`
 
 ### Requirement: Status changes SHALL produce audit events
+
+The `handle_appointment_status_change` trigger SHALL write a row to `appointment_events` for every status change or reschedule, capturing `event_type`, before/after payload, and `by_user_id = auth.uid()` so the lifecycle MUST be reconstructable from history.
 
 #### Scenario: confirmation event
 - **GIVEN** an appointment in `pending` status
@@ -80,6 +92,8 @@
 - **THEN** an `appointment_events` row is written with `event_type = 'rescheduled'` and old/new timestamps in payload
 
 ### Requirement: Manage tokens SHALL be single-use-purpose and verifiable
+
+The `verify_manage_token(plaintext)` function SHALL hash the input, look up the matching `manage_token_hash`, and MUST return the appointment id only when the appointment is non-cancelled — raising "appointment unavailable" otherwise.
 
 #### Scenario: valid token verification
 - **GIVEN** a non-cancelled appointment with a known plaintext manage token

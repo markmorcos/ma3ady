@@ -4,6 +4,8 @@
 
 ### Requirement: Anonymous browsing SHALL work without authentication
 
+The `(public)/[tenantSlug]` route group SHALL render tenant info and active services for the anon role using the public anon key, and unknown slugs MUST surface a friendly "Tenant not found" empty state without prompting sign-in.
+
 #### Scenario: tenant by slug
 - **GIVEN** a deep link `ma3ady://acme` (or in dev `exp://.../--/acme`)
 - **WHEN** the app opens
@@ -19,6 +21,8 @@
 
 ### Requirement: Booking SHALL collect minimum viable contact info
 
+The booking form SHALL require only `name` and `email` (phone and notes optional), validate the email shape client-side before submit, and MUST keep the submit button disabled until validation passes.
+
 #### Scenario: guest fills the form
 - **GIVEN** a guest on the book screen
 - **WHEN** they submit `{ name, email }` only
@@ -32,6 +36,8 @@
 
 ### Requirement: Slot collisions SHALL produce a recoverable error
 
+When `book_appointment` returns `slot_taken` (the EXCLUDE constraint losing path), the UI SHALL navigate the guest back to the slot picker, refetch availability, and MUST show a toast prompting them to pick another time.
+
 #### Scenario: slot taken at submit time
 - **GIVEN** a guest has selected slot S
 - **AND** between selection and submit, another guest booked S
@@ -43,6 +49,8 @@
 
 ### Requirement: The confirmation screen SHALL present the manage link
 
+After a successful booking, the confirmation screen SHALL render the appointment summary, the `ma3ady://manage/<token>` deep link with a copy action, an "Add to my account" Google sign-in CTA, and MUST inform the user that email and WhatsApp messages are on the way.
+
 #### Scenario: post-booking
 - **GIVEN** a successful booking
 - **WHEN** the confirmation screen renders
@@ -52,6 +60,8 @@
 - **AND** a notice tells the user an email and WhatsApp message are on the way
 
 ### Requirement: The manage screen SHALL operate without sign-in via signed token
+
+The `ma3ady://manage/<token>` deep link SHALL open a public manage screen that calls `verify_manage_token` and renders Cancel/Reschedule actions on success; an invalid or cancelled-appointment token MUST show "This link is no longer valid" without exposing details.
 
 #### Scenario: valid token opens manage view
 - **GIVEN** a deep link `ma3ady://manage/<plaintext-token>`
@@ -68,6 +78,8 @@
 
 ### Requirement: Cancellation via manage link SHALL be reversible only by re-booking
 
+The `manage-appointment` Edge Function SHALL set `status = 'cancelled'` and `cancelled_at = now()` when called with a valid token; the slot is freed and the same token MUST stop working — recovery requires a brand-new booking.
+
 #### Scenario: cancel
 - **GIVEN** a guest on the manage screen for a `pending` appointment
 - **WHEN** they tap Cancel and confirm
@@ -76,6 +88,8 @@
 - **AND** the manage link no longer works for this appointment
 
 ### Requirement: Rescheduling via manage link SHALL re-validate availability
+
+A reschedule via manage token SHALL re-call `compute_available_slots` to verify the target slot is free, update `starts_at`/`ends_at` in place, write an `appointment_events` row of type `'rescheduled'`, and the same `manage_token_hash` MUST continue to authorize future actions.
 
 #### Scenario: reschedule to a free slot
 - **GIVEN** a guest selecting a new slot in the manage flow

@@ -102,9 +102,40 @@ After completing all artifacts, summarize:
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
   - These guide what you write, but should never appear in the output
 
+**Spec delta requirement shape (REQUIRED — `openspec validate` enforces this)**
+
+The upstream template under `## ADDED Requirements` looks like this:
+
+```
+### Requirement: <name>
+<!-- requirement text -->
+
+#### Scenario: <name>
+- **WHEN** ...
+- **THEN** ...
+```
+
+The `<!-- requirement text -->` placeholder is **not optional**. `openspec validate` rejects any requirement that:
+
+1. Has no body text between the `### Requirement:` heading and the first `#### Scenario:` block, OR
+2. Has body text that does not contain `SHALL` or `MUST`.
+
+When you author the spec delta, replace the placeholder with **one short sentence** stating the normative rule, including `SHALL` or `MUST`. Example:
+
+```
+### Requirement: Validation SHALL catch missing keys before any sync runs
+
+`make secrets-validate` SHALL parse the master file, compare it to the example schema, and exit non-zero if any required key is missing, empty, or extra. No destination MUST be touched when validation fails.
+
+#### Scenario: ...
+```
+
+This applies to ADDED, MODIFIED, and RENAMED requirements. (REMOVED entries don't need a body.)
+
 **Guardrails**
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
 - Always read dependency artifacts before creating a new one
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum
 - If a change with that name already exists, ask if user wants to continue it or create a new one
 - Verify each artifact file exists after writing before proceeding to next
+- Run `openspec validate <change>` before declaring "done" — fix any errors it reports.

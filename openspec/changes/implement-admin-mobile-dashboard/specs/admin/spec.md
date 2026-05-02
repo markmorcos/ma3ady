@@ -4,6 +4,8 @@
 
 ### Requirement: App mode SHALL be determined by current tenant role
 
+The boot router SHALL inspect the active membership's `role` and route users with `owner`/`admin`/`staff` to `(admin)/(tabs)`, while users whose only memberships are `customer` (or none) MUST land on `(app)/(tabs)`.
+
 #### Scenario: staff signs in
 - **GIVEN** a signed-in user with `currentRole in ('owner', 'admin', 'staff')` for the active tenant
 - **WHEN** the app boots
@@ -17,6 +19,8 @@
 
 ### Requirement: The Today screen SHALL show today's appointments and quick stats
 
+The admin Today screen SHALL render today's appointments in chronological order using the tenant TZ via `useDisplayTimezone` and MUST show stat cards for today's count, this week's confirmed count, and 30-day no-show rate.
+
 #### Scenario: rendering
 - **GIVEN** a staff member of `acme` opens Today
 - **WHEN** the screen mounts
@@ -29,6 +33,8 @@
 - **THEN** an empty state shows "No appointments today" with a CTA to view upcoming days
 
 ### Requirement: Status changes SHALL go through the Edge Function with role check
+
+Appointment status updates from admin surfaces SHALL invoke the `update-appointment-status` Edge Function rather than direct UPDATE, and the function MUST verify membership in the appointment's tenant before mutating, returning HTTP 403 on mismatch.
 
 #### Scenario: staff marks complete
 - **GIVEN** a staff member of `acme` viewing an appointment in `confirmed` status
@@ -45,6 +51,8 @@
 
 ### Requirement: Services SHALL be editable inline by owners and admins
 
+Service edits (toggling `active`, changing duration/buffers/policies) SHALL be allowed for `owner` and `admin` roles only; `staff` MUST see read-only controls on the same screen.
+
 #### Scenario: toggle active
 - **GIVEN** an admin viewing the services tab
 - **WHEN** they toggle a service's active switch
@@ -58,6 +66,8 @@
 - **AND** the same screen for owners/admins shows it enabled
 
 ### Requirement: Team management SHALL respect role hierarchy
+
+The `invite-member` Edge Function SHALL allow `admin` to invite or promote members up to `admin`, while only an `owner` MUST be permitted to grant the `owner` role; attempts that exceed the caller's level return `forbidden_role`.
 
 #### Scenario: admin invites staff
 - **GIVEN** an admin
@@ -75,6 +85,8 @@
 - **AND** an audit row is written (deferred to compliance change)
 
 ### Requirement: Customer home SHALL list tenants the user has booked with
+
+The customer home SHALL query `memberships` joined with `tenants` for the signed-in user and MUST render one card per tenant (with name and `brand_color`) that opens the public booking flow for that slug on tap.
 
 #### Scenario: returning customer
 - **GIVEN** a customer with appointments at tenants `acme` and `bravo`

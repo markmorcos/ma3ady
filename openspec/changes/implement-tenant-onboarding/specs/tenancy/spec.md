@@ -4,6 +4,8 @@
 
 ### Requirement: A signed-in user SHALL be able to claim an available slug and become its owner
 
+The `claim-slug` Edge Function SHALL atomically insert a `tenants` row and an `owner` `memberships` row for the caller; collisions with an existing tenant MUST return `slug_taken` and reserved-list hits MUST return `slug_reserved` (HTTP 409 in both cases).
+
 #### Scenario: successful claim
 - **GIVEN** a signed-in user with no existing memberships
 - **WHEN** they submit `claim-slug` with `{ slug: 'acme', name: 'Acme Clinic', timezone: 'Europe/Berlin', default_locale: 'en' }`
@@ -24,6 +26,8 @@
 
 ### Requirement: Slug availability SHALL be queryable without claiming
 
+A `check_slug_availability` RPC SHALL return `{ available, reason? }` for any candidate slug without side effects, and the response time MUST be under 500ms at p95 to keep the typing UI snappy.
+
 #### Scenario: live check during typing
 - **GIVEN** a user typing `acme` in the slug field
 - **WHEN** the input debounces and an availability RPC is called
@@ -32,6 +36,8 @@
 - **AND** the response time is under 500ms at p95
 
 ### Requirement: Invitations SHALL accept both existing and new users
+
+The `invite-member` Edge Function SHALL insert a `memberships` row directly when the invitee already has an `auth.users` row, otherwise it MUST send a Supabase Auth invitation email and queue a `pending_memberships` row that the `handle_new_user` trigger promotes on first sign-in.
 
 #### Scenario: invite an existing user
 - **GIVEN** an owner of tenant `acme` invites `bob@example.com`
@@ -54,6 +60,8 @@
 - **AND** Cara sees the acme tenant in her picker
 
 ### Requirement: Boot routing SHALL match membership cardinality
+
+The boot router SHALL inspect the user's `memberships` count: zero with no claimed bookings routes to `(onboarding)/welcome`, one auto-selects that tenant, and two-or-more MUST surface the tenant picker modal that persists the choice in `AsyncStorage['app.tenantId']`.
 
 #### Scenario: zero memberships, fresh user
 - **GIVEN** a newly signed-in user with zero memberships and zero claimed bookings

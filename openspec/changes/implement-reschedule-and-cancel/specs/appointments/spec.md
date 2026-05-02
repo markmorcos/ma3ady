@@ -4,6 +4,8 @@
 
 ### Requirement: Status transitions SHALL be restricted to the defined state machine
 
+The `validate_status_transition(from, to)` function SHALL allow only `pending → confirmed`, `pending → cancelled`, `confirmed → completed`, `confirmed → no_show`, `confirmed → cancelled`; terminal states (`completed`, `cancelled`, `no_show`) MUST reject every further change with `invalid_transition`.
+
 #### Scenario: pending → confirmed
 - **GIVEN** an appointment in `pending`
 - **WHEN** a staff member sets it to `confirmed`
@@ -30,6 +32,8 @@
 
 ### Requirement: Reschedule SHALL be available to staff, owner customer, or token holder
 
+The `reschedule-appointment` Edge Function SHALL authorize the request when the caller is the owning customer (`auth.uid() = appointments.user_id`), a tenant member with `staff`/`admin`/`owner` role, OR carries a valid manage token; everyone else MUST receive HTTP 403.
+
 #### Scenario: customer reschedule via auth
 - **GIVEN** a signed-in customer who owns the appointment
 - **WHEN** they call `reschedule-appointment` with a new starts_at
@@ -54,6 +58,8 @@
 
 ### Requirement: Reschedule SHALL preserve status and manage token
 
+A successful reschedule SHALL leave `status` and `manage_token_hash` untouched, so a `confirmed` appointment MUST stay `confirmed` and the previously-issued manage link continues to work.
+
 #### Scenario: confirmed reschedule
 - **GIVEN** a `confirmed` appointment
 - **WHEN** it is rescheduled to a new time
@@ -63,6 +69,8 @@
 
 ### Requirement: Reschedule SHALL recompute ends_at from current service duration
 
+The reschedule function SHALL set `ends_at = new_starts_at + services.duration_minutes` using the service's current value, and the resulting `tstzrange` MUST be re-checked against the EXCLUDE constraint.
+
 #### Scenario: duration changed since booking
 - **GIVEN** an appointment for service S originally booked when `S.duration_minutes = 30`
 - **AND** S's duration has since been updated to 45 minutes
@@ -71,6 +79,8 @@
 - **AND** EXCLUDE constraint is checked against the new range
 
 ### Requirement: Cancellation SHALL record who cancelled and when
+
+Every cancellation SHALL set `cancelled_at = now()` and `cancelled_by_user_id = auth.uid()` (or null for guest-token cancels, with the actor recorded in the `appointment_events` payload as `{by: "guest_token"}`).
 
 #### Scenario: staff cancels
 - **GIVEN** a staff member cancels an appointment

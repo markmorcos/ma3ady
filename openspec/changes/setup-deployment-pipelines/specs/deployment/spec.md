@@ -4,6 +4,8 @@
 
 ### Requirement: CI SHALL gate every PR with lint, typecheck, tests, and db-lint
 
+The CI workflow SHALL run `lint`, `typecheck`, `test`, and `db-lint` jobs in parallel on every PR against `main`, and merging MUST be blocked until all four jobs are green.
+
 #### Scenario: PR opened
 - **GIVEN** a PR opened against `main`
 - **WHEN** the CI workflow runs
@@ -12,6 +14,8 @@
 - **AND** code coverage is reported in the PR comment
 
 ### Requirement: Marketing site deploys SHALL fire only on `marketing/` changes
+
+The marketing deploy workflow's `paths:` filter SHALL match only `marketing/**`, build a Docker image tagged with the commit SHA, push it to `ghcr.io/markmorcos/ma3ady-marketing`, and MUST then `repository-dispatch` to `markmorcos/infrastructure` with the `marketing/deployment.yaml` payload.
 
 #### Scenario: marketing change
 - **GIVEN** a push to `main` that modifies a file under `marketing/`
@@ -26,12 +30,16 @@
 
 ### Requirement: Tenant-landing deploys SHALL mirror marketing
 
+The tenant-landing workflow SHALL match only `tenant-landing/**`, push to its GHCR image, and MUST dispatch the matching `tenant-landing/deployment.yaml` to the infrastructure repo following the same shape as marketing.
+
 #### Scenario: tenant-landing change
 - **GIVEN** a push to `main` that modifies a file under `tenant-landing/`
 - **WHEN** the workflow runs
 - **THEN** the image is pushed and infrastructure is dispatched analogously
 
 ### Requirement: Supabase deploy SHALL be sequential preview → production
+
+The Supabase deploy workflow SHALL run `deploy-preview` first (linking to `SUPABASE_PROJECT_REF_PREVIEW`, running `db push` then `functions deploy`), and `deploy-production` MUST only execute if the preview job succeeds.
 
 #### Scenario: migrations or functions change
 - **GIVEN** a push to `main` modifying `supabase/migrations/**` or `supabase/functions/**`
@@ -42,6 +50,8 @@
 
 ### Requirement: Mobile builds SHALL be manual
 
+The `build-mobile.yml` workflow SHALL be `workflow_dispatch`-only with `profile` (`development|preview|production`) and `platform` (`ios|android|all`) inputs invoking `eas build --non-interactive --no-wait`; no path triggers MUST auto-build the mobile app on push.
+
 #### Scenario: build trigger
 - **GIVEN** a developer wants to build the mobile app
 - **WHEN** they trigger `build-mobile.yml` via `gh workflow run`
@@ -51,6 +61,8 @@
 
 ### Requirement: Production EAS profile SHALL assert real dispatcher env
 
+The production EAS prebuild script SHALL fail with a clear error naming the offending variable when any of `EMAIL_DISPATCHER`, `WHATSAPP_DISPATCHER`, or `PUSH_DISPATCHER` is not `'real'`, and no artifact MUST be produced when the assertion trips.
+
 #### Scenario: production build
 - **GIVEN** an `eas build --profile production` invocation
 - **WHEN** any of `EMAIL_DISPATCHER`, `WHATSAPP_DISPATCHER`, `PUSH_DISPATCHER` is not equal to `'real'`
@@ -59,6 +71,8 @@
 
 ### Requirement: Secrets SHALL be environment-scoped
 
+GitHub Actions environments SHALL bind preview-only secrets (e.g. `SUPABASE_PROJECT_REF_PREVIEW`) to the `preview` environment and prod-only secrets to `production`, so a `deploy-preview` job MUST NOT have access to production secrets.
+
 #### Scenario: preview job cannot read prod secrets
 - **GIVEN** the GitHub Actions environment configuration
 - **WHEN** the `deploy-preview` job runs
@@ -66,6 +80,8 @@
 - **AND** it does NOT have access to `SUPABASE_PROJECT_REF_PROD` or production-only secrets
 
 ### Requirement: Email deliverability SHALL be configured before `EMAIL_DISPATCHER=real`
+
+`make dns-check` SHALL `dig` for SPF (`v=spf1 include:_spf.resend.com -all`), DKIM (`resend._domainkey.ma3ady.com`), and DMARC (`v=DMARC1; p=quarantine` with `rua`); the runbook MUST forbid setting `EMAIL_DISPATCHER=real` in production until that command exits zero.
 
 #### Scenario: SPF record present
 - **GIVEN** the production domain `ma3ady.com`

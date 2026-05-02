@@ -4,6 +4,8 @@
 
 ### Requirement: The Supabase project SHALL be self-bootstrapped via Makefile targets
 
+`make dev-up` SHALL boot the local Supabase stack (Docker) and report API/DB/Studio/Auth as healthy within 30 seconds, and the printed `API URL` + `anon key` MUST be sufficient to wire the mobile app's `.env.local`.
+
 #### Scenario: cold-start local stack
 - **GIVEN** a developer with Docker running and `pnpm install` complete
 - **WHEN** they run `make dev-up`
@@ -12,6 +14,8 @@
 - **AND** the printed `API URL` and `anon key` can be pasted into `.env.local` to connect the mobile app
 
 ### Requirement: Migration filenames SHALL be auto-numbered with a 3-digit prefix
+
+`make migrate-new NAME=<slug>` SHALL create `supabase/migrations/<NNN>_<slug>.sql` where `NNN` is the next 3-digit prefix (computed by listing existing `^[0-9]{3}_` files, sorting, and incrementing the last); CI `db-lint` MUST reject any timestamp-prefixed migration that bypasses the helper.
 
 #### Scenario: first migration in a fresh repo
 - **GIVEN** an empty `supabase/migrations/` directory
@@ -46,6 +50,8 @@
 
 ### Requirement: The Supabase client SHALL be configured once with PKCE + SecureStore
 
+`@/services/api/supabase` SHALL be the single `createClient(...)` call in the codebase, wired with PKCE flow and SecureStore-backed session storage so prior sessions MUST be restored on cold start.
+
 #### Scenario: client factory single-source
 - **GIVEN** the codebase
 - **WHEN** any file imports the Supabase client
@@ -60,12 +66,16 @@
 
 ### Requirement: Email/password and magic-link sign-up SHALL be disabled in `config.toml`
 
+`supabase/config.toml` SHALL set `enable_signup = false` for the email provider so any attempt at `/auth/v1/signup` MUST receive HTTP 400/422 with "signups disabled".
+
 #### Scenario: blocked sign-up attempt
 - **GIVEN** a curl call to `/auth/v1/signup` against the local Supabase
 - **WHEN** the request is sent
 - **THEN** the response is HTTP 400 or 422 with a "signups disabled" error
 
 ### Requirement: The service role key SHALL NEVER be present in the mobile bundle
+
+`EXPO_PUBLIC_SUPABASE_ANON_KEY` SHALL be the only Supabase key referenced from mobile code, and a grep of any `eas build` artifact for the literal `service_role` MUST return zero matches.
 
 #### Scenario: bundle inspection
 - **GIVEN** an `eas build` output

@@ -4,6 +4,8 @@
 
 ### Requirement: Users SHALL be able to export their data on demand
 
+The `export-my-data` Edge Function SHALL return a JSON blob containing the caller's profile, memberships (slugs only), appointments, and related events; the response MUST exclude any other user's data and be saveable via the platform share sheet.
+
 #### Scenario: export request
 - **GIVEN** a signed-in user opens settings → Data & Privacy
 - **WHEN** they tap "Download my data"
@@ -12,6 +14,8 @@
 - **AND** no other user's data is included
 
 ### Requirement: Users SHALL be able to delete their account
+
+The `delete-my-account` Edge Function SHALL call `auth.admin.deleteUser`, anonymize linked `guest_contacts`, and cascade-delete `memberships`/`push_tokens`; if the caller is the sole owner of any tenant, the function MUST return `transfer_ownership_first` and perform no deletion.
 
 #### Scenario: delete with no sole-ownership
 - **GIVEN** a user who does not solely own any tenant
@@ -30,6 +34,8 @@
 
 ### Requirement: Cancelled appointments SHALL be anonymized after 90 days
 
+The daily `anonymize_old_appointments` job SHALL find cancelled appointments older than 90 days and MUST null PII on the linked `guest_contacts` (`name = '<anonymized>', phone = null, email = sha256(email)`) plus clear `appointments.notes`, while keeping the appointment id and timestamps for tenant analytics.
+
 #### Scenario: scheduled job
 - **GIVEN** a cancelled appointment with `cancelled_at < now() - interval '90 days'`
 - **WHEN** the daily `anonymize_old_appointments` job runs
@@ -39,12 +45,16 @@
 
 ### Requirement: No-show appointments SHALL be anonymized after 18 months
 
+The same daily job SHALL anonymize no-show appointments whose `created_at` is older than 18 months, applying the identical PII null-out rules as for cancelled appointments.
+
 #### Scenario: long-tail anonymization
 - **GIVEN** a no-show appointment with `created_at < now() - interval '18 months'`
 - **WHEN** the daily job runs
 - **THEN** PII is anonymized as above
 
 ### Requirement: Production builds SHALL ship native push and real dispatchers
+
+The `eas build --profile production` configuration SHALL include `expo-notifications` and MUST assert every dispatcher env var (`EMAIL_DISPATCHER`, `WHATSAPP_DISPATCHER`, `PUSH_DISPATCHER`) equals `real` before bundling.
 
 #### Scenario: production build assertion
 - **GIVEN** an `eas build --profile production` invocation
@@ -55,6 +65,8 @@
 
 ### Requirement: RLS isolation SHALL be verified by an automated test suite
 
+`tests/security/rls.test.ts` SHALL forge JWTs for the wrong tenant and probe every domain table for leak; CI MUST gate merges on this suite passing with zero data leaks.
+
 #### Scenario: pen-test pass
 - **GIVEN** the `tests/security/rls.test.ts` suite
 - **WHEN** CI runs
@@ -64,6 +76,8 @@
 
 ### Requirement: Privacy and Terms SHALL be available in EN and AR
 
+The data-and-privacy settings screen SHALL link to `https://ma3ady.com/privacy/` and `/terms/` in the user's current locale, and the destination MUST render localized content for both `en` and `ar`.
+
 #### Scenario: navigation from app
 - **GIVEN** the data-and-privacy settings screen
 - **WHEN** the user taps "Privacy Policy" or "Terms of Service"
@@ -71,6 +85,8 @@
 - **AND** the destination renders correctly with localized content
 
 ### Requirement: Store listings SHALL be versioned in the repo
+
+The `store/apple/` and `store/google/` directories SHALL contain title, description, keywords (Apple), screenshots, and privacy URL files in `en` and `ar`; these checked-in files MUST be the source of truth — live listings flow from this directory, not the other way.
 
 #### Scenario: listings present
 - **GIVEN** the `store/` directory
@@ -80,6 +96,8 @@
 - **AND** these files are the source of truth — changes to live store listings flow from this directory, not the other way around
 
 ### Requirement: Final brand assets SHALL replace placeholders before store submission
+
+A pre-submit check SHALL grep `assets/branding/`, `marketing/public/`, and `tenant-landing/public/` for the string `PLACEHOLDER` and MUST fail if any match remains; the final SVG/PNG masters (app icon, adaptive icon, themed Android icon, OG image) must be in place and signed off by the brand designer.
 
 #### Scenario: placeholder asset detection
 - **GIVEN** any file in `assets/branding/`, `marketing/public/`, or `tenant-landing/public/`

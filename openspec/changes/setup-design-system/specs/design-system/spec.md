@@ -4,6 +4,8 @@
 
 ### Requirement: Components SHALL consume theme tokens, not raw colors
 
+Every styled component SHALL resolve colors through the active `ThemeProvider` (e.g. `theme.colors.brand[500]`), and switching theme MUST repaint without remounting the tree.
+
 #### Scenario: button background sourced from theme
 - **GIVEN** a `<Button variant="primary">`
 - **WHEN** it renders
@@ -12,12 +14,16 @@
 
 ### Requirement: Components SHALL render correctly in light, dark, en, and ar
 
+The `/dev/design-system` showcase SHALL render every component in all four `(light|dark) × (en|ar)` combinations, and any component MUST be free of layout regressions across them before being marked stable.
+
 #### Scenario: showcase coverage
 - **GIVEN** the `/dev/design-system` route is open
 - **WHEN** a developer toggles theme and locale
 - **THEN** every component in the showcase renders without layout regressions in each of the four combinations (`light/en`, `light/ar`, `dark/en`, `dark/ar`)
 
 ### Requirement: Touch targets SHALL be at least 44×44 points
+
+Interactive components SHALL have a hit area of at least 44×44 points per the WCAG 2.1 AA baseline; small visual variants MUST achieve this through padding rather than shrinking the underlying tappable region.
 
 #### Scenario: button hit area
 - **GIVEN** a `<Button size="sm">` with text "OK"
@@ -26,6 +32,8 @@
 - **AND** padding compensates for the visual size to keep the design proportional
 
 ### Requirement: RTL layout SHALL be honored without `left`/`right`
+
+Components SHALL use logical `start`/`end` style keys exclusively, and the `no-physical-direction` ESLint rule MUST fail any `left:` or `right:` literal in `StyleSheet.create` or inline styles.
 
 #### Scenario: button with leading icon in Arabic
 - **GIVEN** a `<Button>` with a leading icon in Arabic locale
@@ -41,6 +49,8 @@
 
 ### Requirement: Status colors SHALL map deterministically
 
+The `<Badge status="..." />` component SHALL map appointment statuses to colors per `project.md` §1b (`pending → warning, confirmed → brand, completed → success, cancelled → muted, no_show → danger`), and color MUST never be the only differentiator — every badge also carries an icon and label.
+
 #### Scenario: confirmed status
 - **GIVEN** an appointment with `status === 'confirmed'`
 - **WHEN** a `<Badge status="confirmed" />` renders
@@ -54,6 +64,8 @@
 - **AND** the visual additionally includes a strikethrough icon (color is not the only differentiator)
 
 ### Requirement: No inline hex literals in component styles
+
+The `no-inline-hex` ESLint rule SHALL fail on any `#[0-9A-Fa-f]{3,8}` literal in `StyleSheet.create` or inline `style={...}`, and the suggested fix MUST be importing from `@/design/tokens`.
 
 #### Scenario: lint check
 - **GIVEN** any source file under `src/`

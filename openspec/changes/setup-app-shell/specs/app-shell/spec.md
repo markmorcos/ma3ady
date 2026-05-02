@@ -4,6 +4,8 @@
 
 ### Requirement: The app SHALL boot through explicit, observable phases
 
+`appStore.bootPhase` SHALL advance through `i18n → theme → auth → tenant → ready`, and the splash MUST stay up until that final phase or until a 5-second per-phase timeout fires the `degraded` fallback.
+
 #### Scenario: happy path
 - **GIVEN** a fresh app launch with all dependencies healthy
 - **WHEN** the app boots
@@ -21,6 +23,8 @@
 
 ### Requirement: Cold-start interactive time SHALL be ≤ 2 seconds on mid-range hardware
 
+On Pixel 5a class hardware, `appStore.bootPhase === 'ready'` SHALL be reached within 2000ms of process start, and the synthetic CI perf test MUST enforce a 1500ms budget on the runner.
+
 #### Scenario: perf budget on Pixel 5a class device
 - **GIVEN** an Expo Go install on a Pixel 5a or equivalent
 - **WHEN** the app is launched cold (after a process kill, no warm cache)
@@ -28,6 +32,8 @@
 - **AND** the perf test in `tests/perf/boot.test.ts` enforces a synthetic 1500ms budget on the CI runner
 
 ### Requirement: The app SHALL provide two error boundary tiers
+
+`<RouteErrorBoundary>` SHALL wrap each route group and recover the affected screen only; `<RootErrorBoundary>` MUST wrap the root layout, render the full-screen recovery UI with a Restart button, and report the error to `client_errors` via `report-client-error`.
 
 #### Scenario: route-group error
 - **GIVEN** a render error inside `(admin)/(tabs)/services.tsx`
@@ -45,6 +51,8 @@
 - **AND** the error is logged to `client_errors` via the `report-client-error` Edge Function
 
 ### Requirement: All timestamp rendering SHALL go through `useDisplayTimezone`
+
+Every `<Time value={...} context="..." />` component SHALL resolve its zone via `useDisplayTimezone()`, defaulting to the tenant timezone for public-booking, customer-bookings, and admin contexts; admins with `profiles.display_timezone_override` MUST see admin surfaces in their override zone.
 
 #### Scenario: public booking flow
 - **GIVEN** a public booking surface for tenant `acme` (timezone `Europe/Berlin`)
@@ -68,6 +76,8 @@
 
 ### Requirement: Lint SHALL block raw timestamp rendering
 
+The custom `no-raw-time-render` ESLint rule SHALL flag any `Date` or stringified timestamp passed directly into a `<Text>` child, and the suggested fix MUST be `<Time value={...} context="..." />`.
+
 #### Scenario: violation detected
 - **GIVEN** a source file containing `<Text>{appointment.starts_at}</Text>`
 - **WHEN** ESLint runs
@@ -76,6 +86,8 @@
 
 ### Requirement: 404 SHALL render a friendly recovery screen
 
+Expo Router's `+not-found` route SHALL render a friendly empty state with a "Go home" CTA so unknown deep links MUST never leave the user on a blank screen.
+
 #### Scenario: unknown route
 - **GIVEN** a deep link to an unknown route, e.g. `ma3ady://garbage`
 - **WHEN** Expo Router resolves to `+not-found`
@@ -83,6 +95,8 @@
 - **AND** a "Go home" CTA returns them to the main route stack
 
 ### Requirement: Public booking SHALL NOT block on auth/tenant boot phases
+
+The `(public)/[tenantSlug]` route group SHALL render as soon as i18n + theme are ready, so a deep link from email MUST land on the booking flow even while auth/tenant resolution proceeds in parallel.
 
 #### Scenario: deep link from email while signed-out
 - **GIVEN** a deep link `ma3ady://acme/...` is opened

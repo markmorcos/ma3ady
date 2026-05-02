@@ -4,6 +4,8 @@
 
 ### Requirement: Edge Functions SHALL emit structured logs with a request id
 
+A `withLogging` wrapper SHALL emit `function_start`, `function_end`, and (on throw) `function_error` JSON log lines stamped with a fresh `request_id` UUID; downstream functions invoked via `x-request-id` MUST reuse that id so a full call graph can be filtered as one trace.
+
 #### Scenario: function call lifecycle
 - **GIVEN** any Edge Function wrapped by `withLogging`
 - **WHEN** the function is invoked
@@ -18,6 +20,8 @@
 - **AND** the resulting logs can be filtered by a single `request_id` to see the full call graph
 
 ### Requirement: Mobile errors SHALL be reported to a queryable backend
+
+The mobile `logError(error, context)` helper SHALL invoke the `report-client-error` Edge Function, which inserts a `client_errors` row; boundary errors are always sampled while non-fatal errors honor `EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE`, and a failing report MUST be silently swallowed to avoid nested failures.
 
 #### Scenario: render error caught by boundary
 - **GIVEN** a screen throws during render
@@ -41,6 +45,8 @@
 
 ### Requirement: `client_errors` SHALL be tenant-scoped via RLS
 
+RLS on `client_errors` SHALL allow admins to select rows where `tenant_id` matches their membership and MUST deny direct INSERT for all roles — the only write path is the `report-client-error` SECURITY DEFINER function.
+
 #### Scenario: cross-tenant read attempt
 - **GIVEN** an admin of tenant X
 - **WHEN** they query `client_errors` directly
@@ -53,6 +59,8 @@
 - **AND** the only path is via `report-client-error` (SECURITY DEFINER)
 
 ### Requirement: The reporter SHALL rate-limit and bound payload size
+
+`report-client-error` SHALL reject bodies larger than 8KB with HTTP 413 and MUST rate-limit each source IP to 30 requests per 60-second window, returning HTTP 429 once the limit is exceeded.
 
 #### Scenario: payload too large
 - **GIVEN** a body of 9KB sent to `report-client-error`
@@ -68,6 +76,8 @@
 
 ### Requirement: Admins SHALL be able to view recent errors for their tenant
 
+The `(admin)/dev-tools/errors` route SHALL list the last 100 `client_errors` rows for the active tenant with `kind` and date filters; staff MUST NOT see the route in navigation and direct access MUST surface "Insufficient permission".
+
 #### Scenario: admin opens dev-tools/errors
 - **GIVEN** an admin of tenant `acme` opens `/(admin)/dev-tools/errors`
 - **WHEN** the screen mounts
@@ -82,6 +92,8 @@
 - **AND** if they hit it directly, the screen shows "Insufficient permission"
 
 ### Requirement: No third-party trackers SHALL be present in v1
+
+`package.json` SHALL NOT depend on any third-party analytics or crash-reporting SDK (`@sentry/*`, `posthog-*`, `@amplitude/*`, `mixpanel-*`, `@bugsnag/*`, `firebase`, `@datadog/*`); adding any of them MUST require a separate change folder with a privacy-policy update.
 
 #### Scenario: dependency check
 - **GIVEN** `package.json`
