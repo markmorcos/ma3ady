@@ -1,0 +1,26 @@
+# OpenSpec configuration for Ma3ady
+# Single source of truth for project decisions lives in openspec/project.md.
+# Capability specs in openspec/specs/<capability>/spec.md.
+# Pending proposals in openspec/changes/<slug>/.
+
+schema: spec-driven
+
+# Capabilities planned for v1. Each will materialize a spec.md under openspec/specs/
+# as the corresponding change in openspec/changes/ is accepted.
+capabilities:
+  - app-shell
+  - branding
+  - design-system
+  - i18n
+  - dev-tooling
+  - auth
+  - tenancy
+  - availability
+  - services
+  - appointments
+  - public-booking
+  - admin
+  - notifications
+  - marketing-site
+  - deployment
+  - compliance

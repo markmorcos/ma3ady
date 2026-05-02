@@ -1,0 +1,24 @@
+# Tasks
+
+- [ ] 3.1 Install deps: `pnpm add i18next react-i18next expo-localization @react-native-async-storage/async-storage`
+- [ ] 3.2 Write `src/i18n/locales/en.json` with namespaces: `common`, `errors`, `nav`, `auth`, `booking`, `admin`
+- [ ] 3.3 Write `src/i18n/locales/ar.json` with parity to `en.json` (every key present, native Arabic translations)
+- [ ] 3.4 Write `src/i18n/index.ts`:
+  - module-load: `i18next.use(initReactI18next).init({ lng: 'en', resources: { en, ar }, fallbackLng: 'en', interpolation: { escapeValue: false } })`
+  - export `bootstrapI18n()` that reads `AsyncStorage['app.lang']` → `expo-localization.getLocales()[0].languageCode` → `'en'`, then calls `i18next.changeLanguage(resolved)` and triggers RTL bootstrap if needed
+- [ ] 3.5 Write `src/i18n/i18next.d.ts` declaring `import 'i18next'` module augmentation with typed `defaultNS` and `resources`
+- [ ] 3.6 Write `src/i18n/rtl.ts`:
+  - `RTL_LANGUAGES = new Set(['ar'])`
+  - `applyRTL(lng: string)` checks `I18nManager.isRTL` vs desired, calls `I18nManager.forceRTL(...)` if mismatch, sets `AsyncStorage['app.rtlBootstrapped']`, calls `Updates.reloadAsync()` (dev: `DevSettings.reload()`)
+  - First-time switch from EN to AR triggers exactly one reload; subsequent app boots are stable
+- [ ] 3.7 Write `src/hooks/useLocale.ts`:
+  - `useLocale(): { lang: 'en'|'ar', setLang: (l) => Promise<void> }`
+  - `setLang` persists to AsyncStorage, calls `i18next.changeLanguage`, calls `applyRTL`
+- [ ] 3.8 Modify `app/_layout.tsx`:
+  - call `bootstrapI18n()` in a `useEffect`, hold splash via `expo-splash-screen` until resolved
+  - wrap children in a memoized provider that re-renders on `i18next.on('languageChanged')`
+- [ ] 3.9 Add `.env.example` entry: `EXPO_PUBLIC_DEFAULT_LOCALE=en`
+- [ ] 3.10 Add a `/dev/i18n` screen behind the dev-tools gate: shows current lang, lets you toggle to test RTL
+- [ ] 3.11 Add a Jest test verifying `t('common.cancel')` returns `'Cancel'` in en and `'إلغاء'` in ar
+- [ ] 3.12 Add a Jest test verifying every key in en.json has a counterpart in ar.json (parity check)
+- [ ] 3.13 Verify on simulator: launching with `EXPO_PUBLIC_DEFAULT_LOCALE=ar` → app boots in Arabic → after one reload, layout is RTL

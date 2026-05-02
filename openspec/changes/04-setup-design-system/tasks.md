@@ -1,0 +1,25 @@
+# Tasks
+
+- [ ] 4.1 Install deps: `pnpm add lucide-react-native react-native-svg @gorhom/bottom-sheet react-native-reanimated react-native-gesture-handler`
+- [ ] 4.2 Configure `react-native-reanimated/plugin` in `babel.config.js`
+- [ ] 4.3 Write `src/design/tokens.ts` with `colors` (per `project.md` §1b table), `spacing` (8px grid), `radii` (8/12/16/24), `typography` (sizes 12–40), `shadows`, `motion` (easings + durations)
+- [ ] 4.4 Write `src/design/theme.ts`: `lightTheme`, `darkTheme`, `Theme` type. Each theme exposes the same shape — components consume `theme.colors.brand[500]`, never the raw token map
+- [ ] 4.5 Write `src/design/ThemeProvider.tsx`: context + `useTheme()` + system theme via `useColorScheme()`; honor user override stored at `AsyncStorage['app.theme']` ('light'|'dark'|'system')
+- [ ] 4.6 Modify `app/_layout.tsx` to wrap children with `<ThemeProvider>` (after `<I18nProvider>`)
+- [ ] 4.7 Write `src/components/Text.tsx` — variants: `display | h1 | h2 | body | caption | label`; uses `theme.typography` + `theme.colors.text`
+- [ ] 4.8 Write `src/components/Button.tsx` — variants × sizes; min hit target 44×44; loading + disabled states; honors `start`/`end` for icon position in RTL
+- [ ] 4.9 Write `src/components/Card.tsx`
+- [ ] 4.10 Write `src/components/Badge.tsx` — status enum drives color via `statusColorMap`
+- [ ] 4.11 Write `src/components/Input.tsx` — label + error + helper text; full RTL support
+- [ ] 4.12 Write `src/components/Icon.tsx` — `<Icon name="calendar" color="brand.500" size={20} />` resolves token to hex
+- [ ] 4.13 Write `src/components/EmptyState.tsx`
+- [ ] 4.14 Write `src/components/Skeleton.tsx`
+- [ ] 4.15 Write `src/components/Sheet.tsx` wrapping `@gorhom/bottom-sheet`
+- [ ] 4.16 Write `src/components/Toast.tsx` + `src/state/toastStore.ts` (zustand)
+- [ ] 4.17 Write `src/branding/Logo.tsx` (wordmark) consuming `assets/branding/wordmark-{en,ar}.svg` based on `useLocale()`
+- [ ] 4.18 Write `src/branding/Mark.tsx` (clock-3 mark) consuming `assets/branding/mark.svg`
+- [ ] 4.19 Add ESLint rule `no-inline-hex` (custom or via `eslint-plugin-no-color-literals`)
+- [ ] 4.20 Add ESLint rule banning `left`/`right` in `StyleSheet`/`style` props (custom regex rule)
+- [ ] 4.21 Add `/dev/design-system` route showing every component in light + dark + en + ar (4 combinations)
+- [ ] 4.22 Snapshot tests: `Button` in 3 variants × 2 themes
+- [ ] 4.23 Verify on simulator: design system showcase renders correctly in all 4 combos

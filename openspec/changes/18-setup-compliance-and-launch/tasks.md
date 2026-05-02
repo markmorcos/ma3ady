@@ -1,0 +1,43 @@
+# Tasks
+
+- [ ] 18.1 Finalize `docs/legal/en/privacy.md` and `terms.md`:
+  - Identify ma3ady as data controller, sub-processors (Supabase, Resend, Meta WhatsApp, Expo Push)
+  - Lawful bases per `project.md` §1d
+  - Retention table (cancelled 90d, no-show 18mo)
+  - Right to access (export-my-data), right to be forgotten (delete-account)
+  - Contact email
+- [ ] 18.2 Translate to Arabic in `docs/legal/ar/`
+- [ ] 18.3 Run `deno task render-legal` to update `marketing/public/{en,ar}/{privacy,terms}/index.html`
+- [ ] 18.4 `make migrate-new NAME=anonymize_jobs` migration:
+  - `anonymize_old_appointments()` SQL function: hash email, null name, null phone on guest_contacts where related appointments are old enough; null notes on appointments
+  - Schedule via `cron.schedule('anonymize-old', '15 3 * * *', 'select anonymize_old_appointments();')` (daily at 3:15)
+- [ ] 18.5 Write Edge Function `supabase/functions/delete-account/index.ts`:
+  - Verifies caller's JWT
+  - Refuses if user is sole owner of any tenant (returns `{ error: 'transfer_ownership_first', tenants: [...] }`)
+  - Anonymizes any `guest_contacts` rows previously claimed by the user
+  - Calls `supabase.auth.admin.deleteUser(user_id)` (cascades to memberships, etc.)
+- [ ] 18.6 Write Edge Function `supabase/functions/export-my-data/index.ts`:
+  - Verifies JWT
+  - Selects: profile, memberships (tenant slugs only, no other tenant data), appointments, guest_contacts.claimed_by_user_id rows, appointment_events for those appointments
+  - Returns a JSON blob with appropriate `Content-Disposition: attachment`
+- [ ] 18.7 Write `app/(app)/(tabs)/settings/data-and-privacy.tsx`:
+  - Lists what we collect (linked to privacy policy)
+  - "Download my data" button → invokes export Edge Function, saves via `expo-file-system` + `expo-sharing`
+  - "Delete my account" button → confirmation sheet (with re-auth prompt), invokes delete Edge Function
+- [ ] 18.8 Install `expo-notifications`: `pnpm add expo-notifications`
+- [ ] 18.9 Add native push registration in `src/services/notifications/registerForPush.ts`:
+  - On first sign-in, request permission, get Expo push token, upsert into `push_tokens(user_id, token, platform)` table (new in this migration)
+- [ ] 18.10 `make migrate-new NAME=push_tokens` for the `push_tokens` table
+- [ ] 18.11 Implement `ExpoPushDispatcher` in `supabase/functions/_shared/dispatchers/push.ts` calling Expo's push API
+- [ ] 18.12 Build dev clients: `make build-dev-ios`, `make build-dev-android`
+- [ ] 18.13 Update README + Makefile help to indicate dev-client is now the supported flow (Expo Go still works for read-only smoke tests, mirrors stminaconnect's note)
+- [ ] 18.14 Update `eas.json`: production profile sets `EMAIL_DISPATCHER=real, WHATSAPP_DISPATCHER=real, PUSH_DISPATCHER=real`
+- [ ] 18.15 Build preview with `eas build --profile preview`, install on test devices, smoke-test the entire flow with real notifications enabled
+- [ ] 18.16 RLS pen-test fixture: Jest suite using two service-role-forged anon clients to assert cross-tenant isolation across all 12+ domain tables; lives under `tests/security/rls.test.ts`
+- [ ] 18.17 Compose store listings:
+  - Apple: subtitle, description, keywords, screenshots (EN+AR), privacy URL, support URL, license agreement
+  - Google: short + full description, screenshots, feature graphic, content rating, data safety form
+  - Both: declare data collection per the privacy manifest
+- [ ] 18.18 Submit to TestFlight (internal) and Play Console (internal track) for final QA
+- [ ] 18.19 Public submission to App Store + Play Store
+- [ ] 18.20 Monitor crash reports + onboarding funnel metrics for 7 days post-launch

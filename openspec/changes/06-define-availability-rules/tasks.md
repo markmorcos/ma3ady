@@ -1,0 +1,33 @@
+# Tasks
+
+- [ ] 6.1 `make migrate-new NAME=availability` → `supabase/migrations/002_availability.sql`
+- [ ] 6.2 Create `availability_rules` table with full schema and `end_time > start_time` check
+- [ ] 6.3 Create `availability_exception_kind` enum: `block | extra`
+- [ ] 6.4 Create `availability_exceptions` table with `ends_at > starts_at` check
+- [ ] 6.5 Create indexes: `(tenant_id, day_of_week)` on rules, `(tenant_id, starts_at)` on exceptions
+- [ ] 6.6 Enable RLS on both tables
+- [ ] 6.7 RLS policies on `availability_rules`:
+  - `select` — public (anon key allowed) for any rule of an existing tenant
+  - `insert/update/delete` — owner or admin of the tenant only
+- [ ] 6.8 RLS policies on `availability_exceptions` — same as rules
+- [ ] 6.9 Write `compute_available_slots(text, uuid, timestamptz, timestamptz) returns table(...) language plpgsql stable security invoker`:
+  - Resolve `tenant_id` + `timezone` via `tenants` table
+  - Resolve service: duration, buffers, notice/advance constraints, daily_cap (services from change 07; placeholder rejection if service not present yet)
+  - Expand rules: for each day in `[range_start, range_end)` in tenant TZ, find rules whose `day_of_week` matches and `valid_from/valid_until` covers the date; produce intervals `(date + start_time, date + end_time)` in tenant TZ → cast to UTC timestamptz
+  - Subtract `block` exceptions overlapping the range
+  - Union with `extra` exceptions
+  - Tile each interval into slots of `duration_minutes`, padding with `buffer_before_min` and `buffer_after_min`
+  - Filter out slots starting before `now() + min_notice_min`
+  - Filter out slots starting after `now() + max_advance_days`
+  - Anti-join with `appointments` where `status not in ('cancelled','no_show')` and time ranges overlap
+  - If `daily_cap` set, limit per tenant-TZ day
+- [ ] 6.10 Generate updated types: `pnpm dlx supabase gen types typescript --local > src/types/database.ts`
+- [ ] 6.11 Write `src/services/api/availability.ts` with `getAvailableSlots(...)` RPC wrapper
+- [ ] 6.12 Add seed in `supabase/preview-seed.sql`: rules Mon–Fri 09:00–17:00 for demo tenant + one block exception (lunch break 12:00–13:00 daily, modeled as five exceptions or a separate per-day rule)
+- [ ] 6.13 Tests:
+  - Insert rule + service + appointment, call `compute_available_slots`, assert returned slots are correct
+  - DST boundary test (e.g., last Sunday of March in `Europe/Berlin`): a 09:00 rule in local time produces the right UTC slot before and after the spring-forward
+  - `block` exception subtracts; `extra` exception adds
+  - `daily_cap` enforced
+  - `min_notice_min` filters past slots
+- [ ] 6.14 Document SQL function in a top-of-file comment with example call

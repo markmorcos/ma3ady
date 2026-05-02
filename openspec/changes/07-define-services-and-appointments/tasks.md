@@ -1,0 +1,44 @@
+# Tasks
+
+- [ ] 7.1 `make migrate-new NAME=services` → `003_services.sql`
+- [ ] 7.2 Create `services` table with full schema and constraints
+- [ ] 7.3 Enable RLS, policies: select where `active = true` for public; insert/update/delete owner/admin
+- [ ] 7.4 `make migrate-new NAME=appointments` → `004_appointments.sql`
+- [ ] 7.5 Create `appointment_status` enum
+- [ ] 7.6 Create `guest_contacts` table with `unique(tenant_id, email)`
+- [ ] 7.7 Create `appointments` table with the EXCLUDE constraint, indexes, and the "exactly one of user_id/guest_contact_id" check
+- [ ] 7.8 Create `appointment_events` table for audit
+- [ ] 7.9 Write `handle_appointment_status_change()` trigger function (`security definer`):
+  - on INSERT → write `created` event with the inserted row as payload
+  - on UPDATE → if `status` changed, write event of `event_type = 'status_changed'` with `{from, to}`; if `starts_at`/`ends_at` changed, write `'rescheduled'` event with old/new
+- [ ] 7.10 Add trigger to `appointments` table: `after insert or update`
+- [ ] 7.11 Enable RLS on all three tables
+- [ ] 7.12 Policies on `appointments`:
+  - `select` — own (`user_id = auth.uid()`) OR same-tenant staff/admin/owner OR via the `verify_manage_token(token)` SECURITY DEFINER function (used by Edge Functions for guest manage flow)
+  - `update` — staff+ of tenant; OR via Edge Function with verified manage token
+  - `insert` — denied at policy level (must go through `book_appointment` SECURITY DEFINER function)
+  - `delete` — denied (cancellations are status updates, never row deletes)
+- [ ] 7.13 Policies on `guest_contacts`:
+  - `select` — staff+ of tenant; or own row by `claimed_by_user_id = auth.uid()`
+  - `insert/update` — through `book_appointment` only (no direct policy)
+- [ ] 7.14 Write `book_appointment(p_tenant_slug text, p_service_id uuid, p_starts_at timestamptz, p_guest_name text, p_guest_email text, p_guest_phone text default null) returns (appointment_id uuid, manage_token text) language plpgsql security definer`:
+  - Resolve tenant + service
+  - Compute `ends_at = starts_at + duration`
+  - Verify slot is in `compute_available_slots(...)` result for that time
+  - Upsert `guest_contacts(tenant_id, name, email, phone, locale)` returning id
+  - Generate a 32-byte URL-safe random token, compute `sha256` hash
+  - Insert appointment with `manage_token_hash`, status `pending`
+  - Catch EXCLUDE violation → raise `'slot_taken'` error
+  - Return appointment_id + plaintext manage_token
+- [ ] 7.15 Write `verify_manage_token(p_token text) returns uuid security definer` — returns `appointment_id` if hash matches a non-cancelled appointment, raises otherwise
+- [ ] 7.16 Finalize `compute_available_slots` body from change 06 now that services + appointments exist
+- [ ] 7.17 Generate types: `pnpm dlx supabase gen types typescript --local > src/types/database.ts`
+- [ ] 7.18 Write `src/services/api/services.ts` (`getActiveServices(tenantSlug)`, `getService(id)`)
+- [ ] 7.19 Write `src/services/api/appointments.ts` (`getMyAppointments`, `getAppointment(id)`)
+- [ ] 7.20 Write `src/services/api/booking.ts` (`bookAppointment(...)` wrapping the RPC)
+- [ ] 7.21 Tests:
+  - EXCLUDE violation: two concurrent inserts at the same slot — exactly one succeeds, the other gets `slot_taken`
+  - Status state machine: can transition pending → confirmed; cannot transition cancelled → confirmed (rule check, lands in change 13)
+  - Guest booking: anonymous client successfully calls `book_appointment` and receives a manage token
+  - Manage token: a token cannot be used after the appointment is cancelled
+- [ ] 7.22 Seed: services for demo tenant (e.g., "Consultation 30min", "Long Session 60min"); a couple of confirmed appointments to populate test data

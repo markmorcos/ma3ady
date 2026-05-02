@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+*.log
+.pnpm-store/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Expo
+.expo/
+dist/
+web-build/
+*.jks
+*.p12
+*.key
+*.mobileprovision
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Build artifacts
+ios/Pods/
+ios/build/
+android/build/
+android/app/build/
+android/.gradle/
+
+# Test
+coverage/

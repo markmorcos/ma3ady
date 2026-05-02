@@ -1,0 +1,50 @@
+# Tasks
+
+- [ ] 14.1 `make migrate-new NAME=notifications` → `006_notifications.sql` with table + indexes + enums
+- [ ] 14.2 `make migrate-new NAME=pg_cron_setup` → `007_pg_cron_setup.sql`:
+  - Enable `pg_cron` extension
+  - Create `notify_due_reminders()` SQL function that scans for due appointments and inserts `notifications` rows of `event = 'reminder_24h'` or `'reminder_1h'`
+  - `select cron.schedule('send-reminders', '*/5 * * * *', $$ select notify_due_reminders(); $$)`
+- [ ] 14.3 Write trigger on `appointment_events` that calls `pg_net` to invoke `send-appointment-notification` Edge Function with the event id
+- [ ] 14.4 Write `supabase/functions/_shared/dispatchers/email.ts` with `EmailDispatcher` interface, `MockEmailDispatcher`, `ResendEmailDispatcher` (uses Resend API)
+- [ ] 14.5 Write `supabase/functions/_shared/dispatchers/whatsapp.ts` similarly; the real impl reuses existing legacy template `event_notification` + WABA phone number id from env
+- [ ] 14.6 Write `supabase/functions/_shared/dispatchers/push.ts` with `MockPushDispatcher` (writes a row to `notifications` of channel `push`, status `sent`, payload contains the message body); `ExpoPushDispatcher` deferred (stubbed)
+- [ ] 14.7 Write `supabase/functions/_shared/dispatchers/index.ts` factory `getDispatchers()` reading `EMAIL_DISPATCHER`, `WHATSAPP_DISPATCHER`, `PUSH_DISPATCHER`
+- [ ] 14.8 Write `supabase/functions/_shared/templates/`:
+  - `bookingConfirmed.ts`, `bookingRescheduled.ts`, `bookingCancelled.ts`, `reminder24h.ts`, `reminder1h.ts`
+  - Each exports `{ subject(locale), html(locale, vars), text(locale, vars), whatsappParams(locale, vars), pushBody(locale, vars) }`
+  - Localized en + ar
+- [ ] 14.9 Write `supabase/functions/_shared/ics.ts` — Deno `.ics` generator returning a string with `SUMMARY`, `DTSTART`, `DTEND`, `LOCATION`, `URL` (manage link)
+- [ ] 14.10 Write Edge Function `supabase/functions/send-appointment-notification/index.ts`:
+  - Input: `{ event_id }`
+  - Loads the event + appointment + service + tenant + recipient (user via `profiles` or guest via `guest_contacts`)
+  - Resolves locale: `profiles.locale` or `guest_contacts.locale` or `tenants.default_locale`
+  - For each channel that the recipient has identifiers for (email always; phone for WhatsApp; push token for push):
+    - Insert `notifications` row with status `queued`
+    - Call dispatcher; on success update row to `sent` with `provider_id`; on failure to `failed` with `error`
+  - Idempotency: skip if a `notifications` row with same `(appointment_id, channel, event)` already exists with status in (`queued`, `sent`)
+- [ ] 14.11 Write `notifications` event mapping:
+  - `appointment_events.event_type = 'created'` → `event = 'booked'`
+  - `'status_changed' from→to in {pending→confirmed}` → `event = 'confirmed'`
+  - `'status_changed' to=cancelled` → `event = 'cancelled'`
+  - `'rescheduled'` → `event = 'rescheduled'`
+  - `'status_changed' to=completed` → `event = 'completed'` (no notification by default; admin-only)
+  - `'status_changed' to=no_show` → `event = 'no_show'` (no notification)
+- [ ] 14.12 Add to `.env.example`:
+  - `EMAIL_DISPATCHER=mock`
+  - `WHATSAPP_DISPATCHER=mock`
+  - `PUSH_DISPATCHER=mock`
+  - `RESEND_API_KEY=...`
+  - `RESEND_FROM="Ma3ady <hello@ma3ady.com>"`
+  - `WHATSAPP_ACCESS_TOKEN=...`
+  - `WHATSAPP_PHONE_NUMBER_ID=...`
+  - `WHATSAPP_TEMPLATE_NAME=event_notification`
+- [ ] 14.13 In Supabase preview/prod project secrets, set the real values (call deferred to change 17)
+- [ ] 14.14 Tests:
+  - Mock dispatcher writes to `notifications` with `sent`
+  - Idempotency: same event triggered twice produces one row
+  - Locale selection logic
+  - Reminder cron only fires once per (appointment, kind)
+  - `.ics` validates against the `ical-validator`
+  - Production-mode dispatch attempts a real call (use vcr/nock-style recording)
+- [ ] 14.15 Verify in dev: book an appointment → `notifications` table grows with `sent` rows in mock channel; payloads readable from Studio
