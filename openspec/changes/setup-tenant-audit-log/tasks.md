@@ -1,6 +1,6 @@
 # Tasks
 
-- [ ] 1.1 `make migrate-new NAME=tenant_audit_events` → `010_tenant_audit_events.sql`
+- [ ] 1.1 `make migrate-new NAME=tenant_audit_events` → `tenant_audit_events.sql`
 - [ ] 1.2 Create `tenant_audit_event_kind` enum with the full list from `proposal.md`
 - [ ] 1.3 Create `tenant_audit_events` table with full schema and indexes
 - [ ] 1.4 Enable RLS:

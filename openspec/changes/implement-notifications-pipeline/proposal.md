@@ -13,10 +13,10 @@ Push is wired via the dispatcher interface but defaults to `mock` (in-app toasts
 
 ## What Changes
 
-- **ADDED** migration `006_notifications.sql`:
+- **ADDED** migration `notifications.sql`:
   - `notifications(id, appointment_id, channel enum('email','whatsapp','push'), event text, status enum('queued','sent','failed'), provider_id text, payload jsonb, error text, created_at, sent_at)`
   - Index `(appointment_id)`, `(status, created_at)` for cron-driven retries
-- **ADDED** migration `007_pg_cron_setup.sql`:
+- **ADDED** migration `pg_cron_setup.sql`:
   - `create extension if not exists pg_cron;`
   - Cron job `'send-reminders' every 5 minutes` invoking `notify_due_reminders()` SQL function
   - `notify_due_reminders()`: finds appointments with `starts_at` between `now()+23h45m` and `now()+24h15m` (T-24h window) or T-1h window with no prior reminder of that kind in `notifications`, inserts queued rows

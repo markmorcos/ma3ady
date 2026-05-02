@@ -6,7 +6,7 @@ The legacy app pre-generated `availability_slot` rows. Per `project.md` §4 we r
 
 ## What Changes
 
-- **ADDED** migration `002_availability.sql`:
+- **ADDED** migration `availability.sql`:
   - `availability_rules(id, tenant_id, service_id nullable, day_of_week int 0–6, start_time time, end_time time, valid_from date nullable, valid_until date nullable, created_at)` — `service_id` null means "applies to every service for this tenant"
   - `availability_exceptions(id, tenant_id, service_id nullable, kind enum('block','extra'), starts_at timestamptz, ends_at timestamptz, reason text)`
   - Check: `end_time > start_time` on rules; `ends_at > starts_at` on exceptions

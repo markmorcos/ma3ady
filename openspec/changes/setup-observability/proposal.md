@@ -8,7 +8,7 @@ This change formalizes the conventions: structured logging in Edge Functions, a 
 
 ## What Changes
 
-- **ADDED** migration `009_client_errors.sql`:
+- **ADDED** migration `client_errors.sql`:
   - `client_error_kind enum('boundary','unhandled_rejection','manual','network','rls_denied')`
   - `client_errors(id, user_id nullable, tenant_id nullable, kind client_error_kind, message text, stack text, payload jsonb, app_version text, platform text, locale text, created_at)`
   - Index `(tenant_id, created_at desc)`, `(user_id, created_at desc)`, `(kind, created_at desc)`

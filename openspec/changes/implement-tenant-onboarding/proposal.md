@@ -16,7 +16,7 @@ After Google OAuth lands (the `implement-google-oauth` change), a signed-in user
   - Input: `{ email, role }`
   - If user exists → insert `memberships` row directly
   - If not → call `supabase.auth.admin.inviteUserByEmail(email)` then insert pending membership row keyed by email (table `pending_memberships(tenant_id, email, role)`); upgraded to a real `memberships` row on the user's first sign-in via `claim-bookings` trigger
-- **ADDED** migration `005_pending_memberships.sql` with the table + a trigger on `auth.users` insert that promotes pending rows to memberships when emails match
+- **ADDED** migration `pending_memberships.sql` with the table + a trigger on `auth.users` insert that promotes pending rows to memberships when emails match
 - **ADDED** screens:
   - `app/(onboarding)/_layout.tsx`
   - `app/(onboarding)/welcome.tsx` — "Sign up your business / Join an existing one"

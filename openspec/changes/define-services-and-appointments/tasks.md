@@ -1,9 +1,9 @@
 # Tasks
 
-- [ ] 1.1 `make migrate-new NAME=services` → `003_services.sql`
+- [ ] 1.1 `make migrate-new NAME=services` → `services.sql`
 - [ ] 1.2 Create `services` table with full schema and constraints
 - [ ] 1.3 Enable RLS, policies: select where `active = true` for public; insert/update/delete owner/admin
-- [ ] 1.4 `make migrate-new NAME=appointments` → `004_appointments.sql`
+- [ ] 1.4 `make migrate-new NAME=appointments` → `appointments.sql`
 - [ ] 1.5 Create `appointment_status` enum
 - [ ] 1.6 Create `guest_contacts` table with `unique(tenant_id, email)`
 - [ ] 1.7 Create `appointments` table with the EXCLUDE constraint, indexes, and the "exactly one of user_id/guest_contact_id" check

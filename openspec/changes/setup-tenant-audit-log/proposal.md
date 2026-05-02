@@ -8,7 +8,7 @@ This change adds a tenant-wide audit trail with a uniform shape, automatic trigg
 
 ## What Changes
 
-- **ADDED** migration `010_tenant_audit_events.sql`:
+- **ADDED** migration `tenant_audit_events.sql`:
   - `tenant_audit_event_kind enum`: full list below
   - `tenant_audit_events(id, tenant_id, kind, by_user_id nullable, by_kind enum('user','system','guest_token'), target_kind text, target_id uuid nullable, payload jsonb, created_at)`
   - Indexes: `(tenant_id, created_at desc)`, `(by_user_id, created_at desc)`, `(target_kind, target_id)`

@@ -1,6 +1,6 @@
 # Tasks
 
-- [ ] 1.1 `make migrate-new NAME=availability` → `supabase/migrations/002_availability.sql`
+- [ ] 1.1 `make migrate-new NAME=availability` → `supabase/migrations/availability.sql`
 - [ ] 1.2 Create `availability_rules` table with full schema and `end_time > start_time` check
 - [ ] 1.3 Create `availability_exception_kind` enum: `block | extra`
 - [ ] 1.4 Create `availability_exceptions` table with `ends_at > starts_at` check

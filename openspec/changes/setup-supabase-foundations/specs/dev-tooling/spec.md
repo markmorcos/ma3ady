@@ -11,17 +11,38 @@
 - **AND** `supabase status` reports `API`, `DB`, `Studio`, `Auth` as healthy
 - **AND** the printed `API URL` and `anon key` can be pasted into `.env.local` to connect the mobile app
 
-### Requirement: Migration files SHALL follow `NNN_snake_case.sql` naming
+### Requirement: Migration filenames SHALL be auto-numbered with a 3-digit prefix
 
-#### Scenario: creating a new migration
-- **WHEN** a developer runs `make migrate-new NAME=add_appointments`
-- **THEN** a file `supabase/migrations/NNN_add_appointments.sql` is created
-- **AND** `NNN` is the next sequential 3-digit number after the latest existing migration
+#### Scenario: first migration in a fresh repo
+- **GIVEN** an empty `supabase/migrations/` directory
+- **WHEN** a developer runs `make migrate-new NAME=init`
+- **THEN** the file `supabase/migrations/001_init.sql` is created
+- **AND** `make migrate-new` exits 0 and prints the path
+
+#### Scenario: subsequent migration
+- **GIVEN** the highest existing migration is `007_pg_cron_setup.sql`
+- **WHEN** a developer runs `make migrate-new NAME=client_errors`
+- **THEN** the file `supabase/migrations/008_client_errors.sql` is created
+- **AND** the prefix is computed by listing `^[0-9]{3}_` files, sorting, taking the last, parsing the integer, and incrementing — never by counting files (gaps from rare deletions are preserved)
+
+#### Scenario: NAME validation
+- **GIVEN** `make migrate-new` invoked without `NAME=` or with an invalid slug (uppercase, spaces, leading/trailing dash)
+- **WHEN** the target runs
+- **THEN** it exits non-zero with a message describing the expected `^[a-z][a-z0-9_]*$` pattern
+- **AND** no file is created
 
 #### Scenario: rejected timestamp prefix
 - **GIVEN** a PR that introduces `supabase/migrations/20260512_foo.sql`
-- **WHEN** the lint step runs
-- **THEN** the PR is rejected with a message referencing the convention
+- **WHEN** the CI `db-lint` step runs
+- **THEN** the PR is rejected with a message referencing the `<NNN>_<slug>.sql` convention
+- **AND** the developer is directed to use `make migrate-new` to regenerate the filename
+
+#### Scenario: number collision on parallel PRs
+- **GIVEN** two open PRs each adding `008_<slug>.sql`
+- **WHEN** the second PR is being rebased after the first merges
+- **THEN** the rebase is expected to surface the conflict
+- **AND** the developer re-runs `make migrate-new NAME=<their-slug>` to claim `009`
+- **AND** the conflict resolves cleanly (one rename, no SQL change)
 
 ### Requirement: The Supabase client SHALL be configured once with PKCE + SecureStore
 

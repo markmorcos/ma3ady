@@ -8,11 +8,11 @@ This change establishes the schema, the EXCLUDE-based double-booking guard, the 
 
 ## What Changes
 
-- **ADDED** migration `003_services.sql`:
+- **ADDED** migration `services.sql`:
   - `services(id, tenant_id, name, description, duration_minutes, buffer_before_min int default 0, buffer_after_min int default 0, min_notice_min int default 60, max_advance_days int default 60, daily_cap int nullable, active boolean default true, created_at, updated_at)`
   - Check constraints: `duration_minutes > 0`, `buffer_*_min >= 0`, `min_notice_min >= 0`, `max_advance_days > 0`
   - RLS: read public for `active = true`; write owner/admin only
-- **ADDED** migration `004_appointments.sql`:
+- **ADDED** migration `appointments.sql`:
   - `appointment_status enum('pending','confirmed','cancelled','completed','no_show')`
   - `guest_contacts(id, tenant_id, name, email, phone nullable, locale, claimed_by_user_id nullable references auth.users, created_at, updated_at, unique(tenant_id, email))`
   - `appointments(id, tenant_id, service_id, user_id nullable references auth.users, guest_contact_id nullable references guest_contacts, starts_at timestamptz, ends_at timestamptz, status appointment_status default 'pending', notes text, manage_token_hash text not null, cancelled_at, cancelled_by_user_id, created_at, updated_at)`

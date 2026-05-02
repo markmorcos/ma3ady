@@ -1,6 +1,6 @@
 # Tasks
 
-- [ ] 1.1 `make migrate-new NAME=client_errors` → `009_client_errors.sql`:
+- [ ] 1.1 `make migrate-new NAME=client_errors` → `client_errors.sql`:
   - `client_error_kind` enum
   - `client_errors` table with full schema and indexes
   - RLS: deny all inserts from public; admins of `tenant_id` can select; users can select own rows

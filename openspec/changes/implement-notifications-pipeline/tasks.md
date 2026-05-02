@@ -1,7 +1,7 @@
 # Tasks
 
-- [ ] 1.1 `make migrate-new NAME=notifications` → `006_notifications.sql` with table + indexes + enums
-- [ ] 1.2 `make migrate-new NAME=pg_cron_setup` → `007_pg_cron_setup.sql`:
+- [ ] 1.1 `make migrate-new NAME=notifications` → `notifications.sql` with table + indexes + enums
+- [ ] 1.2 `make migrate-new NAME=pg_cron_setup` → `pg_cron_setup.sql`:
   - Enable `pg_cron` extension
   - Create `notify_due_reminders()` SQL function that scans for due appointments and inserts `notifications` rows of `event = 'reminder_24h'` or `'reminder_1h'`
   - `select cron.schedule('send-reminders', '*/5 * * * *', $$ select notify_due_reminders(); $$)`

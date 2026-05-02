@@ -14,7 +14,20 @@
 - [ ] 1.12 Write `.prettierrc` (`semi: true`, `singleQuote: true`, `printWidth: 100`, `trailingComma: "all"`)
 - [ ] 1.13 Write `.prettierignore`
 - [ ] 1.14 `pnpm exec husky init`; add `.husky/pre-commit` running `pnpm lint:fix && pnpm typecheck`
-- [ ] 1.15 Write `Makefile` with all targets listed in proposal
+- [ ] 1.15 Write `Makefile` with all targets listed in proposal. The `migrate-new` target implementation:
+  ```make
+  migrate-new: ## Create a new sequentially-numbered migration. Usage: make migrate-new NAME=add_foo
+  	@if [ -z "$(NAME)" ]; then echo "ERROR: NAME=<slug> required"; exit 1; fi
+  	@if ! echo "$(NAME)" | grep -qE '^[a-z][a-z0-9_]*$$'; then \
+  		echo "ERROR: NAME must match ^[a-z][a-z0-9_]*$$ (lowercase, underscores)"; exit 1; fi
+  	@mkdir -p supabase/migrations
+  	@last=$$(ls supabase/migrations/ 2>/dev/null | grep -E '^[0-9]{3}_' | sort | tail -1 | grep -oE '^[0-9]{3}'); \
+  	next=$$(printf "%03d" $$((10#$${last:-000} + 1))); \
+  	file="supabase/migrations/$${next}_$(NAME).sql"; \
+  	if [ -e "$$file" ]; then echo "ERROR: $$file already exists"; exit 1; fi; \
+  	touch "$$file"; \
+  	echo "Created $$file"
+  ```
 - [ ] 1.16 Write `jest.config.js` (preset `jest-expo`, transformIgnorePatterns for RN/Expo deps)
 - [ ] 1.17 Write `jest.setup.ts` (mock `expo-localization`, `expo-secure-store`, `react-native-reanimated`)
 - [ ] 1.18 Write `.env.example` with all `EXPO_PUBLIC_*` vars + server-side secret placeholders

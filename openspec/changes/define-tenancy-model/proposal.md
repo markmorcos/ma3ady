@@ -8,7 +8,7 @@ Per `project.md` §3, tenants are identified by `slug`, served at `<slug>.ma3ady
 
 ## What Changes
 
-- **ADDED** migration `001_tenancy.sql` introducing:
+- **ADDED** migration `tenancy.sql` introducing:
   - `tenants(id uuid pk, slug text unique not null, name text not null, timezone text not null, default_locale text not null, brand_color text, created_at, updated_at)` — no `logo_url` in v1 (no storage layer; see `project.md` §1f)
   - `slug ~ '^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$'` check
   - `tenant_role enum('owner','admin','staff','customer')`

@@ -32,7 +32,7 @@
 - [ ] 1.13 Boot performance budget test:
   - In `tests/perf/boot.test.ts`, mock all four boot phases with 100ms latency, assert `bootPhase === 'ready'` within 1.5s on the test runner
   - In `/dev/perf` route: visual stopwatch from app launch to ready
-- [ ] 1.14 Add `display_timezone_override` column to `profiles` (will require an additive migration; included in this change as `008_profiles_tz_override.sql`):
+- [ ] 1.14 Add `display_timezone_override` column to `profiles` (will require an additive migration; included in this change as `profiles_tz_override.sql`):
   - `alter table profiles add column display_timezone_override text;`
   - check constraint validates IANA zone via a helper function `is_valid_iana_zone(text)` using a small whitelist or `pg_timezone_names`
 - [ ] 1.15 Write `app/(admin)/(tabs)/settings/timezone.tsx` — admin can pick from a list of IANA zones (sourced from a static asset of common zones; "I'm here right now" CTA reads `Intl.DateTimeFormat().resolvedOptions().timeZone` for one-tap)

@@ -1,7 +1,7 @@
 # Tasks
 
-- [ ] 1.1 `make migrate-new NAME=tenancy` → `supabase/migrations/001_tenancy.sql`
-- [ ] 1.2 In `001_tenancy.sql`, create `tenants` table with full schema and slug check constraint
+- [ ] 1.1 `make migrate-new NAME=tenancy` → `supabase/migrations/tenancy.sql`
+- [ ] 1.2 In `tenancy.sql`, create `tenants` table with full schema and slug check constraint
 - [ ] 1.3 Create `tenant_role` enum: `owner | admin | staff | customer`
 - [ ] 1.4 Create `memberships` table with `unique (user_id, tenant_id)`
 - [ ] 1.5 Create `profiles` table referencing `auth.users(id)` on cascade
