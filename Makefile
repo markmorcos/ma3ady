@@ -6,13 +6,11 @@ help: ## Show this help
 install: ## Install dependencies
 	pnpm install
 
-dev-up: ## Start local Supabase (placeholder until setup-supabase-foundations lands)
-	@command -v supabase >/dev/null 2>&1 || { echo "ERROR: supabase CLI not installed"; exit 1; }
-	supabase start
+dev-up: ## Start local Supabase
+	pnpm exec supabase start
 
 dev-down: ## Stop local Supabase
-	@command -v supabase >/dev/null 2>&1 || { echo "ERROR: supabase CLI not installed"; exit 1; }
-	supabase stop
+	pnpm exec supabase stop
 
 migrate-new: ## Create a new sequentially-numbered migration. Usage: make migrate-new NAME=add_foo
 	@if [ -z "$(NAME)" ]; then echo "ERROR: NAME=<slug> required"; exit 1; fi
@@ -27,7 +25,7 @@ migrate-new: ## Create a new sequentially-numbered migration. Usage: make migrat
 	echo "Created $$file"
 
 migrate-up: ## Apply migrations to local Supabase
-	supabase db push --local
+	pnpm exec supabase db push --local
 
 seed: ## Seed local DB (placeholder)
 	@echo "seed target not yet implemented; lands in setup-supabase-foundations"

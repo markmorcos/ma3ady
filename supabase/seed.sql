@@ -1,0 +1,3 @@
+-- Local-only seed. Idempotent. Truncate-and-insert per table.
+-- Loaded by `supabase db reset` and `make seed`. Real fixture rows land in later changes
+-- (define-tenancy-model, define-services-and-appointments) once the tables exist.
