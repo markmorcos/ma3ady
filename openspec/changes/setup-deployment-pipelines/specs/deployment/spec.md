@@ -64,3 +64,25 @@
 - **WHEN** the `deploy-preview` job runs
 - **THEN** it has access to `SUPABASE_PROJECT_REF_PREVIEW` only
 - **AND** it does NOT have access to `SUPABASE_PROJECT_REF_PROD` or production-only secrets
+
+### Requirement: Email deliverability SHALL be configured before `EMAIL_DISPATCHER=real`
+
+#### Scenario: SPF record present
+- **GIVEN** the production domain `ma3ady.com`
+- **WHEN** `dig TXT ma3ady.com +short` is run
+- **THEN** the output includes a record matching `v=spf1 include:_spf.resend.com -all`
+
+#### Scenario: DKIM record present
+- **WHEN** `dig TXT resend._domainkey.ma3ady.com +short` is run
+- **THEN** the output is the public key value Resend issued for the domain
+- **AND** the Resend dashboard shows the domain as "Verified"
+
+#### Scenario: DMARC record present
+- **WHEN** `dig TXT _dmarc.ma3ady.com +short` is run
+- **THEN** the output includes `v=DMARC1` with `p=quarantine` (or stricter) and a `rua` reporting address
+
+#### Scenario: dispatcher flip is gated by verification
+- **GIVEN** any of SPF, DKIM, or DMARC is missing or misconfigured
+- **WHEN** `make dns-check` runs
+- **THEN** the command exits non-zero with a list of missing/wrong records
+- **AND** the runbook stipulates `EMAIL_DISPATCHER=real` must NOT be set in production until `make dns-check` passes

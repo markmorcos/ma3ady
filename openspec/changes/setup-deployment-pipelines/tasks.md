@@ -20,14 +20,24 @@
   - Steps: `pnpm install` → `expo/expo-github-action@v8` with `eas-version: latest, token: ${EXPO_TOKEN}` → `eas build --profile ${profile} --platform ${platform} --non-interactive --no-wait`
 - [ ] 1.6 Add to `eas.json` (created in the `setup-monorepo-and-tooling` change) the production-profile pre-build hook script that asserts `EXPO_PUBLIC_*_DISPATCHER === 'real'`
 - [ ] 1.7 Write `docs/deployment.md`:
-  - Initial setup: Supabase project creation, secrets, Cloudflare DNS records, infrastructure repo deploy.yaml entry
+  - Initial setup: Supabase project creation, infrastructure repo deploy.yaml entry, Cloudflare zone bootstrap
   - Rollback procedure for marketing/tenant-landing (re-dispatch with previous SHA)
   - Rollback procedure for Supabase (revert PR + redeploy; for migrations, write a new compensating migration)
   - Mobile rollback: revert in EAS Update; native bundle revert via re-submit
-- [ ] 1.8 Write `docs/secrets.md`:
-  - List every secret with owner + rotation cadence + where it lives
-  - Rotation procedure for each
-- [ ] 1.9 Add Makefile targets `deploy-functions PROJECT_REF=...` (calls `supabase functions deploy ${FUNCTIONS} --project-ref $$PROJECT_REF`) and `db-diff` (generates a candidate migration from local schema diff against preview)
-- [ ] 1.10 Test: Open a PR touching `marketing/public/index.html` and verify CI passes; merge to main and verify the marketing deploy workflow runs (in dry-run mode if infra repo not yet wired)
-- [ ] 1.11 Test: Open a PR touching `supabase/migrations/`, verify CI db-lint passes; merge and verify supabase deploy workflow runs preview then prod
-- [ ] 1.12 Manual run: `gh workflow run build-mobile.yml -f profile=preview -f platform=ios` and verify EAS build queued
+- [ ] 1.8 Write `docs/dns-setup.md` covering Cloudflare records for ma3ady.com:
+  - **A/CNAME**: apex → ingress IP, `www` → apex (CNAME), `auth` → ingress, `*` (wildcard) → ingress
+  - **SPF (TXT @)**: `v=spf1 include:_spf.resend.com -all` (single record; merge if other senders ever join)
+  - **DKIM (TXT resend._domainkey)**: paste the public key string Resend provides on domain verification
+  - **DMARC (TXT _dmarc)**: `v=DMARC1; p=quarantine; rua=mailto:dmarc@ma3ady.com; ruf=mailto:dmarc@ma3ady.com; fo=1; pct=100; aspf=r; adkim=r`
+  - **MX**: only if/when receiving email at @ma3ady.com (deferred — no inbound mail in v1; outbound only)
+  - Verification commands: `dig TXT ma3ady.com +short`, `dig TXT resend._domainkey.ma3ady.com +short`, `dig TXT _dmarc.ma3ady.com +short`
+  - Resend dashboard "Verified" check before flipping `EMAIL_DISPATCHER=real`
+- [ ] 1.9 Add to Resend dashboard: configure `ma3ady.com` as a verified sending domain; copy the DKIM public key into Cloudflare per 1.8
+- [ ] 1.10 Add Makefile targets:
+  - `deploy-functions PROJECT_REF=...` (calls `supabase functions deploy ${FUNCTIONS} --project-ref $$PROJECT_REF`)
+  - `db-diff` (generates a candidate migration from local schema diff against preview)
+  - `dns-check` — runs the dig commands from 1.8, asserts each record matches the expected value, exits non-zero on drift
+- [ ] 1.11 Test: Open a PR touching `marketing/public/index.html` and verify CI passes; merge to main and verify the marketing deploy workflow runs (in dry-run mode if infra repo not yet wired)
+- [ ] 1.12 Test: Open a PR touching `supabase/migrations/`, verify CI db-lint passes; merge and verify supabase deploy workflow runs preview then prod
+- [ ] 1.13 Manual run: `gh workflow run build-mobile.yml -f profile=preview -f platform=ios` and verify EAS build queued
+- [ ] 1.14 Send a test email from preview to a Gmail and Outlook inbox; confirm SPF + DKIM + DMARC all show `pass` in the message headers

@@ -78,3 +78,22 @@
 - **THEN** subdirectories `apple/` and `google/` each contain title, description, keywords (Apple), screenshots, and privacy URL files
 - **AND** translations exist for `en` and `ar`
 - **AND** these files are the source of truth — changes to live store listings flow from this directory, not the other way around
+
+### Requirement: Final brand assets SHALL replace placeholders before store submission
+
+#### Scenario: placeholder asset detection
+- **GIVEN** any file in `assets/branding/`, `marketing/public/`, or `tenant-landing/public/`
+- **WHEN** the placeholder check (`grep -r "PLACEHOLDER" assets/ marketing/public/ tenant-landing/public/`) runs
+- **THEN** zero matches are returned
+- **AND** the corresponding final SVG/PNG masters are present and signed off by the brand designer
+
+#### Scenario: app icon roundtrip
+- **GIVEN** the final 1024×1024 iOS icon master
+- **WHEN** `eas build --profile production` packages the iOS bundle
+- **THEN** the bundle's `Icon-1024.png` matches the master's checksum
+- **AND** the same applies to Android adaptive icons + monochrome themed icon
+
+#### Scenario: marketing OG image
+- **GIVEN** a Twitter / Facebook share preview of `https://ma3ady.com`
+- **WHEN** the OG image is fetched
+- **THEN** it is the final 1200×630 designer-produced image, not a placeholder

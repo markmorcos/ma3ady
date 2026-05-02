@@ -25,7 +25,7 @@ This is the marquee user flow. It must be fast (no auth latency), clear (no jarg
 3. **Confirmation screen passes the plaintext token via query for the "manage" CTA**. Yes, the token is sensitive — but the confirmation screen is presented exactly to the booker, on their device, immediately after booking. It's not stored beyond that view. The sent emails carry the token too; one extra place is acceptable.
 4. **No optimistic update on booking**. The slot might already be taken; we wait for the server. Snappy enough at sub-second.
 5. **DayStrip + SlotGrid over a full month calendar**. Mobile-first. A month grid would dominate the screen and force a second tap to see times. The strip + per-day grid is faster to scan.
-6. **Tenant header is branded with `tenants.brand_color`**. First moment of brand reinforcement. We don't ship per-tenant logos in v1 — the wordmark is the tenant name in the header — but the optional `logo_url` is honored if set.
+6. **Tenant header is branded with `tenants.brand_color`**. First moment of brand reinforcement. The wordmark is the tenant name set in our type. No per-tenant logos in v1 (per `project.md` §1f — no storage layer); we'll revisit when `storage-and-uploads` lands.
 7. **Empty states are first-class**. "No slots this week" + "Try next week" CTA. No spinner death.
 8. **Deep links use `ma3ady://manage/<token>`** in production and the Expo dev URL in development. The route file `app/manage/[token].tsx` works in both because Expo Router handles both schemes.
 9. **The confirmation screen sets a flag in TanStack Query cache to invalidate "My bookings" the next time the user authenticates** — so a guest who books and then signs in immediately sees their booking via the claim flow.

@@ -34,10 +34,18 @@
 - [ ] 1.14 Update `eas.json`: production profile sets `EMAIL_DISPATCHER=real, WHATSAPP_DISPATCHER=real, PUSH_DISPATCHER=real`
 - [ ] 1.15 Build preview with `eas build --profile preview`, install on test devices, smoke-test the entire flow with real notifications enabled
 - [ ] 1.16 RLS pen-test fixture: Jest suite using two service-role-forged anon clients to assert cross-tenant isolation across all 12+ domain tables; lives under `tests/security/rls.test.ts`
-- [ ] 1.17 Compose store listings:
+- [ ] 1.17 Brand assets finalization (designer hand-off → integration):
+  - Receive designer SVG masters for wordmark (en + ar), mark, app icon, splash, OG image, favicon set
+  - Replace `assets/branding/wordmark-en.svg`, `wordmark-ar.svg`, `mark.svg` (drop placeholders)
+  - Generate platform variants: 1024×1024 iOS icon, 432×432 Android adaptive (foreground + background), monochrome SVG for Android 13+ themed icons, splash 1284×2778 (light + dark)
+  - Wire via `app.json` `expo.icon`, `expo.android.adaptiveIcon`, `expo.splash`
+  - Replace `marketing/public/{icon,favicon,apple-touch-icon,og-image}.{png,ico}` and `tenant-landing/public/...` equivalents
+  - Re-run Lighthouse audit on marketing site to confirm no regressions
+  - Submit asset repo update to the brand designer for sign-off (signed-off PR before merge)
+- [ ] 1.18 Compose store listings:
   - Apple: subtitle, description, keywords, screenshots (EN+AR), privacy URL, support URL, license agreement
   - Google: short + full description, screenshots, feature graphic, content rating, data safety form
   - Both: declare data collection per the privacy manifest
-- [ ] 1.18 Submit to TestFlight (internal) and Play Console (internal track) for final QA
-- [ ] 1.19 Public submission to App Store + Play Store
-- [ ] 1.20 Monitor crash reports + onboarding funnel metrics for 7 days post-launch
+- [ ] 1.19 Submit to TestFlight (internal) and Play Console (internal track) for final QA
+- [ ] 1.20 Public submission to App Store + Play Store
+- [ ] 1.21 Monitor crash reports + onboarding funnel metrics for 7 days post-launch

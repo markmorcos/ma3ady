@@ -54,11 +54,15 @@ Status mapping: `pending → warning`, `confirmed → brand`, `completed → suc
 ### 1d. GDPR Baseline
 
 - **Lawful basis**: contract performance (booking) + legitimate interest (transactional notifications).
-- **Data minimization**: collect only name, email, optional phone, plus Google profile (sub, email, name, picture) for authenticated users.
+- **Data minimization**: collect only name, email, optional phone, plus Google profile (sub, email, name) for authenticated users. Google profile picture is **not** stored (no avatar surface in v1).
 - **Retention**: cancelled appointments retained 90 days then anonymized (PII nulled, audit row kept). No-show appointments retained 18 months for tenant analytics.
 - **Right to be forgotten**: any user (customer or tenant member) may delete their account; appointment history is anonymized but kept (tenant business records).
 - **Sub-processors**: Supabase (EU region), Resend (email), Meta WhatsApp Cloud API, Expo Push (later phase). Listed in the public privacy policy.
 - **Cookie banner**: only on the marketing website (`ma3ady.com`). The mobile app does not use third-party trackers in v1; analytics is in-house only.
+
+### 1f. No User-Uploaded Storage in v1
+
+There is **no Supabase Storage bucket** in v1. No tenant logos, no service images, no avatars, no attachments. Brand identity is name + brand color only. Adding a storage layer is a deferred capability (`storage-and-uploads`); it would require RLS on storage objects, a virus-scan policy, image transforms, and a CDN strategy — collectively too much for v1 scope. This means: the database has no `logo_url`, `avatar_url`, or similar columns.
 
 ### 1e. Per-Tenant Data Isolation Is Law
 
@@ -76,7 +80,7 @@ This project deliberately defers the cost of cutting custom dev clients. Daily d
 | Email send | `EMAIL_DISPATCHER=mock` (Edge Function logs to `notifications`) | Resend live keys |
 | Splash / app icon | Expo defaults | Native splash, adaptive icon, themed Android icon |
 | Deep linking | `exp://` in Expo Go | `ma3ady://` + universal links via `apple-app-site-association` and Android Asset Links |
-| Sentry | console.log shim | Real DSN |
+| Mobile crash reports | console.error → in-app `client_errors` reporter via Edge Function | Native crash hooks (Sentry, deferred) |
 
 **Rule**: a change proposal that adds capability requiring a dev client MUST mark itself as "Phase: dev-client required" in `proposal.md` and explain why a mock is insufficient. Default mode is `mock` for all dispatchers; production builds must set every dispatcher to `real`.
 
@@ -84,7 +88,7 @@ This project deliberately defers the cost of cutting custom dev clients. Daily d
 
 Multi-tenant. Tenant identity = a unique `slug` matching `^[a-z0-9-]+$`, served at `<slug>.ma3ady.com` and used as the deep-link key in the mobile app.
 
-- **`tenants`**: `id`, `slug` (unique), `name`, `timezone` (IANA, per-tenant), `default_locale` (`en`|`ar`), `brand_color`, `logo_url`, `created_at`.
+- **`tenants`**: `id`, `slug` (unique), `name`, `timezone` (IANA, per-tenant), `default_locale` (`en`|`ar`), `brand_color`, `created_at`.
 - **`memberships`**: `(user_id, tenant_id, role)` — a single user may belong to multiple tenants with different roles. Roles: `owner`, `admin`, `staff`, `customer`. (Customer membership is created when a guest later signs in with Google and we link prior bookings.)
 - **Reserved slugs** (cannot be claimed): `www, app, admin, auth, api, cdn, static, mail, support, status, blog, docs, help, dashboard, console, billing, ma3ady, public, dev, staging, test, preview, beta`.
 - **Subdomain serving**: a single Docker image serves all `<slug>.ma3ady.com` traffic; tenant resolved by `Host` header. Wildcard DNS at Cloudflare, wildcard TLS via the infrastructure ingress.
@@ -155,11 +159,11 @@ Each capability gets one folder under `openspec/specs/<capability>/spec.md` once
 
 | Capability | Owns |
 |---|---|
-| `app-shell` | Expo Router structure, route groups, navigation primitives, splash, error boundaries |
-| `branding` | Logo assets, color tokens, typography, voice |
+| `app-shell` | Expo Router structure, route groups, navigation primitives, splash, error boundaries, boot sequence, `useDisplayTimezone` |
+| `branding` | Wordmark + clock-3 mark assets, color tokens, typography, voice |
 | `design-system` | Component library, theme provider, light/dark/system, RTL helpers |
 | `i18n` | i18next setup, en+ar locales, RTL bootstrap, locale persistence |
-| `dev-tooling` | Makefile, Husky, ESLint, Prettier, Jest setup, `/dev/*` debug screens |
+| `dev-tooling` | Makefile, Husky, ESLint, Prettier, Jest setup, `/dev/*` debug screens, `secrets` fanout |
 | `auth` | Supabase Google OAuth, callback, authStore, session lifecycle, sign-out |
 | `tenancy` | tenants + memberships tables, RLS, slug validation, reserved list, tenant picker |
 | `availability` | rules + exceptions + `compute_available_slots`, weekly grid editor |
@@ -168,9 +172,21 @@ Each capability gets one folder under `openspec/specs/<capability>/spec.md` once
 | `public-booking` | anonymous booking flow, guest_contacts, signed manage-token links, claim-on-sign-in |
 | `admin` | mobile-first admin mode (today's bookings, slot management, services, team) |
 | `notifications` | dispatcher pattern (mock\|real) for email/whatsapp/push, `notifications` audit table, reminder cron |
+| `audit-log` | `tenant_audit_events` for memberships, services, rules, tenants; admin viewer; retention |
+| `observability` | Supabase logs as backend source of truth, `client_errors` table, structured logging conventions |
 | `marketing-site` | static HTML marketing site at ma3ady.com, per-tenant landing pages on subdomains |
-| `deployment` | Dockerfiles, deployment.yaml, GH Actions for marketing/supabase/mobile |
-| `compliance` | privacy policy + terms renderer (en/ar), data retention jobs, deletion flows |
+| `deployment` | Dockerfiles, deployment.yaml, GH Actions for marketing/supabase/mobile, email deliverability (SPF/DKIM/DMARC) |
+| `compliance` | privacy policy + terms renderer (en/ar), data retention jobs, deletion flows, brand assets finalization |
+
+Deferred capabilities (no change folder yet, will land as separate proposals when scheduled):
+
+- `storage-and-uploads` — Supabase Storage bucket for tenant logos / service images. Out of v1.
+- `staff-resources` — per-staff schedules and assignment.
+- `paid-bookings` — Stripe / payment intents.
+- `native-push` — `expo-notifications` with APNs/FCM and `expo_push_tokens` table.
+- `native-google-signin` — `@react-native-google-signin/google-signin` for one-tap.
+- `web-booking-surface` — booking from a browser, not the app.
+- `additional-locales` — de, fr, etc.
 
 ## 7. Environments
 
@@ -190,15 +206,107 @@ Each capability gets one folder under `openspec/specs/<capability>/spec.md` once
 
 Phases are advisory, not contractual. Each phase is one or more `openspec/changes/<slug>/` proposals. A phase ships when its changes are accepted and the resulting code is on `main`.
 
-- **Phase 0 — Brand & foundations**: brand assets, design tokens, monorepo setup (single-app for now), Makefile, Husky, ESLint, Prettier, Jest.
-- **Phase 1 — Supabase + i18n + design system**: local dev stack, en+ar locales with RTL, design system components, dev-tooling screens.
-- **Phase 2 — Tenancy + availability + services schema**: tables, RLS, `compute_available_slots`, EXCLUDE constraint on appointments.
-- **Phase 3 — Auth (Google OAuth)**: callback route, authStore, tenant picker, anonymous booking with signed-token manage links.
-- **Phase 4 — Public booking flow (mobile)**: tenant browse, service select, slot pick, anonymous book, manage-token deep link, claim-on-sign-in.
-- **Phase 5 — Admin mobile mode**: today's bookings, mark complete/no-show, manage services, weekly grid editor for availability rules.
-- **Phase 6 — Notifications pipeline**: dispatcher pattern, email + WhatsApp Edge Functions (mock first), `pg_cron` reminders, audit trail.
-- **Phase 7 — Marketing site + tenant landing**: static HTML, en+ar, per-tenant landing on subdomains, deep-link CTA.
-- **Phase 8 — Deployment pipelines**: GH Actions for marketing/supabase/mobile, deployment.yaml files, infrastructure repo dispatch.
-- **Phase 9 — Compliance & launch**: privacy + terms (en+ar), data retention jobs, account deletion, store submission (cuts a dev client at this point).
+- **Phase 0 — Foundations**: `setup-monorepo-and-tooling`, `setup-secrets-sync`, `setup-supabase-foundations`, `setup-app-shell`. Empty Expo app boots in Expo Go, hits local Supabase, has theme + i18n providers, single-source-of-truth secrets fanout works.
+- **Phase 1 — Identity & design**: `setup-i18n-en-ar`, `setup-design-system`. en+ar with RTL, full component library, dev-tooling design-system showcase.
+- **Phase 2 — Domain schema**: `define-tenancy-model`, `define-availability-rules`, `define-services-and-appointments`, `setup-tenant-audit-log`. All tables, RLS, `compute_available_slots`, EXCLUDE constraint, audit triggers.
+- **Phase 3 — Auth + onboarding**: `implement-google-oauth`, `implement-tenant-onboarding`. Sign-in works in Expo Go; tenant claim flow live.
+- **Phase 4 — Public booking flow**: `implement-public-booking-flow`. Anonymous browse → book → manage via token deep link.
+- **Phase 5 — Admin mobile mode**: `implement-admin-mobile-dashboard`, `implement-availability-rules-grid`. Today screen, services CRUD, team management, rules grid.
+- **Phase 6 — Lifecycle + comms**: `implement-reschedule-and-cancel`, `implement-notifications-pipeline`. State machine, dispatcher pattern (mock), `pg_cron` reminders, audit trail.
+- **Phase 7 — Observability**: `setup-observability`. Supabase logs configured, `client_errors` reporter live, structured logging conventions enforced.
+- **Phase 8 — Marketing surfaces**: `setup-marketing-site`, `setup-tenant-landing-app`. Static HTML, en+ar, per-tenant landing, universal-link bouncer.
+- **Phase 9 — Deployment**: `setup-deployment-pipelines`. GH Actions, deployment.yamls, infrastructure dispatch, email deliverability DNS.
+- **Phase 10 — Compliance & launch**: `setup-compliance-and-launch`. Privacy + terms (en+ar), retention jobs, account deletion, brand assets finalization, dev client cut, store submission.
 
-Deferred capabilities (separate change folders when scheduled): Stripe paid bookings, native push, native Google Sign-In, staff resources, multi-staff scheduling, web booking surface, additional locales (de/fr/etc.).
+## 10. Display Timezone Strategy
+
+**Storage**: every timestamp is `timestamptz` (canonical UTC). The database has no concept of "user time" or "tenant time" at rest.
+
+**Display**: a single hook `useDisplayTimezone()` in `@/hooks/useDisplayTimezone` resolves the right zone per surface:
+
+| Surface | Default zone | Override |
+|---|---|---|
+| Public booking (`(public)/[tenantSlug]/...`) | **Tenant** timezone | Per-session toggle in the booking screen header — switches to device timezone. Never persisted; resets next session. |
+| Customer "My bookings" (`(app)/(tabs)/bookings`) | **Tenant** timezone of each booking | The user's device timezone is shown in muted parentheses for context (`Tue 14:00 (your time: 13:00)`). No interactive override; reading-only. |
+| Admin surfaces (`(admin)/*`) | **Tenant** timezone | Per-user persistent override at `profiles.display_timezone_override` (nullable IANA). Editable in admin settings. Useful for traveling owners. |
+| Notifications (email, WhatsApp, push) | **Recipient's locale-and-tenant resolved zone**: tenant TZ if recipient is the tenant's customer/staff; recipient's saved override only if they're admin viewing in another zone | Computed at send-time. |
+| `.ics` calendar attachment | UTC `DTSTART`/`DTEND` with `TZID` of the tenant for human readability | RFC 5545 covers this; the calendar app converts. |
+
+**Rules**:
+1. Never render a `timestamptz` without going through `useDisplayTimezone()` — lint rule enforces this for any `Date` or string-ified timestamp inside a `<Text>` child.
+2. Never display two times in two different zones in the same view without explicit labels (e.g., "Berlin time" vs "your time").
+3. The "your time" tooltip pattern is the standard way to show local time alongside tenant time.
+4. Tenant timezone changes (an owner moving the business): existing appointments keep their `timestamptz` (no shift), but the rules and exceptions re-render in the new zone — matches reality.
+
+## 11. Secrets — Single Source of Truth + Fanout
+
+Every secret in this project lives in **one** file: `secrets/secrets.local.toml` (gitignored). A committed `secrets/secrets.example.toml` declares the schema. Make targets fan out to the appropriate destinations.
+
+**Schema** (sketch — full file in `setup-secrets-sync/tasks.md`):
+
+```toml
+[github]
+INFRASTRUCTURE_DISPATCH_TOKEN = "..."
+EXPO_TOKEN = "..."
+SUPABASE_ACCESS_TOKEN = "..."
+SUPABASE_PROJECT_REF_PREVIEW = "..."
+SUPABASE_PROJECT_REF_PROD = "..."
+SUPABASE_DB_PASSWORD_PREVIEW = "..."
+SUPABASE_DB_PASSWORD_PROD = "..."
+
+[supabase.preview]
+GOOGLE_CLIENT_ID = "..."
+GOOGLE_CLIENT_SECRET = "..."
+RESEND_API_KEY = "..."
+RESEND_FROM = "Ma3ady <hello@ma3ady.com>"
+WHATSAPP_ACCESS_TOKEN = "..."
+WHATSAPP_PHONE_NUMBER_ID = "..."
+WHATSAPP_TEMPLATE_NAME = "event_notification"
+EMAIL_DISPATCHER = "mock"
+WHATSAPP_DISPATCHER = "mock"
+PUSH_DISPATCHER = "mock"
+
+[supabase.production]
+# same keys, prod values; dispatchers all "real"
+
+[eas.preview]
+EXPO_PUBLIC_SUPABASE_URL = "..."
+EXPO_PUBLIC_SUPABASE_ANON_KEY = "..."
+EXPO_PUBLIC_AUTH_REDIRECT_URI = "..."
+
+[eas.production]
+# same keys, prod values
+```
+
+**Fanout targets**:
+
+- `make secrets-sync-github` → `gh secret set NAME -b VALUE` for each `[github]` key
+- `make secrets-sync-supabase ENV=preview` → `supabase secrets set NAME=VALUE --project-ref $REF` for each `[supabase.<env>]` key
+- `make secrets-sync-eas ENV=preview` → `eas secret:create --scope project --name NAME --value VALUE --type string` for each `[eas.<env>]` key
+- `make secrets-sync ENV=preview` → all three above
+- `make secrets-validate` → asserts every key in `secrets.example.toml` exists in `secrets.local.toml`; CI runs this against a stripped-down `secrets.example.toml` to detect schema drift
+
+**Cloudflare DNS** (Resend SPF/DKIM/DMARC, wildcard subdomain) is a one-time manual setup documented in `docs/dns-setup.md`. Not in the secrets file because it's not a secret — but the runbook lives next to the rest.
+
+**Firebase**: not used in v1. When `native-push` lands, FCM credentials get a new `[firebase]` section.
+
+## 12. Observability
+
+**Backend**: Supabase Logs are the source of truth. Postgres logs, Auth logs, Edge Function logs, Realtime logs all flow into the Supabase dashboard. We do not run our own log aggregator.
+
+- Edge Functions use a tiny `log({event, level, ...meta})` helper that emits structured JSON to stdout — Supabase's log explorer can filter on the `event` field.
+- Edge Functions wrap every handler in a `try/catch` that logs `event: "function_error"` with the request id, then rethrows.
+- DB-level errors surface in Postgres logs automatically.
+- Log retention follows the Supabase plan tier; we don't try to extend.
+
+**Mobile**: a minimal in-app reporter writes to a `client_errors` table via Edge Function `report-client-error`:
+
+- `client_errors(id, user_id nullable, tenant_id nullable, kind enum, payload jsonb, app_version, platform, created_at)`
+- Only writes — no read access for clients (RLS denies select).
+- Owners/admins can read their own tenant's `client_errors` via the audit-log viewer.
+- Crash hook: top-level `ErrorBoundary` plus a `logError(error, context)` helper. In Expo Go: console.error + `report-client-error`. In production builds: same plus optional native crash hook (Sentry, deferred).
+- Sample-rate: 100% in dev/preview, 10% in production for non-fatal errors (full sample for crashes).
+
+**No third-party trackers**. PostHog, Sentry, Mixpanel, Amplitude — none of these in v1. Adding any of them would require a privacy-policy update and a sub-processor disclosure.
+
+**Why this is enough for v1**: Supabase covers the backend completely. The mobile error volume in early access is small enough that 10% sampling + manual triage works. We add Sentry later only if signal-to-noise warrants it.

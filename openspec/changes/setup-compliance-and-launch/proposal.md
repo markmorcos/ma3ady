@@ -7,6 +7,7 @@ Last mile before launching publicly. This change covers:
 - Privacy + Terms in EN + AR (formalizing the drafts from the `setup-marketing-site` change)
 - Data retention jobs (anonymize cancelled appointments after 90 days; retain no-shows 18 months)
 - Account deletion flow (right to be forgotten)
+- **Brand assets finalization** — replace placeholder wordmark/mark/icon/splash SVGs with designer-cut final assets across mobile, marketing, and tenant-landing
 - Store listing prep (App Store + Play Store metadata, screenshots, privacy disclosures)
 - Cutting the first **dev client** for native push notifications and native splash/icon
 - Switching dispatchers from `mock` to `real` for the first preview/prod release
@@ -35,6 +36,13 @@ This is the **first phase that requires a dev client**, per `project.md` §2. Up
 - **ADDED** `expo-notifications` dependency and push registration on first sign-in
 - **MODIFIED** notifications dispatcher: `PUSH_DISPATCHER=real` now ships an `ExpoPushDispatcher` implementation
 - **ADDED** RLS pen-test fixture: a Jest suite that uses two forged JWTs and runs ~30 cross-tenant probes to assert isolation
+- **MODIFIED** `assets/branding/`: placeholder SVGs replaced with designer-cut final assets:
+  - `wordmark-en.svg`, `wordmark-ar.svg` — final vector wordmarks
+  - `mark.svg` — final clock-3 mark, single-color capable, optical adjustments at small sizes
+  - `app-icon-1024.png` (iOS), `adaptive-icon-foreground.png` + `adaptive-icon-background.png` (Android), `icon-monochrome.svg` (Android 13+ themed icons)
+  - `splash-light.png`, `splash-dark.png` (1284×2778 master, scaled by Expo)
+  - `og-image.png` for marketing site (1200×630), `apple-touch-icon.png`, full favicon set
+- **MODIFIED** `marketing/public/` and `tenant-landing/public/` to consume the same final mark/wordmark
 
 ## Impact
 

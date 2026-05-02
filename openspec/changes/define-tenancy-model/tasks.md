@@ -14,7 +14,7 @@
   - `assert_slug_available(slug text) returns void volatile language plpgsql` — raises if conflict
 - [ ] 1.9 Enable RLS on `tenants`, `memberships`, `profiles`
 - [ ] 1.10 Policies on `tenants`:
-  - `select` — public if request comes through anon key with explicit slug filter (allow read of `slug, name, timezone, default_locale, brand_color, logo_url`); members can select all columns
+  - `select` — public if request comes through anon key with explicit slug filter (allow read of `slug, name, timezone, default_locale, brand_color`); members can select all columns
   - `update` — owner or admin only
   - `insert` — disabled at policy level (must go through `claim_slug` Edge Function in the `implement-tenant-onboarding` change)
   - `delete` — owner only

@@ -21,6 +21,18 @@ capabilities:
   - public-booking
   - admin
   - notifications
+  - audit-log
+  - observability
   - marketing-site
   - deployment
   - compliance
+
+# Deferred capabilities (will land via separate change folders when scheduled)
+deferred_capabilities:
+  - storage-and-uploads
+  - staff-resources
+  - paid-bookings
+  - native-push
+  - native-google-signin
+  - web-booking-surface
+  - additional-locales

@@ -58,7 +58,7 @@
 
 #### Scenario: anonymous tenant lookup
 - **GIVEN** an anonymous client with the public anon key
-- **WHEN** the client queries `select slug, name, timezone, default_locale, brand_color, logo_url from tenants where slug = 'acme'`
+- **WHEN** the client queries `select slug, name, timezone, default_locale, brand_color from tenants where slug = 'acme'`
 - **THEN** the row is returned if the tenant exists
 - **AND** sensitive columns (none in v1) are excluded by the policy
 

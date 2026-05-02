@@ -8,7 +8,7 @@ The repo and infrastructure exist; CI/CD wiring brings them together. Per `proje
 - Supabase → `supabase db push` + `supabase functions deploy` from GH Actions, two project refs (preview + production) sequentially
 - Mobile → EAS Build, manual `workflow_dispatch` only
 
-This change ships the GitHub Actions workflows, secret declarations, and the connect-the-pipes work. It also includes a CI workflow that lints, typechecks, and tests on every PR.
+This change ships the GitHub Actions workflows, the connect-the-pipes work, **email deliverability DNS records** (SPF/DKIM/DMARC for Resend on `ma3ady.com`), and a CI workflow that lints, typechecks, and tests on every PR. Secret management itself lives in the `setup-secrets-sync` change — this change just consumes the resulting secrets.
 
 ## What Changes
 
@@ -19,12 +19,15 @@ This change ships the GitHub Actions workflows, secret declarations, and the con
   - `deploy-supabase.yml` — on push to `supabase/migrations/**` or `supabase/functions/**`, runs preview deploy then prod deploy sequentially
   - `build-mobile.yml` — `workflow_dispatch` only, inputs `profile` and `platform`, runs `eas build`
 - **ADDED** `eas.json` profile assertions matching `project.md` §2 (production requires real dispatchers)
-- **ADDED** secrets declaration (in repo settings, documented in `docs/secrets.md`):
-  - GitHub: `INFRASTRUCTURE_DISPATCH_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF_PREVIEW`, `SUPABASE_PROJECT_REF_PROD`, `SUPABASE_DB_PASSWORD`, `EXPO_TOKEN`
-  - Supabase: per-project secrets via `supabase secrets set` for `RESEND_API_KEY`, `WHATSAPP_*`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-- **ADDED** `docs/deployment.md` — runbook: how to do an initial deploy, how to roll back, how to rotate secrets
-- **ADDED** `docs/secrets.md` — secret inventory + rotation procedure
-- **ADDED** `Makefile` targets: `deploy-functions PROJECT_REF=...` (placeholder calling out to supabase CLI), `db-diff` (helper for migration generation against preview)
+- **CONSUMES** secrets populated by the `setup-secrets-sync` change (GitHub repo secrets, Supabase project secrets, EAS secrets)
+- **ADDED** `docs/deployment.md` — runbook: how to do an initial deploy, how to roll back
+- **ADDED** `docs/dns-setup.md` — runbook for Cloudflare DNS records:
+  - `ma3ady.com` → infrastructure ingress (apex + `www` + `auth` + `*` wildcard)
+  - **SPF**: `TXT @ "v=spf1 include:_spf.resend.com -all"`
+  - **DKIM**: Resend-provided `TXT resend._domainkey ...` record
+  - **DMARC**: `TXT _dmarc "v=DMARC1; p=quarantine; rua=mailto:dmarc@ma3ady.com; pct=100"`
+  - Verification step: `dig TXT ma3ady.com` and Resend dashboard "verified" badge before going live
+- **ADDED** Makefile targets: `deploy-functions PROJECT_REF=...` (placeholder calling out to supabase CLI), `db-diff` (helper for migration generation against preview), `dns-check` (runs `dig` against required records and reports status)
 
 ## Impact
 
