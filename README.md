@@ -6,7 +6,35 @@ Multi-tenant appointment booking, mobile-first. Built with Expo + Supabase.
 
 ## Status
 
-Pre-implementation. The repository currently contains only the OpenSpec folder. Implementation begins once the Phase 0 change (`setup-monorepo-and-tooling`) is accepted.
+Phase 0 in progress. Project shell (Expo SDK 55, pnpm, lint/typecheck/test gates, `/dev/*` debug surface) is on `main`.
+
+## First-time setup
+
+```bash
+# Tooling
+nvm use 20    # or any node >= 20
+corepack enable
+
+# Install
+pnpm install
+
+# Secrets — copy the schema then fill in real values
+cp secrets/secrets.example.toml secrets/secrets.local.toml
+make secrets-validate
+
+# Run
+make expo-start
+```
+
+See [`secrets/README.md`](secrets/README.md) for where each secret comes from and how rotation works. `secrets/secrets.local.toml` is gitignored — never commit it.
+
+To fan secrets out to a target environment:
+
+```bash
+make secrets-sync ENV=preview
+make secrets-sync ENV=production
+make secrets-audit            # read-only drift check
+```
 
 ## Conventions
 

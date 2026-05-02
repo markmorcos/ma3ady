@@ -38,3 +38,9 @@ android/.gradle/
 
 # Test
 coverage/
+
+# Secrets
+secrets/secrets.local.toml
+secrets/*.local.toml
+secrets/*.bak
+secrets/*.encrypted

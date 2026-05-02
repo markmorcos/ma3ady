@@ -4,6 +4,8 @@
 
 ### Requirement: All project secrets SHALL flow from a single master file
 
+Every project secret SHALL be declared in `secrets/secrets.example.toml` (committed schema) and populated in `secrets/secrets.local.toml` (gitignored master). The example file MUST document each key with an inline comment and MUST NOT contain a non-empty value for any credential-shaped key.
+
 #### Scenario: master file is gitignored
 - **GIVEN** the repo
 - **WHEN** `git check-ignore secrets/secrets.local.toml` runs
@@ -19,6 +21,8 @@
 
 ### Requirement: Validation SHALL catch missing keys before any sync runs
 
+`make secrets-validate` SHALL parse the master file, compare it to the example schema, and exit non-zero if any required key is missing, empty, or extra. No destination MUST be touched when validation fails.
+
 #### Scenario: missing key in master
 - **GIVEN** a `secrets.local.toml` that omits `[github].EXPO_TOKEN`
 - **WHEN** `make secrets-validate` runs
@@ -32,6 +36,8 @@
 - **AND** still exits non-zero (master must match schema exactly)
 
 ### Requirement: Sync targets SHALL fan out to all destinations
+
+`make secrets-sync ENV=<env>` SHALL push every section of the master to its corresponding destination — `[github]` to GitHub Actions via `gh`, `[supabase.<env>]` to the matching Supabase project via `supabase`, `[eas.<env>]` to EAS via `eas`. The aggregate command MUST exit zero only if all sub-commands succeed.
 
 #### Scenario: full sync
 - **GIVEN** a populated, valid `secrets.local.toml`
@@ -48,6 +54,8 @@
 
 ### Requirement: Audit SHALL report drift between master and destinations read-only
 
+`make secrets-audit` SHALL list secrets from each destination and report drift — keys present in master but missing from a destination, and keys in a destination not declared in master. The audit MUST never mutate any destination.
+
 #### Scenario: drift detection
 - **GIVEN** a master file with `RESEND_API_KEY = "abc"`
 - **AND** the Supabase preview project has `RESEND_API_KEY = "xyz"`
@@ -62,6 +70,8 @@
 
 ### Requirement: CI SHALL enforce schema-drift detection on every PR
 
+The CI workflow SHALL run `scripts/secrets/validate.ts` against `secrets/secrets.example.toml` on every pull request. The job MUST fail the PR if the example contains a non-empty credential-shaped value, is missing a required top-level section, or declares a wrong `schema_version`.
+
 #### Scenario: example file becomes invalid
 - **GIVEN** a PR that adds `[github].NEW_KEY` to `secrets.example.toml` without a comment or with an example value
 - **WHEN** the CI `validate-secrets-schema` job runs
@@ -69,6 +79,8 @@
 - **AND** the PR cannot merge until the example file is corrected
 
 ### Requirement: Sync SHALL not run if validation fails
+
+The Makefile sync targets SHALL depend on `secrets-validate` and MUST abort before invoking `gh`, `supabase`, or `eas` if validation fails — guaranteeing no destination is partially updated.
 
 #### Scenario: validate-then-sync ordering
 - **GIVEN** a master file missing a required key

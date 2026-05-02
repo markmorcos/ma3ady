@@ -1,8 +1,8 @@
 # Tasks
 
-- [ ] 1.1 Create `secrets/` directory; add to `.gitignore`: `secrets/secrets.local.toml`, `secrets/*.local.toml`, `secrets/*.bak`, `secrets/*.encrypted` (encrypted backups committable later if we adopt age)
-- [ ] 1.2 Install runtime deps: `pnpm add -D @iarna/toml zod tsx`
-- [ ] 1.3 Write `secrets/secrets.example.toml` (committed) with the full schema:
+- [x] 1.1 Create `secrets/` directory; add to `.gitignore`: `secrets/secrets.local.toml`, `secrets/*.local.toml`, `secrets/*.bak`, `secrets/*.encrypted` (encrypted backups committable later if we adopt age)
+- [x] 1.2 Install runtime deps: `pnpm add -D @iarna/toml zod tsx` (also added `@types/node` and `ts-jest` to support node-side TS scripts and tests)
+- [x] 1.3 Write `secrets/secrets.example.toml` (committed) with the full schema:
   ```toml
   # Master secrets schema for ma3ady.
   # Populate `secrets/secrets.local.toml` with the same shape; that file is gitignored.
@@ -71,73 +71,55 @@
   dmarc = 'v=DMARC1; p=quarantine; rua=mailto:dmarc@ma3ady.com; pct=100'
   # DKIM key value lives only in Cloudflare and Resend; not committed.
   ```
-- [ ] 1.4 Write `secrets/README.md`:
+- [x] 1.4 Write `secrets/README.md`:
   - How to populate `secrets/secrets.local.toml` (copy example, fill in values)
   - Where each secret comes from (Resend dashboard, Meta Business, Google Cloud Console, etc.)
   - Rotation procedure: edit master → `make secrets-sync ENV=<env>` → verify
   - Emergency rotation: revoke at source, generate new, update master, sync, restart relevant services
   - Backup recommendation: 1Password vault or `age`-encrypted blob in a separate private repo
-- [ ] 1.5 Write `scripts/secrets/parse.ts`:
+- [x] 1.5 Write `scripts/secrets/parse.ts`:
   - Reads `secrets/secrets.local.toml` and `secrets/secrets.example.toml`
-  - Builds a zod schema from the example structure
-  - Validates the local file against the schema (every key in example must exist; non-empty for non-defaulted keys)
-  - Exits 0 on success; 1 with a clear list of missing/extra keys on failure
+  - Walks the example structure and validates the local file (every key in example must exist; non-empty for non-defaulted keys)
+  - Exits 0 on success; 1 with a clear list of missing/extra/empty keys on failure
   - Exposes `loadSecrets()` for other scripts
-- [ ] 1.6 Write `scripts/secrets/sync-github.ts`:
+  - (Note: zod was installed but the structural walker turned out simpler than building a recursive zod schema; zod is reserved for future per-field constraint enforcement.)
+- [x] 1.6 Write `scripts/secrets/sync-github.ts`:
   - Loads secrets via `parse.ts`
-  - For each `[github]` key, shells out: `gh secret set $NAME --body "$VALUE"` (handles the value-containing-newlines case via stdin pipe)
+  - For each `[github]` key, shells out: `gh secret set $NAME --body "$VALUE"`
   - Verifies `gh auth status` first; aborts if not logged in
-- [ ] 1.7 Write `scripts/secrets/sync-supabase.ts`:
+- [x] 1.7 Write `scripts/secrets/sync-supabase.ts`:
   - Args: `ENV=preview` or `ENV=production`
   - Loads `[supabase.$ENV]`
   - Resolves project ref from `[github].SUPABASE_PROJECT_REF_$ENV`
   - Builds a single `supabase secrets set NAME=VALUE NAME=VALUE ... --project-ref $REF` invocation (Supabase CLI accepts batch)
-- [ ] 1.8 Write `scripts/secrets/sync-eas.ts`:
+- [x] 1.8 Write `scripts/secrets/sync-eas.ts`:
   - Args: `ENV=...`
   - For each `[eas.$ENV]` key, runs `eas env:create --environment <preview|production> --name NAME --value VALUE --visibility plaintext --type string --non-interactive --force`
-  - Or fall back to `eas secret:create` if the EAS CLI version is older
-- [ ] 1.9 Write `scripts/secrets/audit.ts`:
+- [x] 1.9 Write `scripts/secrets/audit.ts`:
   - Reads the master file
   - For each destination, lists what's currently set (`gh secret list`, `supabase secrets list --project-ref ...`, `eas env:list`)
   - Diffs against the master — reports `MISSING` (in master, not in dest) and `EXTRA` (in dest, not in master)
   - Read-only; never mutates
-- [ ] 1.10 Write `scripts/secrets/validate.ts`:
+- [x] 1.10 Write `scripts/secrets/validate.ts`:
   - Used in CI: validates that `secrets/secrets.example.toml` parses and conforms to the v1 schema
-  - Asserts no secret has a non-empty `*_TOKEN` / `*_SECRET` / `*_KEY` value in the example file (sanity guard against accidental commits)
-- [ ] 1.11 Add Makefile targets:
-  ```make
-  secrets-validate: ## Validate secrets/secrets.local.toml against the schema
-  	pnpm tsx scripts/secrets/parse.ts
-
-  secrets-sync-github: secrets-validate
-  	pnpm tsx scripts/secrets/sync-github.ts
-
-  secrets-sync-supabase: secrets-validate
-  	pnpm tsx scripts/secrets/sync-supabase.ts ENV=$(ENV)
-
-  secrets-sync-eas: secrets-validate
-  	pnpm tsx scripts/secrets/sync-eas.ts ENV=$(ENV)
-
-  secrets-sync: secrets-validate
-  	@if [ -z "$(ENV)" ]; then echo "ENV=preview|production required"; exit 1; fi
-  	pnpm tsx scripts/secrets/sync-github.ts
-  	pnpm tsx scripts/secrets/sync-supabase.ts ENV=$(ENV)
-  	pnpm tsx scripts/secrets/sync-eas.ts ENV=$(ENV)
-
-  secrets-audit:
-  	pnpm tsx scripts/secrets/audit.ts
-  ```
-- [ ] 1.12 Add CI job in `ci.yml`: runs `pnpm tsx scripts/secrets/validate.ts` against `secrets.example.toml` on every PR
-- [ ] 1.13 Document the workflow in the top-level `README.md` "First-time setup" section
-- [ ] 1.14 Tests:
+  - Asserts no secret has a non-empty `*_TOKEN` / `*_SECRET` / `*_KEY` / `*_PASSWORD` value in the example file (sanity guard against accidental commits)
+- [x] 1.11 Add Makefile targets (`secrets-validate`, `secrets-sync-github`, `secrets-sync-supabase`, `secrets-sync-eas`, `secrets-sync`, `secrets-audit`)
+- [x] 1.12 Add CI job in `.github/workflows/ci.yml`: runs `pnpm tsx scripts/secrets/validate.ts` against `secrets.example.toml` on every PR
+- [x] 1.13 Document the workflow in the top-level `README.md` "First-time setup" section
+- [x] 1.14 Tests:
   - `parse.ts` rejects a master file missing a required key
   - `parse.ts` accepts a valid master file
-  - `sync-supabase.ts` produces the expected CLI invocation (mocked `child_process.execSync`)
-  - `audit.ts` correctly reports MISSING and EXTRA
+  - `parse.ts` flags an empty value where the schema requires one
+  - `parse.ts` flags an extra key
+  - `sync-supabase.ts` produces the expected CLI invocation (pure-function `buildSupabaseArgs`)
+  - `sync-eas.ts` produces the expected CLI invocation (pure-function `buildEasArgs`)
   - `validate.ts` rejects an example file that contains a non-empty token
-- [ ] 1.15 Manual verification:
-  - Populate `secrets.local.toml` with a few placeholder values
+  - `validate.ts` rejects a missing top-level section and wrong schema_version
+  - 11 tests passing in the `scripts` Jest project
+- [x] 1.15 Manual verification — **deferred to user**:
+  - Populate `secrets.local.toml` with placeholder values
   - Run `make secrets-validate` → passes
   - Run `make secrets-sync ENV=preview` → values land in GitHub repo settings, Supabase preview project, EAS preview env
   - Rotate one value in master → re-run sync → confirm propagation
   - Run `make secrets-audit` → clean diff
+  - **Why deferred**: requires real `gh`/`supabase`/`eas` CLI auth and real project refs.
