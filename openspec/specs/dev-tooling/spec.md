@@ -1,8 +1,11 @@
-# dev-tooling — Spec Delta
+# dev-tooling Specification
 
-## ADDED Requirements
-
+## Purpose
+TBD - created by archiving change setup-monorepo-and-tooling. Update Purpose after archive.
+## Requirements
 ### Requirement: The repository SHALL be a pnpm workspace with a single root package
+
+The repository SHALL use pnpm as its package manager and declare a single-root workspace. No `packages/` subprojects exist in v1; the workspace is reserved for future shared packages.
 
 #### Scenario: pnpm install
 - **GIVEN** a fresh clone of the repo
@@ -11,6 +14,8 @@
 - **AND** `node_modules` is created at the workspace root only, not inside `app/` or `src/`
 
 ### Requirement: Daily commands SHALL be exposed via `make` targets
+
+Every recurring developer command — install, local stack lifecycle, migrations, Expo start, EAS builds, lint/typecheck/test — SHALL have a named `make` target. Running `make` with no arguments MUST print a help index of every annotated target.
 
 #### Scenario: discoverable help
 - **GIVEN** a developer runs `make` with no arguments
@@ -25,6 +30,8 @@
 
 ### Requirement: TypeScript paths SHALL alias `@/` to `src/`
 
+The TypeScript config and Metro bundler SHALL both resolve `@/<path>` to `src/<path>`. No other path aliases exist; relative deep imports (`../../`) MUST be discouraged via lint rules.
+
 #### Scenario: import using alias
 - **GIVEN** a file in `app/index.tsx`
 - **WHEN** it imports `import { Button } from '@/components/Button'`
@@ -32,6 +39,8 @@
 - **AND** Metro bundler resolves the same path at runtime
 
 ### Requirement: Husky pre-commit hook SHALL block broken commits
+
+A Husky `pre-commit` hook SHALL run `pnpm lint:fix && pnpm typecheck` on every commit. The commit MUST be rejected when either step fails.
 
 #### Scenario: failing typecheck
 - **GIVEN** a staged change that introduces a TypeScript error
@@ -41,6 +50,8 @@
 - **AND** the staged changes remain in the index
 
 ### Requirement: A `/dev/*` debug surface SHALL exist gated by an env flag
+
+The app SHALL expose a `/dev/*` route group reachable only when `EXPO_PUBLIC_SHOW_DEV_TOOLS === '1'`. The index MUST list dev utilities (database inspector, design-system showcase, locale switcher); concrete implementations land in later changes.
 
 #### Scenario: dev tools hidden by default
 - **GIVEN** `EXPO_PUBLIC_SHOW_DEV_TOOLS` is unset or not equal to `'1'`
@@ -54,7 +65,10 @@
 
 ### Requirement: Production EAS profile SHALL assert real dispatchers
 
+The `production` profile in `eas.json` SHALL run a prebuild script that fails the build if any `EXPO_PUBLIC_*_DISPATCHER` env var is not set to `real`. This MUST prevent accidentally shipping a production build wired to mock notification surfaces.
+
 #### Scenario: dispatcher mismatch on production build
 - **GIVEN** an `eas build --profile production` invocation
 - **WHEN** any `EXPO_PUBLIC_*_DISPATCHER` env is not `real`
 - **THEN** the build fails before bundling with a clear error message naming the offending variable
+

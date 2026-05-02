@@ -27,3 +27,13 @@ We deliberately use **pnpm** (stminaconnect uses npm; ma3ady upgrades) and a **s
 - Affects `dev-tooling` capability.
 - Unblocks every subsequent change. No runtime user-facing behavior yet.
 - Sets the conventions all future code must follow (pnpm, path alias, lint rules, Husky gate).
+
+## Post-apply notes
+
+Versions installed differ slightly from the original wording — Expo SDK 55's pinned peer set wins:
+
+- React Native **0.83.6** (not 0.81) and TypeScript **5.9.3** (not 5.6) — these are what SDK 55 ships with.
+- `babel.config.js` uses **`babel-preset-expo` only** — `expo-router/babel` was merged into the preset in SDK 50 and including it explicitly emits a deprecation warning.
+- ESLint pinned to `^9` and Jest pinned to `^29` to satisfy `eslint-config-expo` and `jest-expo` peer ranges respectively.
+
+See `design.md → Implementation Notes` for the rationale.

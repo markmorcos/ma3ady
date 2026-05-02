@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "ma3ady",
+    "slug": "ma3ady",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "ma3ady",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAFAF9"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ma3ady.app"
+    },
+    "android": {
+      "package": "com.ma3ady.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FAFAF9"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

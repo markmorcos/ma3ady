@@ -30,3 +30,14 @@ Ma3ady is a fresh Expo app. We need to lock conventions before writing applicati
 7. **No inline hex in components — lint rule**. Forces every color through the design tokens established in the `setup-design-system` change.
 8. **`/dev/*` routes are part of the app shell from day one**. Gated by env var. Cheaper than retrofitting later, useful for debugging during development of every subsequent change.
 9. **Production EAS profile asserts dispatcher env vars are `real`**. Build-time guard so we can't accidentally ship a build that talks to mock notification surfaces.
+
+## Implementation Notes (post-apply)
+
+Two deltas between the proposal and what actually got installed — both forced by Expo SDK 55's pinned peer set:
+
+- **RN 0.83.6 / TS 5.9.3** (proposal said "RN 0.81 / TS 5.6"). Expo SDK 55 ships with `react-native@0.83.x` and pulls TS 5.9 via `expo install`. Forcing the older versions would break SDK 55 compatibility, so the SDK-compatible versions are canonical going forward.
+- **Babel preset only** — `babel.config.js` uses `babel-preset-expo` with no plugins. Since SDK 50 the `expo-router/babel` plugin was merged into the preset; adding it explicitly emits a deprecation warning. Future changes should not re-add it.
+
+Other minor adjustments:
+- ESLint pinned to `^9` (latest is `10.x` but `eslint-config-expo` peers on 8/9).
+- Jest pinned to `^29` (latest is `30.x` but `jest-expo`'s `jest-watch-typeahead` peers on 27/28/29).
