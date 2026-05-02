@@ -1,0 +1,41 @@
+# Tasks
+
+- [ ] 1.1 `make migrate-new NAME=pending_memberships` → `005_pending_memberships.sql`
+- [ ] 1.2 Create `pending_memberships(tenant_id, email lowercase, role, invited_by_user_id, invited_at, primary key (tenant_id, email))`
+- [ ] 1.3 Modify `handle_new_user` trigger from the `define-tenancy-model` change: after creating profile, also `insert into memberships select tenant_id, new.id, role from pending_memberships where lower(email) = lower(new.email)`, then delete the pending rows
+- [ ] 1.4 Write Edge Function `supabase/functions/claim-slug/index.ts`:
+  - Verify caller's JWT
+  - Parse + validate input (slug regex, locale enum, timezone IANA validation via `Intl.DateTimeFormat`)
+  - Begin transaction: `assert_slug_available(slug)` → insert tenant → insert membership(owner)
+  - Return `{ tenant: { id, slug, ... } }`
+- [ ] 1.5 Write Edge Function `supabase/functions/invite-member/index.ts`:
+  - Verify caller is owner or admin of `tenant_id`
+  - If user exists in auth.users with the email: insert membership directly, return `{ status: 'added' }`
+  - Else: call `supabase.auth.admin.inviteUserByEmail` then upsert into `pending_memberships`, return `{ status: 'invited' }`
+- [ ] 1.6 Write `app/(onboarding)/_layout.tsx`
+- [ ] 1.7 Write `app/(onboarding)/welcome.tsx` with two CTAs
+- [ ] 1.8 Write `app/(onboarding)/claim-slug.tsx`:
+  - Slug input with live availability check (debounce 400ms, calls `assert_slug_available` via RPC; visual feedback)
+  - Name, timezone (pre-fill from `Intl.DateTimeFormat().resolvedOptions().timeZone`), locale (radio en/ar), brand color (color swatch picker, optional)
+  - Submit → calls `claim-slug` Edge Function
+  - Success → navigate to `joined.tsx`
+- [ ] 1.9 Write `app/(onboarding)/joined.tsx` — "You're all set" with CTAs to "Set up services", "Set availability", "Invite team"
+- [ ] 1.10 Write `app/(app)/tenants/picker.tsx` modal:
+  - Lists memberships, each row shows tenant name, role, brand color
+  - "Add another tenant" CTA → onboarding flow with the existing user logged in
+- [ ] 1.11 Modify `src/state/tenantStore.ts`:
+  - `createTenant(input)` calls Edge Function, refetches memberships, sets `currentTenantId`
+  - `selectTenant(id)` updates state + AsyncStorage
+- [ ] 1.12 Modify `app/_layout.tsx` boot:
+  - After auth restore: fetch memberships
+  - 0 memberships and just signed in → push `/onboarding/welcome`
+  - 0 memberships and was a guest who just signed in but has claimed bookings → home (customer mode)
+  - 1 → auto-select that tenant, route to home (mode determined by membership role)
+  - >1 → show picker modal
+- [ ] 1.13 Tests:
+  - Slug claim happy path
+  - Slug collision returns clear error
+  - Reserved slug rejected
+  - Pending membership promotes correctly when invited user signs in
+  - Tenant picker renders all memberships
+- [ ] 1.14 Verify on simulator with two test accounts: A claims `acme`, A invites B@gmail.com → B signs in → B sees acme membership

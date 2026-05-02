@@ -1,0 +1,50 @@
+# Tasks
+
+- [ ] 1.1 Write `app/(admin)/_layout.tsx` — Tabs with 5 entries: Today, Upcoming, Services, Team, Settings
+- [ ] 1.2 Modify `app/_layout.tsx` boot routing logic per `currentRole`
+- [ ] 1.3 Write `app/(app)/_layout.tsx` (customer mode tabs): Home, My bookings, Settings
+- [ ] 1.4 Write `app/(app)/(tabs)/index.tsx` — customer home: next upcoming appointment card + "Browse tenants" CTA (lists tenants the user has booked with — derived from their `appointments` rows)
+- [ ] 1.5 Write `app/(app)/(tabs)/bookings.tsx` — customer's appointments, upcoming + past tabs
+- [ ] 1.6 Write `app/(app)/(tabs)/settings.tsx` — profile, locale, theme, sign-out
+- [ ] 1.7 Write `src/services/api/admin.ts`:
+  - `getTodayAppointments(tenantId)` — `where tenant_id = ? and starts_at::date = (now() at time zone tenant_tz)::date order by starts_at`
+  - `getUpcomingAppointments(tenantId, days)` — next N days
+  - `getTenantStats(tenantId)` — counts grouped by status for today, week, month
+  - `updateAppointmentStatus(id, status)` — invokes Edge Function
+- [ ] 1.8 Write `app/(admin)/(tabs)/index.tsx`:
+  - Stats cards row (today count, fill rate)
+  - Timeline: vertical list of today's appointments with time, customer name, service, status badge
+  - Pull-to-refresh
+  - Tap → appointment detail
+- [ ] 1.9 Write `app/(admin)/(tabs)/upcoming.tsx`: SectionList grouped by day
+- [ ] 1.10 Write `app/(admin)/(tabs)/services.tsx`:
+  - Lists all services (active + inactive)
+  - Tap → edit
+  - FAB → new
+  - Toggle active inline
+- [ ] 1.11 Write `app/(admin)/service/[id].tsx` and `service/new.tsx`:
+  - Form: name, description, duration_minutes, buffer_before/after, min_notice_min, max_advance_days, daily_cap
+  - Submit → upsert
+- [ ] 1.12 Write `app/(admin)/(tabs)/team.tsx`:
+  - Lists memberships (excluding self) with role
+  - Invite CTA → modal with email input + role picker → calls `invite-member` Edge Function
+  - Owner/admin can change role or remove
+- [ ] 1.13 Write `app/(admin)/(tabs)/settings.tsx`:
+  - Tenant name, timezone (IANA dropdown), default_locale (en/ar), brand_color (color picker)
+  - Submit → updates tenant row
+  - Owner-only: "Delete tenant" button gated behind a destructive-action confirmation
+- [ ] 1.14 Write `app/(admin)/appointment/[id].tsx`:
+  - Header: customer name, service, status badge
+  - Time, duration, notes
+  - Status actions row depending on current status (covered in the `implement-reschedule-and-cancel` change's spec)
+  - Audit log section listing `appointment_events` rows in reverse chronological order
+- [ ] 1.15 Write Edge Function `supabase/functions/update-appointment-status/index.ts`:
+  - Verifies caller's JWT and that they're staff+ of the appointment's tenant
+  - Validates the state transition (allowed transitions defined in the `implement-reschedule-and-cancel` change)
+  - Updates status (and `cancelled_at`/`cancelled_by_user_id` when cancelling)
+  - Returns updated row
+- [ ] 1.16 Tests:
+  - RLS: customer cannot read another tenant's appointments
+  - Status transition validation (no `cancelled → confirmed`)
+  - Stats calculation correctness on a fixture
+- [ ] 1.17 Verify on simulator with two roles: customer view shows "My bookings" only; staff view shows admin tabs

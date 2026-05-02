@@ -1,0 +1,32 @@
+# Tasks
+
+- [ ] 1.1 `make migrate-new NAME=status_transitions` — create `validate_status_transition(...)` function and a CHECK constraint via trigger that calls it on UPDATE
+- [ ] 1.2 Modify `update-appointment-status` Edge Function to call `validate_status_transition` before updating; map invalid transitions to HTTP 422 with code `invalid_transition`
+- [ ] 1.3 Write Edge Function `supabase/functions/reschedule-appointment/index.ts`:
+  - Identifies caller: JWT (auth user) or manage token (anonymous)
+  - Authorizes: tenant member of staff+ OR appointment.user_id matches OR token verified
+  - Validates `new_starts_at` against `compute_available_slots` for the appointment's service
+  - Updates `starts_at = new_starts_at, ends_at = new_starts_at + duration`
+  - Catches EXCLUDE violation → maps to `slot_taken`
+  - Returns updated appointment
+- [ ] 1.4 Modify `manage-appointment` Edge Function (the `implement-public-booking-flow` change) to delegate to `reschedule-appointment` for the reschedule action — single source of truth for the logic
+- [ ] 1.5 Write `app/(app)/bookings/[id].tsx`:
+  - Fetches the appointment by id (RLS scopes to own rows)
+  - Renders summary card + service info + tenant info
+  - Status-conditional CTAs: pending/confirmed → Reschedule + Cancel; cancelled/completed/no_show → no actions
+  - Reschedule CTA → push `bookings/[id]/reschedule`
+  - Cancel CTA → confirmation sheet → calls `update-appointment-status({status:'cancelled'})`
+- [ ] 1.6 Write `app/(app)/bookings/[id]/reschedule.tsx`:
+  - Reuses `<SlotGrid>` for the appointment's service
+  - On select → confirms, calls `reschedule-appointment` Edge Function with auth (no token)
+- [ ] 1.7 Write `app/(admin)/appointment/[id]/reschedule.tsx` (twin of customer flow with admin auth)
+- [ ] 1.8 Update `update-appointment-status` to set `cancelled_at = now(), cancelled_by_user_id = auth.uid()` when the new status is `cancelled`
+- [ ] 1.9 Tests:
+  - Allowed transitions per the enum table
+  - Disallowed transitions return `invalid_transition` with no row mutation
+  - Admin reschedule
+  - Customer reschedule (via auth)
+  - Guest reschedule (via token) — re-verified to still work after refactor
+  - EXCLUDE collision on reschedule returns `slot_taken`
+  - Cancel populates `cancelled_at` + `cancelled_by_user_id`
+- [ ] 1.10 Verify on simulator: customer signs in, opens "My bookings", reschedules — sees new time on next refresh

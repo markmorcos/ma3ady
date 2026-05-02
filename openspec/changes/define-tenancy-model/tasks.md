@@ -1,0 +1,32 @@
+# Tasks
+
+- [ ] 1.1 `make migrate-new NAME=tenancy` → `supabase/migrations/001_tenancy.sql`
+- [ ] 1.2 In `001_tenancy.sql`, create `tenants` table with full schema and slug check constraint
+- [ ] 1.3 Create `tenant_role` enum: `owner | admin | staff | customer`
+- [ ] 1.4 Create `memberships` table with `unique (user_id, tenant_id)`
+- [ ] 1.5 Create `profiles` table referencing `auth.users(id)` on cascade
+- [ ] 1.6 Create `reserved_slugs(slug primary key)` and seed it with the reserved list from `project.md` §3
+- [ ] 1.7 Write trigger `handle_new_user()` on `auth.users` insert that inserts a `profiles` row with `id = new.id, full_name = coalesce(new.raw_user_meta_data->>'full_name', new.email)`
+- [ ] 1.8 Create helper functions:
+  - `current_user_is_member_of(tenant uuid) returns boolean stable language sql` — exists check on memberships
+  - `current_user_role_in(tenant uuid) returns tenant_role stable language sql`
+  - `tenant_id_from_slug(slug text) returns uuid stable language sql`
+  - `assert_slug_available(slug text) returns void volatile language plpgsql` — raises if conflict
+- [ ] 1.9 Enable RLS on `tenants`, `memberships`, `profiles`
+- [ ] 1.10 Policies on `tenants`:
+  - `select` — public if request comes through anon key with explicit slug filter (allow read of `slug, name, timezone, default_locale, brand_color, logo_url`); members can select all columns
+  - `update` — owner or admin only
+  - `insert` — disabled at policy level (must go through `claim_slug` Edge Function in the `implement-tenant-onboarding` change)
+  - `delete` — owner only
+- [ ] 1.11 Policies on `memberships`:
+  - `select` — current user can see their own memberships; admins of a tenant can see all memberships of that tenant
+  - `insert/update/delete` — owner or admin of the same tenant only; nobody can grant `owner` except an existing owner
+- [ ] 1.12 Policies on `profiles`:
+  - `select` — own row + rows of users who share at least one tenant with current user
+  - `update` — own row only
+- [ ] 1.13 Add seeds in `supabase/preview-seed.sql`: a `demo` tenant with timezone `Europe/Berlin`, locale `en`
+- [ ] 1.14 Generate types: `pnpm dlx supabase gen types typescript --local > src/types/database.ts`
+- [ ] 1.15 Write `src/services/api/tenants.ts` with `getTenantBySlug`, `getMyMemberships`, `claimSlug` (the third stub-only here, real impl in the `implement-tenant-onboarding` change)
+- [ ] 1.16 Write `src/state/tenantStore.ts`: `currentTenantId`, `currentRole`, `tenants` (memberships), `switchTenant(id)` — persists to AsyncStorage `app.tenantId`
+- [ ] 1.17 Tests: RLS policy tests using a second Supabase client with a forged JWT → confirm cross-tenant reads fail, same-tenant reads succeed
+- [ ] 1.18 Verify `make seed` populates the demo tenant

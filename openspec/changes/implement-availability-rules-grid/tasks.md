@@ -1,0 +1,25 @@
+# Tasks
+
+- [ ] 1.1 Add Availability tab to `app/(admin)/_layout.tsx`
+- [ ] 1.2 `make migrate-new NAME=bulk_replace_rules` → migration writing `bulk_replace_rules_for_day(tenant_id uuid, day_of_week int, bands jsonb) returns void security definer`:
+  - Verify caller is owner/admin (raise if not)
+  - In a transaction: delete all rules for `(tenant_id, day_of_week, service_id IS NULL)` then insert new bands
+  - Tenant-wide rules only here; per-service rule editing is a stretch goal in this change
+- [ ] 1.3 Write `src/services/api/availability.ts` adding upsert/delete + `bulkReplaceRulesForDay`
+- [ ] 1.4 Write `<WeeklyRulesGrid>`:
+  - 7 day rows: Mon, Tue, Wed, Thu, Fri, Sat, Sun (in user locale order)
+  - Each row shows configured bands as chips (e.g., "09:00–12:00, 13:00–17:00")
+  - "+" adds a band, opens a time-band picker sheet
+  - Tap a band → edit; long-press → delete confirmation
+  - "Copy" overflow → action sheet "Copy to..." multi-select
+- [ ] 1.5 Write `<TimeBandRow>` with iOS/Android-native time pickers
+- [ ] 1.6 Write `<ExceptionList>` showing upcoming exceptions in chronological order, grouped by month
+- [ ] 1.7 Write `<ExceptionForm>` with `kind` toggle (Block / Extra), datetime pickers, optional reason text
+- [ ] 1.8 Implement copy-day flow: choose source day → pick targets → confirm → calls `bulkReplaceRulesForDay` for each target
+- [ ] 1.9 Empty state: when no rules configured, show illustration + "Set your hours" CTA that pre-fills Mon–Fri 09:00–17:00 as a template
+- [ ] 1.10 Tests:
+  - Bulk replace is atomic (failure rolls back)
+  - Editing a band immediately reflects in `compute_available_slots`
+  - Copy-day produces identical bands on target days
+  - Block exception removes affected slots from public booking flow
+- [ ] 1.11 Verify on simulator: configure rules from scratch, add an exception, see the booking page reflect the change

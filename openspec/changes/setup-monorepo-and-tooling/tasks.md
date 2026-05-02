@@ -1,0 +1,28 @@
+# Tasks
+
+- [ ] 1.1 Run `pnpm init`; set `name: ma3ady`, `private: true`, `engines.node: ">=20"`
+- [ ] 1.2 Add `pnpm-workspace.yaml` listing `.` (single-root for now)
+- [ ] 1.3 Install Expo SDK 55 + RN 0.81 + TypeScript 5.6: `pnpm add expo react react-native @types/react typescript`
+- [ ] 1.4 Install Expo Router v5: `pnpm add expo-router expo-linking expo-constants react-native-screens react-native-safe-area-context`
+- [ ] 1.5 Install dev tooling: `pnpm add -D eslint prettier husky lint-staged jest jest-expo @testing-library/react-native @types/jest`
+- [ ] 1.6 Write `app.json` with `name`, `slug`, `scheme: "ma3ady"`, `ios.bundleIdentifier: "com.ma3ady.app"`, `android.package: "com.ma3ady.app"`, splash + icon paths
+- [ ] 1.7 Write `eas.json` with `development`, `preview`, `production` profiles; production profile requires `EXPO_PUBLIC_*_DISPATCHER=real`
+- [ ] 1.8 Write `tsconfig.json` extending `expo/tsconfig.base`, paths `{"@/*": ["src/*"]}`
+- [ ] 1.9 Write `babel.config.js` with `babel-preset-expo` + `expo-router/babel`
+- [ ] 1.10 Write `metro.config.js` (default Expo, prepared for SVG support later)
+- [ ] 1.11 Write `eslint.config.js` (flat config) with `expo` preset + project-specific rules (no inline hex, prefer `@/` over relative deep paths)
+- [ ] 1.12 Write `.prettierrc` (`semi: true`, `singleQuote: true`, `printWidth: 100`, `trailingComma: "all"`)
+- [ ] 1.13 Write `.prettierignore`
+- [ ] 1.14 `pnpm exec husky init`; add `.husky/pre-commit` running `pnpm lint:fix && pnpm typecheck`
+- [ ] 1.15 Write `Makefile` with all targets listed in proposal
+- [ ] 1.16 Write `jest.config.js` (preset `jest-expo`, transformIgnorePatterns for RN/Expo deps)
+- [ ] 1.17 Write `jest.setup.ts` (mock `expo-localization`, `expo-secure-store`, `react-native-reanimated`)
+- [ ] 1.18 Write `.env.example` with all `EXPO_PUBLIC_*` vars + server-side secret placeholders
+- [ ] 1.19 Write `app/_layout.tsx` (Stack root with Theme + I18n providers — providers stubbed, real impls land in later changes)
+- [ ] 1.20 Write `app/index.tsx` (placeholder home)
+- [ ] 1.21 Create `src/` subdirs each with a `.gitkeep`
+- [ ] 1.22 Add `/dev/_layout.tsx` and `/dev/index.tsx` gated behind `EXPO_PUBLIC_SHOW_DEV_TOOLS === '1'`
+- [ ] 1.23 Verify `pnpm lint` passes on the empty repo
+- [ ] 1.24 Verify `pnpm typecheck` passes
+- [ ] 1.25 Verify `pnpm test` runs (no tests yet, exits 0 with `--passWithNoTests`)
+- [ ] 1.26 Verify Husky pre-commit fires and blocks a bad commit
