@@ -103,5 +103,30 @@
     "tzHereNow": "I'm here right now",
     "tzTenantDefault": "Tenant timezone (default)",
     "tzUseTenantA11y": "Use tenant timezone (no override)"
+  },
+  "audit": {
+    "title": "Audit log",
+    "empty": "No activity yet.",
+    "actorSystem": "System",
+    "actorGuestToken": "Guest manage link",
+    "actorUnknown": "Unknown",
+    "kind": {
+      "tenant.updated": "Tenant settings updated",
+      "member.invited": "Member invited",
+      "member.added": "Member added",
+      "member.role_changed": "Member role changed",
+      "member.removed": "Member removed",
+      "service.created": "Service created",
+      "service.updated": "Service updated",
+      "service.deactivated": "Service deactivated",
+      "service.activated": "Service activated",
+      "service.removed": "Service removed",
+      "availability_rule.created": "Availability rule added",
+      "availability_rule.updated": "Availability rule updated",
+      "availability_rule.deleted": "Availability rule removed",
+      "availability_exception.created": "Availability exception added",
+      "availability_exception.updated": "Availability exception updated",
+      "availability_exception.deleted": "Availability exception removed"
+    }
   }
 }

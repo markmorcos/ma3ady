@@ -12,9 +12,17 @@ export default function Home() {
       <Text style={styles.title}>ma3ady</Text>
       <Text style={styles.subtitle}>{t('common.tagline')}</Text>
       {SHOW_DEV_TOOLS && (
-        <Link href="/dev" style={styles.devLink} accessibilityRole="link">
-          /dev
-        </Link>
+        <View style={styles.devLinks}>
+          <Link href="/dev" style={styles.devLink} accessibilityRole="link">
+            /dev
+          </Link>
+          <Link href="/audit-log" style={styles.devLink} accessibilityRole="link">
+            /audit-log
+          </Link>
+          <Link href="/settings/timezone" style={styles.devLink} accessibilityRole="link">
+            /settings/timezone
+          </Link>
+        </View>
       )}
     </View>
   );
@@ -35,8 +43,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 8,
   },
-  devLink: {
+  devLinks: {
     marginTop: 32,
+    alignItems: 'center',
+    gap: 8,
+  },
+  devLink: {
     fontSize: 12,
     color: colors.brand500,
     opacity: 0.6,

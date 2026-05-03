@@ -412,6 +412,50 @@ export type Database = {
           },
         ]
       }
+      tenant_audit_events: {
+        Row: {
+          by_kind: Database["public"]["Enums"]["tenant_audit_actor_kind"]
+          by_user_id: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["tenant_audit_event_kind"]
+          payload: Json
+          target_id: string | null
+          target_kind: string
+          tenant_id: string
+        }
+        Insert: {
+          by_kind?: Database["public"]["Enums"]["tenant_audit_actor_kind"]
+          by_user_id?: string | null
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["tenant_audit_event_kind"]
+          payload?: Json
+          target_id?: string | null
+          target_kind: string
+          tenant_id: string
+        }
+        Update: {
+          by_kind?: Database["public"]["Enums"]["tenant_audit_actor_kind"]
+          by_user_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["tenant_audit_event_kind"]
+          payload?: Json
+          target_id?: string | null
+          target_kind?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_audit_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           brand_color: string | null
@@ -485,7 +529,22 @@ export type Database = {
         Args: { p_tenant: string }
         Returns: Database["public"]["Enums"]["tenant_role"]
       }
+      purge_old_audit_events: { Args: never; Returns: number }
+      record_audit: {
+        Args: {
+          p_kind: Database["public"]["Enums"]["tenant_audit_event_kind"]
+          p_payload: Json
+          p_target_id: string
+          p_target_kind: string
+          p_tenant_id: string
+        }
+        Returns: undefined
+      }
       tenant_id_from_slug: { Args: { p_slug: string }; Returns: string }
+      tg_jsonb_diff_keys: {
+        Args: { p_after: Json; p_before: Json }
+        Returns: string[]
+      }
       verify_manage_token: { Args: { p_token: string }; Returns: string }
     }
     Enums: {
@@ -496,6 +555,24 @@ export type Database = {
         | "completed"
         | "no_show"
       availability_exception_kind: "block" | "extra"
+      tenant_audit_actor_kind: "user" | "system" | "guest_token"
+      tenant_audit_event_kind:
+        | "tenant.updated"
+        | "member.invited"
+        | "member.added"
+        | "member.role_changed"
+        | "member.removed"
+        | "service.created"
+        | "service.updated"
+        | "service.deactivated"
+        | "service.activated"
+        | "service.removed"
+        | "availability_rule.created"
+        | "availability_rule.updated"
+        | "availability_rule.deleted"
+        | "availability_exception.created"
+        | "availability_exception.updated"
+        | "availability_exception.deleted"
       tenant_role: "owner" | "admin" | "staff" | "customer"
     }
     CompositeTypes: {
@@ -635,6 +712,25 @@ export const Constants = {
         "no_show",
       ],
       availability_exception_kind: ["block", "extra"],
+      tenant_audit_actor_kind: ["user", "system", "guest_token"],
+      tenant_audit_event_kind: [
+        "tenant.updated",
+        "member.invited",
+        "member.added",
+        "member.role_changed",
+        "member.removed",
+        "service.created",
+        "service.updated",
+        "service.deactivated",
+        "service.activated",
+        "service.removed",
+        "availability_rule.created",
+        "availability_rule.updated",
+        "availability_rule.deleted",
+        "availability_exception.created",
+        "availability_exception.updated",
+        "availability_exception.deleted",
+      ],
       tenant_role: ["owner", "admin", "staff", "customer"],
     },
   },

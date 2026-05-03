@@ -51,3 +51,7 @@ export type BookingResult = {
   appointment_id: string;
   manage_token: string;
 };
+
+export type TenantAuditEvent = Database['public']['Tables']['tenant_audit_events']['Row'];
+export type TenantAuditEventKind = Database['public']['Enums']['tenant_audit_event_kind'];
+export type TenantAuditActorKind = Database['public']['Enums']['tenant_audit_actor_kind'];

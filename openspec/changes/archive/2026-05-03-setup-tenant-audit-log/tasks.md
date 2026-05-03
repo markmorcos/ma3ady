@@ -1,0 +1,33 @@
+# Tasks
+
+- [x] 1.1 `make migrate-new NAME=tenant_audit_events` → `supabase/migrations/006_tenant_audit_events.sql`
+- [x] 1.2 `tenant_audit_event_kind` enum with all 16 values from the proposal (tenant.updated, member.*, service.*, availability_rule.*, availability_exception.*). Also added `tenant_audit_actor_kind` enum (`user | system | guest_token`) for the `by_kind` column.
+- [x] 1.3 `tenant_audit_events` table with full schema and three indexes: `(tenant_id, created_at desc)`, `(by_user_id, created_at desc)`, `(target_kind, target_id)`
+- [x] 1.4 RLS enabled. Select policy: owner/admin sees all rows for their tenant; staff sees rows where `target_kind = 'appointment'`. Insert/update/delete policies all denied (writes via SECURITY DEFINER triggers; immutable from app).
+- [x] 1.5 `record_audit(p_tenant_id, p_kind text, p_target_kind text, p_target_id uuid, p_payload jsonb)` SECURITY DEFINER. Reads `current_setting('app.request_id', true)` and `current_setting('app.is_guest_token', true)`, derives `by_kind` from `auth.uid()` + GUC, merges `request_id` into payload, inserts the row. Param `p_kind` is `text` (cast to enum on insert) so trigger calls don't need explicit casts on every literal.
+- [x] 1.6 Per-table triggers calling `record_audit`:
+  - `tenants` AFTER UPDATE: tg_audit_tenants_update writes `tenant.updated` with `columns_changed`, `before`, `after` (excluding `updated_at`)
+  - `memberships` AFTER INSERT (`member.added`) / UPDATE OF role (`member.role_changed` with `from`/`to`) / DELETE (`member.removed`)
+  - `services` AFTER INSERT (`service.created`) / UPDATE (`service.updated` or `service.activated`/`service.deactivated` if `active` flips) / DELETE (`service.removed`)
+  - `availability_rules` AFTER INSERT/UPDATE/DELETE → respective enum values
+  - `availability_exceptions` AFTER INSERT/UPDATE/DELETE → respective enum values
+  - **Deferred**: `pending_memberships` trigger — that table lands in implement-tenant-onboarding. Will be added as part of that change.
+- [ ] 1.7 Edge Functions set `app.request_id` GUC at transaction start — **deferred**: no Edge Functions exist yet (they land in implement-public-booking-flow / implement-notifications-pipeline). The `record_audit` helper already reads the GUC; null when not set.
+- [ ] 1.8 `manage-appointment` flow sets `app.is_guest_token` GUC — **deferred** for the same reason. Helper already handles missing GUC (`by_kind = 'system'` when neither `auth.uid()` nor the guest-token GUC is set).
+- [x] 1.9 `src/services/api/audit.ts` — `getTenantAuditEvents(tenantId, { kinds?, actorId?, targetKind?, targetId?, since?, until?, limit? })` with default limit 50, ordered by `created_at desc`.
+- [x] 1.10 `app/(admin)/(tabs)/audit-log.tsx` — admin-only screen. List, header per row (kind label + tenant-TZ time via `<Time>`), actor sub-line, **inline expansion** showing JSON payload on tap. Substituted inline expansion for the spec'd bottom sheet because `@gorhom/bottom-sheet` doesn't load in Expo Go SDK 54 (TurboModule mismatch we hit earlier). Bottom sheet can land in a dev-client follow-up.
+- [x] 1.11 Audit-log routing: lives at `app/(admin)/(tabs)/audit-log.tsx` so it's auto-discovered by the placeholder Tabs layout. Final tab wiring (with role-based hide for staff) lands when `implement-admin-mobile-dashboard` defines the real Tabs.
+- [x] 1.12 i18n strings for every kind value, en + ar. Plus `audit.title`, `audit.empty`, and three actor labels (`actorSystem`, `actorGuestToken`, `actorUnknown`). Parity test still passes.
+- [x] 1.13 `make migrate-new NAME=audit_log_retention` → `supabase/migrations/007_audit_log_retention.sql`. `purge_old_audit_events()` deletes rows older than 24 months. `cron.schedule('purge-audit-events', '20 3 * * *', ...)` registered via a `do $$ ... $$` block guarded on `pg_extension` presence.
+- [x] 1.14 SQL tests at `supabase/tests/audit.test.sql`. Run via `make test-db`. Covers:
+  - `member.added` produced by setup membership inserts
+  - `tenant.updated` with `columns_changed`/before/after on a tenant timezone update
+  - `service.created` + `service.updated` + `service.deactivated` on the right operations
+  - `member.role_changed` with `from`/`to`
+  - `app.request_id` GUC threading into payload (and absence when unset)
+  - Cross-tenant isolation: staff of audit-x can't see audit-y rows
+  - Staff scope: only `target_kind = 'appointment'` events are visible (zero today since we don't write appointment events here yet)
+  - Immutability: admin's UPDATE / DELETE on audit log return zero rows (RLS denies)
+  - Retention: `purge_old_audit_events()` deletes a fabricated 25-month-old row, leaves recent rows untouched
+  - All 9 test groups pass.
+- [ ] 1.15 Manual sim verification — **deferred to user**. Open the admin audit-log screen after triggering events (edit tenant timezone, change service, etc.) and confirm rows appear in reverse chronological order.

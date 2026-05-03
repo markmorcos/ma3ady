@@ -22,6 +22,7 @@
   - For each channel that the recipient has identifiers for (email always; phone for WhatsApp; push token for push):
     - Insert `notifications` row with status `queued`
     - Call dispatcher; on success update row to `sent` with `provider_id`; on failure to `failed` with `error`
+  - **Carry-over from setup-tenant-audit-log task 1.7**: at the start of the DB transaction, call `set_config('app.request_id', '<uuid>', true)` so audit-log triggers can attribute mutations back to this Edge Function invocation.
   - Idempotency: skip if a `notifications` row with same `(appointment_id, channel, event)` already exists with status in (`queued`, `sent`)
 - [ ] 1.11 Write `notifications` event mapping:
   - `appointment_events.event_type = 'created'` → `event = 'booked'`

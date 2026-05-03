@@ -8,6 +8,7 @@
   - Calls `verify_manage_token(token)` (raises if invalid)
   - For `cancel`: `update appointments set status='cancelled', cancelled_at=now() where id=...`
   - For `reschedule`: validate new slot via `compute_available_slots`, then update `starts_at`/`ends_at`
+  - **Carry-over from setup-tenant-audit-log task 1.7/1.8**: at the start of every DB transaction, call `set_config('app.request_id', '<uuid>', true)` and `set_config('app.is_guest_token', 'true', true)` so audit-log triggers can attribute the action to the originating Edge Function request and record `by_kind = 'guest_token'`.
   - Inserts `appointment_events` rows (already triggered by table triggers, but logs the originator as "guest via token")
   - Returns updated appointment
 - [ ] 1.5 Write `app/(public)/_layout.tsx` (Stack)

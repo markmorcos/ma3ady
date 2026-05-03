@@ -103,5 +103,30 @@
     "tzHereNow": "أنا هنا الآن",
     "tzTenantDefault": "المنطقة الزمنية للجهة (الافتراضية)",
     "tzUseTenantA11y": "استخدام المنطقة الزمنية للجهة (بدون تعديل)"
+  },
+  "audit": {
+    "title": "سجلّ التدقيق",
+    "empty": "لا يوجد نشاط بعد.",
+    "actorSystem": "النظام",
+    "actorGuestToken": "رابط إدارة الضيف",
+    "actorUnknown": "غير معروف",
+    "kind": {
+      "tenant.updated": "تم تحديث إعدادات الجهة",
+      "member.invited": "تم دعوة عضو",
+      "member.added": "تمت إضافة عضو",
+      "member.role_changed": "تم تغيير دور العضو",
+      "member.removed": "تمت إزالة عضو",
+      "service.created": "تم إنشاء خدمة",
+      "service.updated": "تم تحديث خدمة",
+      "service.deactivated": "تم تعطيل خدمة",
+      "service.activated": "تم تفعيل خدمة",
+      "service.removed": "تمت إزالة خدمة",
+      "availability_rule.created": "تمت إضافة قاعدة توفّر",
+      "availability_rule.updated": "تم تحديث قاعدة توفّر",
+      "availability_rule.deleted": "تمت إزالة قاعدة توفّر",
+      "availability_exception.created": "تمت إضافة استثناء توفّر",
+      "availability_exception.updated": "تم تحديث استثناء توفّر",
+      "availability_exception.deleted": "تمت إزالة استثناء توفّر"
+    }
   }
 }
