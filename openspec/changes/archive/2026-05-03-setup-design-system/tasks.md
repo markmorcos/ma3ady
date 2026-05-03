@@ -1,0 +1,25 @@
+# Tasks
+
+- [x] 1.1 Install deps: `pnpm add lucide-react-native react-native-svg @gorhom/bottom-sheet react-native-reanimated react-native-gesture-handler` (snapped to SDK 54 via `expo install`)
+- [x] 1.2 Configure babel for Reanimated — Reanimated 4 + `babel-preset-expo` auto-wires the worklets plugin (the `react-native-reanimated/plugin` of v3 was renamed to `react-native-worklets/plugin` and is now included in the Expo preset). No manual `babel.config.js` change required.
+- [x] 1.3 Write `src/design/tokens.ts` with `colors` (per `project.md` §1b table — `palette.brand.light/dark`, `accent`, `neutral`, `semantic`), `spacing` (8px grid), `radii` (8/12/16/24), `typography` (sizes 12–40), `elevation`, `motion`
+- [x] 1.4 Write `src/design/theme.ts`: `lightTheme`, `darkTheme`, `Theme` type. Each theme exposes the same shape; `statusColorMap` lives here too (pending → warning, etc.).
+- [x] 1.5 Write `src/design/ThemeProvider.tsx`: context + `useTheme()` + `useThemePreference()` + system theme via `useColorScheme()`; honors user override stored at `AsyncStorage['app.theme']` ('light'|'dark'|'system')
+- [x] 1.6 Modify `app/_layout.tsx` to wrap children with `<ThemeProvider>` (after `<I18nProvider>`); also adds `<GestureHandlerRootView>` at the very root for `@gorhom/bottom-sheet`
+- [x] 1.7 Write `src/components/Text.tsx` — variants: `display | h1 | h2 | h3 | body | bodyStrong | caption | label`; uses `theme.typography` + `theme.colors.text`; accepts `color` token prop
+- [x] 1.8 Write `src/components/Button.tsx` — variants × sizes; min hit target 44×44 across all sizes (verified by snapshot test); loading + disabled states; honors `marginStart`/`marginEnd` for icon position in RTL
+- [x] 1.9 Write `src/components/Card.tsx`
+- [x] 1.10 Write `src/components/Badge.tsx` — status enum drives color via `statusColorMap`; every badge also carries an icon (per spec: color is never the only differentiator)
+- [x] 1.11 Write `src/components/Input.tsx` — label + error + helper text; `writingDirection: 'auto'` for RTL handling of the field itself
+- [x] 1.12 Write `src/components/Icon.tsx` — `<Icon name="calendar" color="brand.500" size={20} />` resolves token via `resolveColor(theme, token)`. Curated Lucide subset (calendar, clock, check, x, settings, etc.); add more here as needed
+- [x] 1.13 Write `src/components/EmptyState.tsx`
+- [x] 1.14 Write `src/components/Skeleton.tsx` — Reanimated pulsing opacity loop
+- [x] 1.15 Write `src/components/Sheet.tsx` wrapping `@gorhom/bottom-sheet`'s `BottomSheetModal` with themed background + handle
+- [x] 1.16 Write `src/components/Toast.tsx` + `src/state/toastStore.ts` (zustand). Auto-dismiss after `durationMs`; tap to dismiss early
+- [x] 1.17 Write `src/branding/Logo.tsx` (wordmark) consuming inline SVG strings (en/ar) based on `useLocale()`. SVGs also live as files at `assets/branding/wordmark-{en,ar}.svg` for designer iteration; the runtime import is `src/branding/assets.ts` until react-native-svg-transformer is wired
+- [x] 1.18 Write `src/branding/Mark.tsx` (clock-3 mark) consuming `assets/branding/mark.svg` via the same inline-string approach
+- [x] 1.19 Add ESLint rule `no-inline-hex` — implemented as a project plugin at `eslint-rules/no-inline-hex.js`. Replaces the old `no-restricted-syntax` selectors; message points to `@/design/tokens`. RuleTester-tested.
+- [x] 1.20 Add ESLint rule `no-physical-direction` (banning `left`/`right`/`marginLeft`/etc. in `StyleSheet.create` and inline `style={...}`). Maps to logical `start`/`end` equivalents in the message. RuleTester-tested with valid + invalid cases.
+- [x] 1.21 Add `/dev/design-system` route showing every component (Text, Button, Card, Badge, Input, Icon, Skeleton, EmptyState, Logo, Mark) with theme + locale toggles for the four `(light|dark) × (en|ar)` combinations
+- [x] 1.22 Snapshot tests: Button in 3 variants (primary/secondary/ghost) + loading + disabled states, plus a min-hit-target assertion
+- [x] 1.23 Verify on simulator: design system showcase renders correctly in all 4 combos — **deferred to user**. Open `/dev/design-system` and toggle theme + locale; everything should repaint without remount.

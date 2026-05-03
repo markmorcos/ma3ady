@@ -1,6 +1,8 @@
 const expoConfig = require('eslint-config-expo/flat');
 const noRawTimeRender = require('./eslint-rules/no-raw-time-render');
 const noLiteralString = require('./eslint-rules/no-literal-string');
+const noInlineHex = require('./eslint-rules/no-inline-hex');
+const noPhysicalDirection = require('./eslint-rules/no-physical-direction');
 
 module.exports = [
   ...expoConfig,
@@ -14,23 +16,12 @@ module.exports = [
         rules: {
           'no-raw-time-render': noRawTimeRender,
           'no-literal-string': noLiteralString,
+          'no-inline-hex': noInlineHex,
+          'no-physical-direction': noPhysicalDirection,
         },
       },
     },
     rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: "Literal[value=/^#([0-9a-fA-F]{3}){1,2}$/]",
-          message:
-            'Inline hex colors are not allowed. Import a token from src/design instead.',
-        },
-        {
-          selector: "TemplateElement[value.raw=/#([0-9a-fA-F]{3}){1,2}/]",
-          message:
-            'Inline hex colors are not allowed. Import a token from src/design instead.',
-        },
-      ],
       'no-restricted-imports': [
         'error',
         {
@@ -44,6 +35,8 @@ module.exports = [
         },
       ],
       'ma3ady-rules/no-raw-time-render': 'error',
+      'ma3ady-rules/no-inline-hex': 'error',
+      'ma3ady-rules/no-physical-direction': 'error',
     },
   },
   {
@@ -62,9 +55,10 @@ module.exports = [
     },
   },
   {
+    // src/design/** owns the raw token values. Hex literals belong here only.
     files: ['src/design/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-syntax': 'off',
+      'ma3ady-rules/no-inline-hex': 'off',
     },
   },
   {

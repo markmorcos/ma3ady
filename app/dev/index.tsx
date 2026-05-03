@@ -9,8 +9,10 @@ export default function DevIndex() {
       <Link href="/dev/i18n" style={styles.link}>
         · /dev/i18n — locale switcher
       </Link>
+      <Link href="/dev/design-system" style={styles.link}>
+        · /dev/design-system — component showcase
+      </Link>
       <Text style={styles.line}>· database inspector — coming soon</Text>
-      <Text style={styles.line}>· design-system showcase — coming soon</Text>
     </View>
   );
 }

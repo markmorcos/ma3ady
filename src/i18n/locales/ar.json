@@ -58,6 +58,40 @@
     "reschedule": "تغيير الموعد",
     "noSlots": "لا توجد مواعيد متاحة."
   },
+  "appointments": {
+    "status": {
+      "pending": "قيد الانتظار",
+      "confirmed": "مؤكَّد",
+      "completed": "مكتمل",
+      "cancelled": "ملغى",
+      "no_show": "لم يحضر"
+    },
+    "empty": {
+      "title": "لا توجد حجوزات بعد",
+      "body": "احجز موعدك الأول ليظهر هنا."
+    }
+  },
+  "devShowcase": {
+    "theme": "السِّمة",
+    "locale": "اللغة",
+    "branding": "الهوية",
+    "typography": "الخطوط",
+    "typographyDisplay": "عرض",
+    "typographyH1": "عنوان رئيسي",
+    "typographyH2": "عنوان فرعي",
+    "typographyH3": "عنوان صغير",
+    "typographyBody": "الثعلب البنّي السريع يقفز فوق الكلب الكسول.",
+    "typographyCaption": "تعليق — تفاصيل إضافية.",
+    "typographyLabel": "تسمية",
+    "buttons": "الأزرار",
+    "input": "الإدخال",
+    "badges": "الشارات",
+    "icons": "الأيقونات",
+    "skeleton": "الهيكل",
+    "themeLight": "فاتحة",
+    "themeDark": "داكنة",
+    "themeSystem": "النظام"
+  },
   "admin": {
     "today": "اليوم",
     "services": "الخدمات",

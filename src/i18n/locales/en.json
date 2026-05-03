@@ -58,6 +58,40 @@
     "reschedule": "Reschedule",
     "noSlots": "No times available."
   },
+  "appointments": {
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "no_show": "No-show"
+    },
+    "empty": {
+      "title": "No bookings yet",
+      "body": "Book your first appointment to see it here."
+    }
+  },
+  "devShowcase": {
+    "theme": "Theme",
+    "locale": "Locale",
+    "branding": "Branding",
+    "typography": "Typography",
+    "typographyDisplay": "Display",
+    "typographyH1": "Heading 1",
+    "typographyH2": "Heading 2",
+    "typographyH3": "Heading 3",
+    "typographyBody": "The quick brown fox jumps over the lazy dog.",
+    "typographyCaption": "Caption — supplementary detail.",
+    "typographyLabel": "LABEL",
+    "buttons": "Buttons",
+    "input": "Input",
+    "badges": "Badges",
+    "icons": "Icons",
+    "skeleton": "Skeleton",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
+  },
   "admin": {
     "today": "Today",
     "services": "Services",
