@@ -31,7 +31,7 @@
   - Wraps `console.error` to also call `logError(..., { kind: 'manual' })` in production builds
 - [x] 1.8 Wire `setupGlobalHandlers` in `app/_layout.tsx` early in boot
 - [x] 1.9 Update `<RootErrorBoundary>` and `<RouteErrorBoundary>` (from `setup-app-shell`) to call `logError(err, { kind: 'boundary', context: { route } })`
-- [x] 1.10 Write `app/(admin)/dev-tools/errors.tsx`:
+- [ ] 1.10 Write `app/(admin)/dev-tools/errors.tsx`:
   - Lists last 100 `client_errors` for the current tenant
   - Filters by `kind`, date range
   - Tap → detail view with stack trace, payload

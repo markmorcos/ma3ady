@@ -430,6 +430,13 @@ verify_jwt = false
 [functions.report-client-error]
 verify_jwt = false
 
+# send-appointment-notification is currently invoked from internal flows
+# (manage-appointment delegation, cron, future pg_net trigger). We disable JWT
+# verify because invocations come with the service-role secret bearer token,
+# not user JWTs.
+[functions.send-appointment-notification]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
