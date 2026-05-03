@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
-import i18next from 'i18next';
+import i18next, { changeLanguage, use as i18nUse } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import ar from './locales/ar.json';
@@ -16,7 +16,7 @@ export const resources = {
   ar: { translation: ar },
 } as const;
 
-void i18next.use(initReactI18next).init({
+void i18nUse(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
   resources,
@@ -41,7 +41,7 @@ export async function resolveInitialLocale(): Promise<SupportedLocale> {
 export async function bootstrapI18n(): Promise<SupportedLocale> {
   const resolved = await resolveInitialLocale();
   if (i18next.language !== resolved) {
-    await i18next.changeLanguage(resolved);
+    await changeLanguage(resolved);
   }
   await applyRTL(resolved);
   return resolved;
