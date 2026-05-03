@@ -1,8 +1,11 @@
--- Preview-environment seed. Idempotent. Truncate-and-insert per table.
--- Single fixture tenant for QA. Schema reference values, not real data.
--- The `tenants` table is created in the define-tenancy-model change; until then this is a placeholder.
+-- Preview-environment seed. Applied against the shared preview Supabase
+-- project (cloud), not the local stack. Wiring lives in the deployment
+-- pipelines change (Phase 9). Until then this is a placeholder.
+--
+-- The local stack uses supabase/seed.sql instead — `supabase db reset` and
+-- `make seed` both target that file.
 
--- Example (commented out — uncomment after define-tenancy-model lands):
--- truncate tenants restart identity cascade;
--- insert into tenants (slug, name, timezone, default_locale)
--- values ('demo', 'Demo Clinic', 'Europe/Berlin', 'en');
+-- Example (uncomment when the preview project is provisioned):
+-- truncate public.tenants restart identity cascade;
+-- insert into public.tenants (slug, name, timezone, default_locale, brand_color)
+-- values ('demo', 'Demo Clinic', 'Europe/Berlin', 'en', '#0F766E');

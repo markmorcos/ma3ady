@@ -1,4 +1,4 @@
-.PHONY: help install dev-up dev-down migrate-new migrate-up seed expo-start expo-start-dev-client build-dev-ios build-dev-android build-preview build-prod lint typecheck test test-coverage secrets-validate secrets-sync-github secrets-sync-supabase secrets-sync-eas secrets-sync secrets-audit
+.PHONY: help install dev-up dev-down migrate-new migrate-up seed test-db expo-start expo-start-dev-client build-dev-ios build-dev-android build-preview build-prod lint typecheck test test-coverage secrets-validate secrets-sync-github secrets-sync-supabase secrets-sync-eas secrets-sync secrets-audit
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}'
@@ -27,8 +27,13 @@ migrate-new: ## Create a new sequentially-numbered migration. Usage: make migrat
 migrate-up: ## Apply migrations to local Supabase
 	pnpm exec supabase db push --local
 
-seed: ## Seed local DB (placeholder)
-	@echo "seed target not yet implemented; lands in setup-supabase-foundations"
+LOCAL_DB_URL := postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+seed: ## Seed local DB (supabase/seed.sql)
+	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/seed.sql
+
+test-db: ## Run SQL-based DB tests (RLS, helper functions). Requires local Supabase to be up.
+	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/tenancy.test.sql
 
 expo-start: ## Start Expo dev server (Expo Go)
 	pnpm exec expo start
