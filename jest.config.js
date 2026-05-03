@@ -6,7 +6,7 @@ module.exports = {
       setupFiles: ['<rootDir>/jest.setup.ts'],
       testMatch: ['<rootDir>/app/**/*.test.{ts,tsx}', '<rootDir>/src/**/*.test.{ts,tsx}'],
       transformIgnorePatterns: [
-        'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg))',
+        'node_modules/(?!(\\.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg))',
       ],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
@@ -19,6 +19,23 @@ module.exports = {
       transform: {
         '^.+\\.tsx?$': ['ts-jest', { tsconfig: { module: 'commonjs' } }],
       },
+    },
+    {
+      displayName: 'perf',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/tests/perf/**/*.test.ts'],
+      setupFiles: ['<rootDir>/jest.setup.ts'],
+      transform: {
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { module: 'commonjs', jsx: 'react-jsx' } }],
+      },
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+    },
+    {
+      displayName: 'eslint-rules',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/eslint-rules/__tests__/**/*.test.js'],
     },
   ],
 };

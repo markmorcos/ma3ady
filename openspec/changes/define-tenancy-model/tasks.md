@@ -4,7 +4,7 @@
 - [ ] 1.2 In `tenancy.sql`, create `tenants` table with full schema and slug check constraint
 - [ ] 1.3 Create `tenant_role` enum: `owner | admin | staff | customer`
 - [ ] 1.4 Create `memberships` table with `unique (user_id, tenant_id)`
-- [ ] 1.5 Create `profiles` table referencing `auth.users(id)` on cascade
+- [ ] 1.5 Create `profiles` table referencing `auth.users(id)` on cascade — include a `display_timezone_override text` column with an IANA-zone check constraint (carried over from `setup-app-shell` task 1.14, which deferred the additive migration)
 - [ ] 1.6 Create `reserved_slugs(slug primary key)` and seed it with the reserved list from `project.md` §3
 - [ ] 1.7 Write trigger `handle_new_user()` on `auth.users` insert that inserts a `profiles` row with `id = new.id, full_name = coalesce(new.raw_user_meta_data->>'full_name', new.email)`
 - [ ] 1.8 Create helper functions:
