@@ -89,3 +89,6 @@ export const elevation = {
 } as const;
 
 export const hitSlop = { top: 8, right: 8, bottom: 8, left: 8 } as const;
+
+/** Translucent overlay used behind modal sheets. */
+export const overlay = 'rgba(0, 0, 0, 0.5)';

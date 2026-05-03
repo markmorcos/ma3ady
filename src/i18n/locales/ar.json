@@ -203,5 +203,146 @@
       "availability_exception.updated": "تم تحديث استثناء توفّر",
       "availability_exception.deleted": "تمت إزالة استثناء توفّر"
     }
+  },
+  "home": {
+    "signIn": "تسجيل الدخول",
+    "signedInAs": "مسجَّل الدخول باسم",
+    "openAdmin": "فتح لوحة الإدارة",
+    "openMyApp": "عرض حجوزاتي",
+    "tenantOnboard": "هل تدير عملاً؟ ابدأ هنا",
+    "tenantOnboardSignedIn": "إضافة نشاطي التجاري",
+    "devMenu": "قائمة المطورين",
+    "devTools": "أدوات المطورين"
+  },
+  "app": {
+    "tabs": {
+      "home": "الرئيسية",
+      "bookings": "حجوزاتي",
+      "settings": "الإعدادات"
+    },
+    "homeGreeting": "أهلاً {{name}}",
+    "nextAppointment": "موعدك القادم",
+    "noUpcoming": "لا توجد حجوزات قادمة",
+    "noUpcomingHint": "ليست لديك مواعيد محجوزة. زُر متجراً لتحجز.",
+    "tenantsHeading": "حيث حجزت",
+    "noTenants": "بمجرد أن تحجز في مكان، سيظهر هنا.",
+    "bookingsBucket": {
+      "upcoming": "القادمة",
+      "past": "السابقة"
+    },
+    "bookingsEmpty": {
+      "upcoming": "لا توجد حجوزات قادمة",
+      "past": "لا توجد حجوزات سابقة بعد"
+    },
+    "signedInAs": "مسجَّل الدخول باسم",
+    "settingsLanguage": "اللغة"
+  },
+  "admin": {
+    "tabs": {
+      "today": "اليوم",
+      "upcoming": "القادم",
+      "services": "الخدمات",
+      "availability": "الساعات",
+      "team": "الفريق",
+      "settings": "الإعدادات"
+    },
+    "noTenantSelected": "اختر متجراً لإدارته",
+    "todaySubtitle": "مواعيد اليوم",
+    "todayEmpty": "لا مواعيد اليوم",
+    "upcomingEmpty": "لا مواعيد قادمة",
+    "statTodayCount": "اليوم",
+    "statWeekConfirmed": "هذا الأسبوع",
+    "statNoShowRate": "نسبة عدم الحضور (٣٠ يوم)",
+    "status": {
+      "pending": "قيد الانتظار",
+      "confirmed": "مؤكد",
+      "completed": "مُنجز",
+      "cancelled": "ملغى",
+      "no_show": "لم يحضر"
+    },
+    "statusActions": "الإجراءات",
+    "statusAction": {
+      "confirmed": "تأكيد",
+      "completed": "وضع علامة مُنجز",
+      "cancelled": "إلغاء",
+      "no_show": "وضع علامة عدم حضور",
+      "pending": "تعيين كقيد الانتظار"
+    },
+    "statusUpdated": "تم تحديث الحالة",
+    "appointment": "الموعد",
+    "appointmentNotFound": "لم يُعثر على الموعد",
+    "auditLog": "سجل النشاط",
+    "auditEmpty": "لا شيء مسجَّل بعد",
+    "tzHereNow": "استخدم منطقتي الزمنية الحاليّة",
+    "tzTenantDefault": "افتراضي المتجر",
+    "tzUseTenantA11y": "استخدام منطقة المتجر الافتراضية",
+    "servicesEmpty": "لا توجد خدمات بعد",
+    "serviceCreate": "إضافة خدمة",
+    "serviceCreated": "تم إنشاء الخدمة",
+    "serviceEdit": "تعديل خدمة",
+    "serviceSave": "حفظ التغييرات",
+    "serviceSaved": "تم حفظ الخدمة",
+    "serviceForm": {
+      "name": "الاسم",
+      "description": "الوصف",
+      "durationMin": "المدة (د)",
+      "dailyCap": "الحد اليومي",
+      "dailyCapHint": "(بدون حد)",
+      "bufferBefore": "فاصل قبل (د)",
+      "bufferAfter": "فاصل بعد (د)",
+      "minNotice": "أدنى إشعار (د)",
+      "maxAdvance": "أقصى تقدم (يوم)"
+    },
+    "teamEmpty": "أنت فقط حالياً. ادعُ زملاءك ليساعدوك.",
+    "teamInvite": "دعوة زميل",
+    "teamInviteSend": "إرسال الدعوة",
+    "teamInviteSent": "تم إرسال الدعوة",
+    "teamRole": "الدور",
+    "teamForbiddenRole": "لا يمكنك منح هذا الدور",
+    "role": {
+      "owner": "مالك",
+      "admin": "مدير",
+      "staff": "موظّف",
+      "customer": "عميل"
+    },
+    "settingsTenant": "النشاط",
+    "settingsName": "الاسم",
+    "settingsBrandColor": "لون العلامة (سداسي عشري)",
+    "settingsBrandColorHint": "#0F766E",
+    "settingsTimezoneLabel": "المنطقة الزمنية",
+    "settingsSave": "حفظ",
+    "settingsSaved": "تم الحفظ",
+    "settingsDisplay": "العرض",
+    "settingsDisplayTimezone": "منطقة العرض الزمنية",
+    "settingsAuditLog": "سجل التدقيق",
+    "signOut": "تسجيل الخروج",
+    "availabilityTitle": "ساعات العمل",
+    "availabilitySubtitle": "الأوقات معروضة بـ {{tz}}",
+    "rulesEmptyTitle": "لا توجد ساعات عمل بعد",
+    "rulesEmptyBody": "حدّد جدولك الأسبوعي وسيتمكن العملاء من الحجز.",
+    "rulesApplyTemplate": "استخدم الإثنين–الجمعة ٠٩:٠٠–١٧:٠٠",
+    "rulesTemplateApplied": "تم تطبيق القالب",
+    "rulesSaved": "تم حفظ الساعات",
+    "rulesForbidden": "ليس لديك صلاحية لتعديل الساعات",
+    "dayClosed": "مغلق",
+    "day": {
+      "mon": "الإثنين",
+      "tue": "الثلاثاء",
+      "wed": "الأربعاء",
+      "thu": "الخميس",
+      "fri": "الجمعة",
+      "sat": "السبت",
+      "sun": "الأحد"
+    },
+    "bandHint": "استخدم صيغة س س:د د (٢٤ ساعة)",
+    "bandStart": "البداية",
+    "bandEnd": "النهاية",
+    "bandAdd": "إضافة فترة أخرى",
+    "exceptionsHeading": "الاستثناءات",
+    "exceptionsEmpty": "لا استثناءات قادمة",
+    "exceptionKind": {
+      "block": "محجوب",
+      "extra": "ساعات إضافية"
+    }
   }
 }

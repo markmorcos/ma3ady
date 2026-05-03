@@ -203,5 +203,146 @@
       "availability_exception.updated": "Availability exception updated",
       "availability_exception.deleted": "Availability exception removed"
     }
+  },
+  "home": {
+    "signIn": "Sign in",
+    "signedInAs": "Signed in as",
+    "openAdmin": "Open admin dashboard",
+    "openMyApp": "View my bookings",
+    "tenantOnboard": "Are you a business? Get started",
+    "tenantOnboardSignedIn": "Add your own tenant",
+    "devMenu": "Dev menu",
+    "devTools": "Dev tools"
+  },
+  "app": {
+    "tabs": {
+      "home": "Home",
+      "bookings": "My bookings",
+      "settings": "Settings"
+    },
+    "homeGreeting": "Hi {{name}}",
+    "nextAppointment": "Your next appointment",
+    "noUpcoming": "No upcoming bookings",
+    "noUpcomingHint": "You don't have any appointments scheduled. Visit a tenant to book.",
+    "tenantsHeading": "Where you've booked",
+    "noTenants": "Once you book somewhere, it will show up here.",
+    "bookingsBucket": {
+      "upcoming": "Upcoming",
+      "past": "Past"
+    },
+    "bookingsEmpty": {
+      "upcoming": "No upcoming bookings",
+      "past": "No past bookings yet"
+    },
+    "signedInAs": "Signed in as",
+    "settingsLanguage": "Language"
+  },
+  "admin": {
+    "tabs": {
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "services": "Services",
+      "availability": "Hours",
+      "team": "Team",
+      "settings": "Settings"
+    },
+    "noTenantSelected": "Pick a tenant to manage",
+    "todaySubtitle": "Today's appointments",
+    "todayEmpty": "No appointments today",
+    "upcomingEmpty": "No upcoming appointments",
+    "statTodayCount": "Today",
+    "statWeekConfirmed": "This week",
+    "statNoShowRate": "No-show rate (30d)",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Done",
+      "cancelled": "Cancelled",
+      "no_show": "No-show"
+    },
+    "statusActions": "Actions",
+    "statusAction": {
+      "confirmed": "Confirm",
+      "completed": "Mark complete",
+      "cancelled": "Cancel",
+      "no_show": "Mark no-show",
+      "pending": "Set pending"
+    },
+    "statusUpdated": "Status updated",
+    "appointment": "Appointment",
+    "appointmentNotFound": "Appointment not found",
+    "auditLog": "Activity log",
+    "auditEmpty": "Nothing logged yet",
+    "tzHereNow": "Use my current timezone",
+    "tzTenantDefault": "Tenant default",
+    "tzUseTenantA11y": "Use tenant default timezone",
+    "servicesEmpty": "No services yet",
+    "serviceCreate": "Add service",
+    "serviceCreated": "Service created",
+    "serviceEdit": "Edit service",
+    "serviceSave": "Save changes",
+    "serviceSaved": "Service saved",
+    "serviceForm": {
+      "name": "Name",
+      "description": "Description",
+      "durationMin": "Duration (min)",
+      "dailyCap": "Daily cap",
+      "dailyCapHint": "(no cap)",
+      "bufferBefore": "Buffer before (min)",
+      "bufferAfter": "Buffer after (min)",
+      "minNotice": "Min notice (min)",
+      "maxAdvance": "Max advance (days)"
+    },
+    "teamEmpty": "Just you for now. Invite teammates to share the load.",
+    "teamInvite": "Invite teammate",
+    "teamInviteSend": "Send invite",
+    "teamInviteSent": "Invite sent",
+    "teamRole": "Role",
+    "teamForbiddenRole": "You can't grant that role",
+    "role": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "staff": "Staff",
+      "customer": "Customer"
+    },
+    "settingsTenant": "Business",
+    "settingsName": "Name",
+    "settingsBrandColor": "Brand color (hex)",
+    "settingsBrandColorHint": "#0F766E",
+    "settingsTimezoneLabel": "Timezone",
+    "settingsSave": "Save",
+    "settingsSaved": "Saved",
+    "settingsDisplay": "Display",
+    "settingsDisplayTimezone": "Display timezone",
+    "settingsAuditLog": "Audit log",
+    "signOut": "Sign out",
+    "availabilityTitle": "Working hours",
+    "availabilitySubtitle": "Times shown in {{tz}}",
+    "rulesEmptyTitle": "No working hours yet",
+    "rulesEmptyBody": "Set your weekly schedule and customers can start booking.",
+    "rulesApplyTemplate": "Use Mon–Fri 09:00–17:00",
+    "rulesTemplateApplied": "Template applied",
+    "rulesSaved": "Hours saved",
+    "rulesForbidden": "You don't have permission to edit hours",
+    "dayClosed": "Closed",
+    "day": {
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday",
+      "sun": "Sunday"
+    },
+    "bandHint": "Use HH:MM format (24h)",
+    "bandStart": "Start",
+    "bandEnd": "End",
+    "bandAdd": "Add another band",
+    "exceptionsHeading": "Exceptions",
+    "exceptionsEmpty": "No upcoming exceptions",
+    "exceptionKind": {
+      "block": "Blocked",
+      "extra": "Extra hours"
+    }
   }
 }

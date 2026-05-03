@@ -1,5 +1,13 @@
 import { supabase } from './supabase';
-import { type AvailableSlot } from '@/types/db';
+import {
+  type AvailabilityException,
+  type AvailabilityExceptionInsert,
+  type AvailabilityExceptionKind,
+  type AvailabilityRule,
+  type AvailableSlot,
+} from '@/types/db';
+
+export type Band = { start_time: string; end_time: string };
 
 type GetAvailableSlotsArgs = {
   tenantSlug: string;
@@ -36,3 +44,72 @@ export async function getAvailableSlots({
   if (error) throw error;
   return (data ?? []) as AvailableSlot[];
 }
+
+export async function getRulesForTenant(tenantId: string): Promise<AvailabilityRule[]> {
+  const { data, error } = await supabase
+    .from('availability_rules')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .is('service_id', null)
+    .order('day_of_week')
+    .order('start_time');
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function bulkReplaceRulesForDay(
+  tenantId: string,
+  dayOfWeek: number,
+  bands: Band[],
+): Promise<void> {
+  const { error } = await supabase.rpc('bulk_replace_rules_for_day', {
+    p_tenant_id: tenantId,
+    p_day_of_week: dayOfWeek,
+    p_bands: bands,
+  });
+  if (error) throw error;
+}
+
+export async function getExceptionsForTenant(
+  tenantId: string,
+): Promise<AvailabilityException[]> {
+  const fromIso = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('availability_exceptions')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .gte('starts_at', fromIso)
+    .order('starts_at');
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function upsertException(
+  exception: AvailabilityExceptionInsert & { id?: string },
+): Promise<AvailabilityException> {
+  if (exception.id) {
+    const { id, ...rest } = exception;
+    const { data, error } = await supabase
+      .from('availability_exceptions')
+      .update(rest)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data;
+  }
+  const { data, error } = await supabase
+    .from('availability_exceptions')
+    .insert(exception)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteException(id: string): Promise<void> {
+  const { error } = await supabase.from('availability_exceptions').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export type { AvailabilityException, AvailabilityExceptionKind, AvailabilityRule };
