@@ -16,6 +16,9 @@ export default function Home() {
           <Link href="/dev" style={styles.devLink} accessibilityRole="link">
             /dev
           </Link>
+          <Link href="/sign-in" style={styles.devLink} accessibilityRole="link">
+            /sign-in
+          </Link>
           <Link href="/audit-log" style={styles.devLink} accessibilityRole="link">
             /audit-log
           </Link>

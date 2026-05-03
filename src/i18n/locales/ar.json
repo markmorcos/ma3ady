@@ -45,8 +45,13 @@
     "signIn": "تسجيل الدخول",
     "signOut": "تسجيل الخروج",
     "withGoogle": "المتابعة بحساب جوجل",
+    "continueAsGuest": "المتابعة كضيف",
     "signedOut": "تم تسجيل الخروج.",
-    "sessionExpired": "انتهت الجلسة. الرجاء تسجيل الدخول مجدداً."
+    "sessionExpired": "انتهت الجلسة. الرجاء تسجيل الدخول مجدداً.",
+    "callbackInProgress": "جارٍ تسجيل الدخول…",
+    "callbackErrorTitle": "لم يكتمل تسجيل الدخول",
+    "callbackTimeout": "استغرق تسجيل الدخول وقتاً طويلاً. حاول مجدداً من فضلك.",
+    "callbackMissingCode": "ينقص رابطَ تسجيل الدخول معلومات ضرورية."
   },
   "booking": {
     "bookNow": "احجز الآن",

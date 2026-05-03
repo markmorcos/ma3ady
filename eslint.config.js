@@ -7,7 +7,16 @@ const noPhysicalDirection = require('./eslint-rules/no-physical-direction');
 module.exports = [
   ...expoConfig,
   {
-    ignores: ['node_modules/**', '.expo/**', 'dist/**', 'coverage/**', 'ios/**', 'android/**'],
+    ignores: [
+      'node_modules/**',
+      '.expo/**',
+      'dist/**',
+      'coverage/**',
+      'ios/**',
+      'android/**',
+      // Edge Functions are Deno code; don't lint them with the RN/Expo config.
+      'supabase/functions/**',
+    ],
   },
   {
     files: ['**/*.{ts,tsx}'],

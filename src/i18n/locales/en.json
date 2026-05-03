@@ -45,8 +45,13 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "withGoogle": "Continue with Google",
+    "continueAsGuest": "Continue as guest",
     "signedOut": "You're signed out.",
-    "sessionExpired": "Your session expired. Please sign in again."
+    "sessionExpired": "Your session expired. Please sign in again.",
+    "callbackInProgress": "Signing you in…",
+    "callbackErrorTitle": "Sign-in didn't complete",
+    "callbackTimeout": "Sign-in took too long. Please try again.",
+    "callbackMissingCode": "The sign-in link is missing required information."
   },
   "booking": {
     "bookNow": "Book now",

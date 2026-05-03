@@ -321,6 +321,7 @@ export type Database = {
         Row: {
           created_at: string
           display_timezone_override: string | null
+          first_signed_in_at: string | null
           full_name: string | null
           id: string
           locale: string | null
@@ -329,6 +330,7 @@ export type Database = {
         Insert: {
           created_at?: string
           display_timezone_override?: string | null
+          first_signed_in_at?: string | null
           full_name?: string | null
           id: string
           locale?: string | null
@@ -337,6 +339,7 @@ export type Database = {
         Update: {
           created_at?: string
           display_timezone_override?: string | null
+          first_signed_in_at?: string | null
           full_name?: string | null
           id?: string
           locale?: string | null
@@ -532,7 +535,7 @@ export type Database = {
       purge_old_audit_events: { Args: never; Returns: number }
       record_audit: {
         Args: {
-          p_kind: Database["public"]["Enums"]["tenant_audit_event_kind"]
+          p_kind: string
           p_payload: Json
           p_target_id: string
           p_target_kind: string

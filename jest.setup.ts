@@ -5,6 +5,7 @@
 // throw at import time. Tests that need real values set them per-suite.
 process.env.EXPO_PUBLIC_SUPABASE_URL ||= 'http://127.0.0.1:54321';
 process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||= 'jest-stub-anon-key';
+process.env.EXPO_PUBLIC_AUTH_REDIRECT_URI ||= 'ma3ady://auth/callback';
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(async () => null),
