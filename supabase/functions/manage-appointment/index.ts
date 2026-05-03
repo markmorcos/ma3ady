@@ -105,77 +105,21 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ appointment: data, request_id: requestId });
   }
 
-  // action === 'reschedule'
-  // Look up appointment to get tenant + service for the availability check.
-  const { data: appt, error: apptErr } = await admin
-    .from('appointments')
-    .select('id, tenant_id, service_id, starts_at, ends_at, status')
-    .eq('id', appointmentId)
-    .single();
-  if (apptErr || !appt) {
-    return jsonResponse({ error: 'appointment_lookup_failed' }, 500);
-  }
-
-  const { data: service, error: serviceErr } = await admin
-    .from('services')
-    .select('duration_minutes')
-    .eq('id', appt.service_id)
-    .single();
-  if (serviceErr || !service) {
-    return jsonResponse({ error: 'service_lookup_failed' }, 500);
-  }
-
-  const { data: tenant, error: tenantErr } = await admin
-    .from('tenants')
-    .select('slug')
-    .eq('id', appt.tenant_id)
-    .single();
-  if (tenantErr || !tenant) {
-    return jsonResponse({ error: 'tenant_lookup_failed' }, 500);
-  }
-
-  const newStart = new Date(body.new_starts_at);
-  const newEnd = new Date(newStart.getTime() + service.duration_minutes * 60_000);
-
-  // Verify the requested slot is in the available set.
-  const { data: slots, error: slotsErr } = await admin.rpc(
-    'compute_available_slots',
-    {
-      p_tenant_slug: tenant.slug,
-      p_service_id: appt.service_id,
-      p_range_start: new Date(newStart.getTime() - 60_000).toISOString(),
-      p_range_end: new Date(newEnd.getTime() + 60_000).toISOString(),
+  // action === 'reschedule' — delegate to reschedule-appointment so all three
+  // callers (admin, customer, guest token) share the same logic.
+  const fnUrl = `${supabaseUrl}/functions/v1/reschedule-appointment`;
+  const fnRes = await fetch(fnUrl, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      // service-role bypasses verify_jwt; the manage token IS the auth.
+      authorization: `Bearer ${serviceRoleKey}`,
     },
-  );
-  if (slotsErr) {
-    return jsonResponse({ error: 'availability_check_failed', detail: slotsErr.message }, 500);
-  }
-
-  const ok = (slots ?? []).some(
-    (s: any) =>
-      new Date(s.starts_at).getTime() === newStart.getTime() &&
-      new Date(s.ends_at).getTime() === newEnd.getTime(),
-  );
-  if (!ok) {
-    return jsonResponse({ error: 'slot_unavailable' }, 409);
-  }
-
-  // Apply the reschedule. EXCLUDE may still race-fail; map to slot_taken.
-  const { data: updated, error: updErr } = await admin
-    .from('appointments')
-    .update({
-      starts_at: newStart.toISOString(),
-      ends_at: newEnd.toISOString(),
-    })
-    .eq('id', appointmentId)
-    .select('*')
-    .single();
-  if (updErr) {
-    if (updErr.code === '23P01') {
-      return jsonResponse({ error: 'slot_taken' }, 409);
-    }
-    return jsonResponse({ error: 'reschedule_failed', detail: updErr.message }, 500);
-  }
-
-  return jsonResponse({ appointment: updated, request_id: requestId });
+    body: JSON.stringify({
+      token: body.token,
+      new_starts_at: body.new_starts_at,
+    }),
+  });
+  const fnBody = await fnRes.json().catch(() => ({}));
+  return jsonResponse(fnBody, fnRes.status);
 });

@@ -235,7 +235,10 @@
       "past": "لا توجد حجوزات سابقة بعد"
     },
     "signedInAs": "مسجَّل الدخول باسم",
-    "settingsLanguage": "اللغة"
+    "settingsLanguage": "اللغة",
+    "bookingTitle": "الحجز",
+    "bookingReschedule": "تغيير الموعد",
+    "rescheduleSuccess": "تم تغيير الموعد"
   },
   "admin": {
     "tabs": {

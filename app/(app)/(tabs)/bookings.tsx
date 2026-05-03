@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -124,25 +125,35 @@ export default function BookingsScreen() {
             const tenant = refs?.tenants.get(item.tenant_id);
             const service = refs?.services.get(item.service_id);
             return (
-              <Card>
-                <View style={styles.row}>
-                  <View style={styles.flex}>
-                    <Text variant="bodyStrong">{tenant?.name ?? '—'}</Text>
-                    <Text variant="caption" color="muted">
-                      {service?.name ?? ''}
-                    </Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() =>
+                  router.push({
+                    pathname: '/(app)/bookings/[id]',
+                    params: { id: item.id },
+                  })
+                }
+              >
+                <Card>
+                  <View style={styles.row}>
+                    <View style={styles.flex}>
+                      <Text variant="bodyStrong">{tenant?.name ?? '—'}</Text>
+                      <Text variant="caption" color="muted">
+                        {service?.name ?? ''}
+                      </Text>
+                    </View>
+                    <StatusBadge status={item.status} />
                   </View>
-                  <StatusBadge status={item.status} />
-                </View>
-                <Time
-                  value={item.starts_at}
-                  context="customer-bookings"
-                  tenantTimezone={tenant?.timezone ?? null}
-                  format="long"
-                  secondary
-                  style={styles.time}
-                />
-              </Card>
+                  <Time
+                    value={item.starts_at}
+                    context="customer-bookings"
+                    tenantTimezone={tenant?.timezone ?? null}
+                    format="long"
+                    secondary
+                    style={styles.time}
+                  />
+                </Card>
+              </Pressable>
             );
           }}
           ItemSeparatorComponent={() => <View style={styles.separator} />}

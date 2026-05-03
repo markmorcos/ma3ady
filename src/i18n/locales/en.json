@@ -235,7 +235,10 @@
       "past": "No past bookings yet"
     },
     "signedInAs": "Signed in as",
-    "settingsLanguage": "Language"
+    "settingsLanguage": "Language",
+    "bookingTitle": "Booking",
+    "bookingReschedule": "Reschedule",
+    "rescheduleSuccess": "Rescheduled"
   },
   "admin": {
     "tabs": {

@@ -418,6 +418,12 @@ deno_version = 2
 [functions.manage-appointment]
 verify_jwt = false
 
+# reschedule-appointment supports guest-token callers (delegated from
+# manage-appointment). When a JWT is present it is verified inside the
+# function; otherwise the manage token serves as the authorization.
+[functions.reschedule-appointment]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

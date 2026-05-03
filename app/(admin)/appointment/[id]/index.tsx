@@ -135,6 +135,20 @@ export default function AppointmentDetailScreen() {
           ) : null}
         </Card>
 
+        {(a.status === 'pending' || a.status === 'confirmed') && (
+          <Button
+            label={t('app.bookingReschedule')}
+            variant="secondary"
+            fullWidth
+            onPress={() =>
+              router.push({
+                pathname: '/(admin)/appointment/[id]/reschedule',
+                params: { id: a.id },
+              })
+            }
+          />
+        )}
+
         {transitions.length > 0 && (
           <Card>
             <Text variant="bodyStrong">{t('admin.statusActions')}</Text>
