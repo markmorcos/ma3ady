@@ -18,7 +18,7 @@ module.exports = [
       'supabase/functions/**',
       // Web workspaces are Next.js / static; they ship their own configs.
       'tenant-landing/**',
-      'marketing-site/**',
+      'marketing/**',
     ],
   },
   {

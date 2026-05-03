@@ -1,29 +1,29 @@
 # Tasks
 
-- [ ] 1.1 Create `marketing/` directory with subdirs: `public/`, `public/en/`, `public/ar/`, `templates/`, `scripts/`
-- [ ] 1.2 Write `marketing/Dockerfile` — `FROM nginx:alpine`, `COPY public /usr/share/nginx/html`, `EXPOSE 80`
-- [ ] 1.3 Write `marketing/nginx.conf` — gzip on, cache `*.css|*.js|*.png|*.svg` for 30 days, redirect `www.ma3ady.com` to `ma3ady.com`, custom 404
-- [ ] 1.4 Write `marketing/public/styles.css`:
+- [x] 1.1 Create `marketing/` directory with subdirs: `public/`, `public/en/`, `public/ar/`, `templates/`, `scripts/`
+- [x] 1.2 Write `marketing/Dockerfile` — `FROM nginx:alpine`, `COPY public /usr/share/nginx/html`, `EXPOSE 80`
+- [x] 1.3 Write `marketing/nginx.conf` — gzip on, cache `*.css|*.js|*.png|*.svg` for 30 days, redirect `www.ma3ady.com` to `ma3ady.com`, custom 404
+- [x] 1.4 Write `marketing/public/styles.css`:
   - CSS variables for the brand palette (mirrors design system tokens but recoded as CSS — no JS)
   - Light + dark via `prefers-color-scheme`
   - RTL overrides under `[dir="rtl"]`
   - Typography: Inter for Latin, IBM Plex Sans Arabic for Arabic, loaded via `@font-face` with `woff2` files in `public/fonts/`
-- [ ] 1.5 Write `marketing/public/index.html` (English):
+- [x] 1.5 Write `marketing/public/index.html` (English):
   - `<header class="hero">` with locale switcher links to `/` (en) and `/ar/`
   - Wordmark + tagline ("Booking, simplified.")
   - Two App Store / Play Store badges (visually disabled, alt text "Coming soon")
   - Primary CTA "Try the demo" → `https://demo.ma3ady.com` (the demo tenant landing page from the `setup-tenant-landing-app` change)
-- [ ] 1.6 Write `marketing/public/ar/index.html` (Arabic, `<html dir="rtl" lang="ar">`)
-- [ ] 1.7 Write `marketing/public/404.html` for both locales (en at `/404.html`, ar at `/ar/404.html`)
-- [ ] 1.8 Write `marketing/public/robots.txt` allowing all, pointing to sitemap
-- [ ] 1.9 Write `marketing/public/sitemap.xml` listing the homepage in both locales + privacy + terms
+- [x] 1.6 Write `marketing/public/ar/index.html` (Arabic, `<html dir="rtl" lang="ar">`)
+- [x] 1.7 Write `marketing/public/404.html` for both locales (en at `/404.html`, ar at `/ar/404.html`)
+- [x] 1.8 Write `marketing/public/robots.txt` allowing all, pointing to sitemap
+- [x] 1.9 Write `marketing/public/sitemap.xml` listing the homepage in both locales + privacy + terms
 - [ ] 1.10 Add brand assets to `public/`: `favicon.ico, favicon.png, apple-touch-icon.png, icon.png, og-image.png` (placeholders until designer)
-- [ ] 1.11 Write `docs/legal/en/privacy.md` and `terms.md` — initial drafts
-- [ ] 1.12 Write `docs/legal/ar/privacy.md` and `terms.md` — Arabic translations
+- [x] 1.11 Write `docs/legal/en/privacy.md` and `terms.md` — initial drafts
+- [x] 1.12 Write `docs/legal/ar/privacy.md` and `terms.md` — Arabic translations
 - [ ] 1.13 Write `marketing/templates/legal.html` — shell with header, content slot, footer, language switcher
 - [ ] 1.14 Write `marketing/scripts/render-legal.ts` — Deno task that reads markdown, renders via `marked`, slots into the template, writes to `public/{en,ar}/{privacy,terms}/index.html`
 - [ ] 1.15 Write `marketing/deno.jsonc` with the `render-legal` task definition
-- [ ] 1.16 Write `marketing/deployment.yaml` — schema version 0.4.7, image `ghcr.io/markmorcos/ma3ady-marketing`, port 80, ingress host `ma3ady.com`, TLS via cert-manager (matches stminaconnect)
+- [x] 1.16 Write `marketing/deployment.yaml` — schema version 0.4.7, image `ghcr.io/markmorcos/ma3ady-marketing`, port 80, ingress host `ma3ady.com`, TLS via cert-manager (matches stminaconnect)
 - [ ] 1.17 Build the Docker image locally (`docker build marketing/`) and run it (`docker run -p 8080:80 ...`); verify the homepage loads in both locales
 - [ ] 1.18 Lighthouse: confirm performance + accessibility ≥ 95 on both locale homepages
 - [ ] 1.19 Verify `dir="rtl"` works correctly in the Arabic homepage

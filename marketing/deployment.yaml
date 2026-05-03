@@ -1,0 +1,15 @@
+version: 0.4.7
+
+namespace: ma3ady
+project: ma3ady-marketing
+
+services:
+  - name: marketing
+    context: marketing
+    image: ghcr.io/markmorcos/ma3ady-marketing
+    port: 80
+
+    ingress:
+      host: ma3ady.com
+      path: /
+      pathType: Prefix
