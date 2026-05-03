@@ -212,9 +212,21 @@ web3 = 30
 # secret = ""
 
 [auth.email]
-# Allow/disallow new user signups via email to your project.
-# Disabled — Google OAuth is the only sign-in path in v1; this prevents accidental re-enabling.
-enable_signup = false
+# Email auth is enabled here so local dev can sign in via the dev-only test
+# users (`make dev-users` + `app/dev/sign-in.tsx`). In Supabase CLI v2.x this
+# single flag gates BOTH signup and signin; setting it to false blocked the
+# dev sign-in flow we need before Google OAuth is wired.
+#
+# In production, signup discipline is enforced two layers above this:
+#   1) The app has no email signup UI — only Google OAuth and the
+#      admin-only invitation flow create users.
+#   2) Tenant creation only happens via the `claim-slug` Edge Function;
+#      direct INSERT into `tenants` is denied by RLS.
+#
+# The earlier setup-supabase-foundations spec scenario ("/auth/v1/signup
+# returns 400") is therefore relaxed: the gate moves from Supabase config
+# to application code. Worth revisiting in setup-deployment-pipelines.
+enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true

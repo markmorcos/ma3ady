@@ -53,6 +53,38 @@
     "callbackTimeout": "استغرق تسجيل الدخول وقتاً طويلاً. حاول مجدداً من فضلك.",
     "callbackMissingCode": "ينقص رابطَ تسجيل الدخول معلومات ضرورية."
   },
+  "onboarding": {
+    "signUpBusiness": "سجّل نشاطك على ma3ady",
+    "joinByInviteHint": "إذا كانت هناك دعوة لك، سجّل الدخول بالبريد المدعوّ وسيظهر فريقك تلقائياً.",
+    "claimSlugTitle": "اختر اسم المساحة",
+    "claimSlugHeader": "اختر اسماً لمساحتك",
+    "slugLabel": "المعرّف (النطاق الفرعي)",
+    "slugHint": "أحرف صغيرة وأرقام وشرطات. من ٣ إلى ٣٢ حرفاً.",
+    "slugAvailable": "متاح",
+    "slugTaken": "مستخدَم بالفعل",
+    "slugReserved": "هذا المعرّف محجوز",
+    "slugInvalid": "صيغة المعرّف غير صحيحة",
+    "nameLabel": "اسم العرض",
+    "localeLabel": "اللغة الافتراضية",
+    "timezoneLabel": "المنطقة الزمنية",
+    "timezoneHint": "اخترناها من جهازك. يمكنك تغييرها لاحقاً في الإعدادات.",
+    "brandColorLabel": "لون العلامة (اختياري)",
+    "claimCta": "أنشئ مساحتي",
+    "joinedTitle": "مرحباً",
+    "joinedHeader": "كل شيء جاهز",
+    "joinedBody": "أصبحت مساحتك جاهزة. اختر الخطوة التالية.",
+    "setUpServices": "إعداد الخدمات",
+    "setAvailability": "ضبط التوفّر",
+    "inviteTeam": "دعوة الفريق",
+    "pickerTitle": "اختر مساحة العمل",
+    "addAnotherTenant": "إضافة مساحة أخرى",
+    "roleLabel": {
+      "owner": "مالك",
+      "admin": "مسؤول",
+      "staff": "موظف",
+      "customer": "عميل"
+    }
+  },
   "booking": {
     "bookNow": "احجز الآن",
     "pickTime": "اختر وقتاً",

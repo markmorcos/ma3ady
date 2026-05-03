@@ -1,0 +1,73 @@
+# Tasks
+
+- [ ] 1.1 Create `tenant-landing/` workspace at the repo root with a Next.js 15 app (App Router). Add to `pnpm-workspace.yaml`.
+- [ ] 1.2 Configure tenant-landing's `next.config.js`: standalone output for Docker, image optimization disabled (we have one icon), env validation for `SUPABASE_URL` + `SUPABASE_ANON_KEY` at boot.
+- [ ] 1.3 Add a tenant-resolution middleware (`tenant-landing/middleware.ts`) that reads the `Host` header, parses the slug, fetches the tenant row via Supabase anon, and stamps it on the request via headers (or `unstable_after` for cache attribution).
+- [ ] 1.4 Add a locale middleware (`tenant-landing/middleware.ts`) that:
+  - Resolves locale from `?lang=` param if present and supported, else `Accept-Language`, else tenant's `default_locale`, else `en`
+  - Sets the locale + `dir` (`ltr` for en, `rtl` for ar) in the rendered page
+- [ ] 1.5 Symlink or copy `src/i18n/locales/{en,ar}.json` into `tenant-landing/locales/`. Add a CI check that fails if they drift apart (compare leaf keys).
+- [ ] 1.6 Render `<slug>.ma3ady.com/` (tenant landing). Server component:
+  - Tenant name, brand color, optional logo (no v1 logo storage — fall back to wordmark)
+  - "Book now" primary CTA → `/book`
+  - "Open in app" with deep link `ma3ady://<slug>` (dismissible banner via cookie)
+  - SEO: `<title>{tenant.name} · ma3ady</title>`, OpenGraph tags, JSON-LD `LocalBusiness`
+- [ ] 1.7 Render `/book` page. Server component for the chrome (tenant name, locale chip, TZ chip), client component island for the service picker + slot picker.
+  - Service picker: lists active services with name, duration, description; query via Supabase anon; URL state `?service=<id>`
+  - Slot picker: calls `compute_available_slots` RPC with the selected service, displays slots grouped by tenant-TZ day
+  - Date range picker: 7-day rolling window starting today, with "next week" / "previous week" buttons
+- [ ] 1.8 Booking form (HTML form, posts to `/book/submit` Route Handler):
+  - Name, email (required), phone (optional)
+  - Hidden `service_id`, `starts_at`
+  - Server action calls `book_appointment` RPC with the service-role key
+  - On success: redirect to `/book/confirm?id=<appointment_id>&token=<manage_token>` (token in URL is fine — it's the email to the customer that's the canonical channel; the URL is single-render)
+  - On `slot_taken`/`slot_unavailable`: re-render slot picker with a banner explaining
+- [ ] 1.9 Render `/book/confirm` page:
+  - "You're booked!" with tenant name, service name, time (in tenant TZ + visitor TZ via `<time>` element)
+  - Add-to-calendar buttons: Google Calendar URL, Apple/Outlook .ics download (Edge Function `generate-ics` already lands in `implement-notifications-pipeline`)
+  - "Manage your booking" link to `/manage/<token>`
+  - "Open in app" affordance
+- [ ] 1.10 Render `/manage/<token>` page:
+  - Calls `verify_manage_token` server-side; if invalid, render "this link has expired" page
+  - Shows the booking with cancel + reschedule actions
+  - Cancel: posts to `/manage/<token>/cancel` Route Handler that calls the `manage-appointment` Edge Function (lands in `implement-public-booking-flow`)
+  - Reschedule: re-renders the slot picker scoped to the same service; submitting calls `manage-appointment` with `action: 'reschedule'`
+- [ ] 1.11 Add a session-only TZ toggle component:
+  - Default: tenant TZ
+  - Click → switch to visitor's TZ via `Intl.DateTimeFormat().resolvedOptions().timeZone`
+  - Stored in `sessionStorage` as `app.displayTzOverride`
+  - Re-renders all `<time>` elements via a small client hydration script
+- [ ] 1.12 Generate `/manifest.json` per tenant via a Route Handler:
+  - Reads tenant from request context
+  - Returns `{name, short_name, theme_color: brand_color, background_color: '#FFFFFF', display: 'standalone', icons: [...]}`
+  - Linked from every page via `<link rel="manifest" href="/manifest.json" />`
+- [ ] 1.13 RTL stylesheet:
+  - `app/globals.css` uses logical properties (`margin-inline-start`, `padding-inline-end`) throughout
+  - `<html dir="rtl">` for ar; CSS adapts automatically
+- [ ] 1.14 Open-in-app banner component:
+  - Top of page, `position: sticky`
+  - Detects `navigator.userAgent` for iOS / Android, links to App Store / Play Store deep link respectively
+  - Dismiss button sets `app.openInAppDismissed=1` cookie for the session
+- [ ] 1.15 Dockerfile + deployment:
+  - Multi-stage build: Node 20 alpine, `pnpm install --frozen-lockfile`, `pnpm build`, copy `.next/standalone`
+  - Image pushed to `ghcr.io/markmorcos/ma3ady-tenant-landing` (same convention as marketing site)
+  - `tenant-landing/deployment.yaml` for the infrastructure repo dispatch
+- [ ] 1.16 Wildcard DNS + TLS:
+  - Cloudflare wildcard `*.ma3ady.com` → infrastructure ingress (already part of `setup-deployment-pipelines`)
+  - The tenant-landing image serves all subdomains; Host header drives tenant resolution
+- [ ] 1.17 Tests:
+  - E2E: Playwright test covering "land on /<demo>/, click Book, pick service, pick slot, submit form, see confirmation, click manage link, see manage page"
+  - i18n parity test (extends mobile parity test)
+  - Tenant-resolution middleware test (host → tenant)
+  - Locale-resolution middleware test (Accept-Language + ?lang param)
+  - JSON-LD validation (snapshot of structured data)
+- [ ] 1.18 Docs:
+  - `tenant-landing/README.md`: how to run locally, test against the demo tenant, deploy
+  - Add a section to the top-level `README.md` linking to it
+  - Document in `secrets/secrets.example.toml` if any new secrets are needed (likely none — same Supabase URL + anon key as mobile)
+- [ ] 1.19 Verify on a real device:
+  - From a phone browser, navigate to `<demo>.ma3ady.com/book` (using the local tunnel or staging URL)
+  - Complete a booking
+  - Receive confirmation email
+  - Open the manage link, cancel
+- [ ] 1.20 Add the open-in-app affordance to the **mobile** confirmation screen too: when a booking completes on web and the user later opens the email on a device with the app installed, the universal-link handler routes them into the app's authenticated mode (if signed in) or the booking detail (if not). This is a small `app.json` `associatedDomains` entry + a route `manage/<token>` already created in the mobile app.

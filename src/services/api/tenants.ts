@@ -14,11 +14,18 @@ export async function getTenantBySlug(slug: string): Promise<TenantPublic | null
 }
 
 export async function getMyMemberships(): Promise<TenantWithRole[]> {
-  // Two queries to keep RLS deterministic — memberships first scopes by auth.uid(),
-  // then we fetch the matching tenants by id (anon-readable).
+  // Get the caller's user id; RLS on `memberships` allows tenant admins to
+  // see all memberships of their tenants, so we explicitly filter to OWN
+  // memberships to avoid the picker showing a tenant once per teammate.
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  const userId = userData?.user?.id;
+  if (!userId) return [];
+
   const { data: memberships, error: membershipError } = await supabase
     .from('memberships')
-    .select('tenant_id, role');
+    .select('tenant_id, role')
+    .eq('user_id', userId);
   if (membershipError) throw membershipError;
   if (!memberships || memberships.length === 0) return [];
 

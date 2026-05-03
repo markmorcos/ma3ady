@@ -55,3 +55,10 @@ export type BookingResult = {
 export type TenantAuditEvent = Database['public']['Tables']['tenant_audit_events']['Row'];
 export type TenantAuditEventKind = Database['public']['Enums']['tenant_audit_event_kind'];
 export type TenantAuditActorKind = Database['public']['Enums']['tenant_audit_actor_kind'];
+
+export type PendingMembership = Database['public']['Tables']['pending_memberships']['Row'];
+
+export type SlugAvailability = {
+  available: boolean;
+  reason: 'invalid' | 'reserved' | 'taken' | null;
+};

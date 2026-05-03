@@ -19,6 +19,15 @@ export default function Home() {
           <Link href="/sign-in" style={styles.devLink} accessibilityRole="link">
             /sign-in
           </Link>
+          <Link href="/dev/sign-in" style={styles.devLink} accessibilityRole="link">
+            /dev/sign-in (test users)
+          </Link>
+          <Link href="/welcome" style={styles.devLink} accessibilityRole="link">
+            /welcome (onboarding)
+          </Link>
+          <Link href="/tenants/picker" style={styles.devLink} accessibilityRole="link">
+            /tenants/picker
+          </Link>
           <Link href="/audit-log" style={styles.devLink} accessibilityRole="link">
             /audit-log
           </Link>

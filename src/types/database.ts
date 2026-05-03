@@ -317,6 +317,38 @@ export type Database = {
           },
         ]
       }
+      pending_memberships: {
+        Row: {
+          email: string
+          invited_at: string
+          invited_by_user_id: string | null
+          role: Database["public"]["Enums"]["tenant_role"]
+          tenant_id: string
+        }
+        Insert: {
+          email: string
+          invited_at?: string
+          invited_by_user_id?: string | null
+          role: Database["public"]["Enums"]["tenant_role"]
+          tenant_id: string
+        }
+        Update: {
+          email?: string
+          invited_at?: string
+          invited_by_user_id?: string | null
+          role?: Database["public"]["Enums"]["tenant_role"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_memberships_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -510,6 +542,13 @@ export type Database = {
         Returns: {
           appointment_id: string
           manage_token: string
+        }[]
+      }
+      check_slug_availability: {
+        Args: { p_slug: string }
+        Returns: {
+          available: boolean
+          reason: string
         }[]
       }
       compute_available_slots: {

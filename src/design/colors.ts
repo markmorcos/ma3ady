@@ -13,3 +13,18 @@ export const colors = {
   white: '#FFFFFF',
   brandTint: '#0F766E10',
 } as const;
+
+/**
+ * Curated brand-color picker swatches for tenant onboarding. Includes the
+ * default ma3ady teal plus seven balanced alternatives.
+ */
+export const brandSwatches = [
+  '#0F766E', // brand teal (default)
+  '#2563EB', // blue
+  '#7C3AED', // violet
+  '#DB2777', // pink
+  '#DC2626', // red
+  '#F59E0B', // amber
+  '#10B981', // emerald
+  '#0F172A', // slate
+] as const;

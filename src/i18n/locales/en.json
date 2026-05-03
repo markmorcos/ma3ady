@@ -53,6 +53,38 @@
     "callbackTimeout": "Sign-in took too long. Please try again.",
     "callbackMissingCode": "The sign-in link is missing required information."
   },
+  "onboarding": {
+    "signUpBusiness": "Set up your business on ma3ady",
+    "joinByInviteHint": "If you were invited, sign in with the invited email — your team will appear automatically.",
+    "claimSlugTitle": "Claim your slug",
+    "claimSlugHeader": "Pick a name for your space",
+    "slugLabel": "Slug (your subdomain)",
+    "slugHint": "Lowercase letters, numbers, and dashes. 3–32 characters.",
+    "slugAvailable": "Available",
+    "slugTaken": "Already taken",
+    "slugReserved": "This slug is reserved",
+    "slugInvalid": "Invalid slug format",
+    "nameLabel": "Display name",
+    "localeLabel": "Default language",
+    "timezoneLabel": "Timezone",
+    "timezoneHint": "We pre-filled this from your device. Change later in settings.",
+    "brandColorLabel": "Brand color (optional)",
+    "claimCta": "Create my space",
+    "joinedTitle": "Welcome",
+    "joinedHeader": "You're all set",
+    "joinedBody": "Your space is live. Pick where to go next.",
+    "setUpServices": "Set up services",
+    "setAvailability": "Set availability",
+    "inviteTeam": "Invite team",
+    "pickerTitle": "Pick a workspace",
+    "addAnotherTenant": "Add another workspace",
+    "roleLabel": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "staff": "Staff",
+      "customer": "Customer"
+    }
+  },
   "booking": {
     "bookNow": "Book now",
     "pickTime": "Pick a time",

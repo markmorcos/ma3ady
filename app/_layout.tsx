@@ -1,16 +1,31 @@
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, type ReactNode } from 'react';
+import { StyleSheet } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { runBootSequence } from '@/boot/bootSequence';
 import { defaultRunners } from '@/boot/defaultRunners';
 import { RootErrorBoundary } from '@/components/RootErrorBoundary';
-import { ThemeProvider } from '@/design/ThemeProvider';
+import { ToastViewport } from '@/components/Toast';
+import { ThemeProvider, useTheme } from '@/design/ThemeProvider';
 import { useAppStore } from '@/state/appStore';
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 function I18nProvider({ children }: { children: ReactNode }) {
   return <>{children}</>;
+}
+
+function ThemedSafeArea({ children }: { children: ReactNode }) {
+  const theme = useTheme();
+  return (
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={[styles.safe, { backgroundColor: theme.colors.bg }]}
+    >
+      {children}
+    </SafeAreaView>
+  );
 }
 
 export default function RootLayout() {
@@ -27,15 +42,24 @@ export default function RootLayout() {
   }, [bootPhase]);
 
   return (
-    <RootErrorBoundary>
-      <ThemeProvider>
-        <I18nProvider>
-          <Stack screenOptions={{ headerShown: false }} />
-        </I18nProvider>
-      </ThemeProvider>
-    </RootErrorBoundary>
+    <SafeAreaProvider>
+      <RootErrorBoundary>
+        <ThemeProvider>
+          <I18nProvider>
+            <ThemedSafeArea>
+              <Stack screenOptions={{ headerShown: false }} />
+              <ToastViewport />
+            </ThemedSafeArea>
+          </I18nProvider>
+        </ThemeProvider>
+      </RootErrorBoundary>
+    </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+});
 
 // NOTE: <GestureHandlerRootView> is required at the root for `@gorhom/bottom-sheet`
 // to receive gestures. We omit it here because (1) no screen mounts a <Sheet> yet
