@@ -20,3 +20,19 @@ export type TenantPublic = Pick<
   Tenant,
   'id' | 'slug' | 'name' | 'timezone' | 'default_locale' | 'brand_color'
 >;
+
+export type AvailabilityRule = Database['public']['Tables']['availability_rules']['Row'];
+export type AvailabilityRuleInsert =
+  Database['public']['Tables']['availability_rules']['Insert'];
+
+export type AvailabilityException =
+  Database['public']['Tables']['availability_exceptions']['Row'];
+export type AvailabilityExceptionInsert =
+  Database['public']['Tables']['availability_exceptions']['Insert'];
+
+export type AvailabilityExceptionKind = Database['public']['Enums']['availability_exception_kind'];
+
+export type AvailableSlot = {
+  starts_at: string;
+  ends_at: string;
+};

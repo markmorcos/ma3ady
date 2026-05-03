@@ -32,8 +32,9 @@ LOCAL_DB_URL := postgresql://postgres:postgres@127.0.0.1:54322/postgres
 seed: ## Seed local DB (supabase/seed.sql)
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/seed.sql
 
-test-db: ## Run SQL-based DB tests (RLS, helper functions). Requires local Supabase to be up.
+test-db: ## Run all SQL-based DB tests (RLS, helper functions, availability). Requires local Supabase to be up.
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/tenancy.test.sql
+	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/availability.test.sql
 
 expo-start: ## Start Expo dev server (Expo Go)
 	pnpm exec expo start

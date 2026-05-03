@@ -34,6 +34,91 @@ export type Database = {
   }
   public: {
     Tables: {
+      availability_exceptions: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          kind: Database["public"]["Enums"]["availability_exception_kind"]
+          reason: string | null
+          service_id: string | null
+          starts_at: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          kind: Database["public"]["Enums"]["availability_exception_kind"]
+          reason?: string | null
+          service_id?: string | null
+          starts_at: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["availability_exception_kind"]
+          reason?: string | null
+          service_id?: string | null
+          starts_at?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_exceptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      availability_rules: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          service_id: string | null
+          start_time: string
+          tenant_id: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          service_id?: string | null
+          start_time: string
+          tenant_id: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          service_id?: string | null
+          start_time?: string
+          tenant_id?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memberships: {
         Row: {
           created_at: string
@@ -144,6 +229,18 @@ export type Database = {
     }
     Functions: {
       assert_slug_available: { Args: { p_slug: string }; Returns: undefined }
+      compute_available_slots: {
+        Args: {
+          p_range_end: string
+          p_range_start: string
+          p_service_id: string
+          p_tenant_slug: string
+        }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       current_user_is_member_of: {
         Args: { p_tenant: string }
         Returns: boolean
@@ -155,6 +252,7 @@ export type Database = {
       tenant_id_from_slug: { Args: { p_slug: string }; Returns: string }
     }
     Enums: {
+      availability_exception_kind: "block" | "extra"
       tenant_role: "owner" | "admin" | "staff" | "customer"
     }
     CompositeTypes: {
@@ -286,6 +384,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      availability_exception_kind: ["block", "extra"],
       tenant_role: ["owner", "admin", "staff", "customer"],
     },
   },
