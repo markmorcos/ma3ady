@@ -349,7 +349,16 @@ email_optional = false
 enabled = true
 client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
-redirect_uri = ""
+# Must match the "Authorized redirect URI" registered on the OAuth client in
+# Google Cloud Console. Google rejects HTTP redirect URIs except for
+# `localhost` / `127.0.0.1`, so for physical-device testing we run a
+# Cloudflare quick-tunnel (HTTPS) over the local Supabase port and register
+# THAT URL with Google. The trycloudflare.com URL is ephemeral — it changes
+# every time `cloudflared tunnel --url http://127.0.0.1:54321` restarts.
+# When that happens, update this URI, the matching one in Google Cloud
+# Console, and EXPO_PUBLIC_SUPABASE_URL in .env, then restart Supabase.
+# In hosted Supabase this becomes https://<project-ref>.supabase.co/auth/v1/callback.
+redirect_uri = "https://route-accommodations-acoustic-present.trycloudflare.com/auth/v1/callback"
 skip_nonce_check = true
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.

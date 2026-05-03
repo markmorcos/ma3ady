@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 import { supabase } from '@/services/api/supabase';
@@ -8,10 +9,24 @@ WebBrowser.maybeCompleteAuthSession();
 const STORAGE_KEY_VERIFIER = 'auth.pkceVerifier';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const REDIRECT_URI = process.env.EXPO_PUBLIC_AUTH_REDIRECT_URI;
 
 if (!SUPABASE_URL) throw new Error('EXPO_PUBLIC_SUPABASE_URL must be set');
-if (!REDIRECT_URI) throw new Error('EXPO_PUBLIC_AUTH_REDIRECT_URI must be set');
+
+/**
+ * Resolves the OAuth redirect URI at call time so it adapts per runtime:
+ *
+ * - In Expo Go, `ma3ady://` is not registered with the OS, so we route the
+ *   redirect through Expo's `exp://<lan-ip>:8081/--/auth/callback` proxy and
+ *   the dev server hands it back to the JS layer via the deep link listener.
+ * - In a dev client or prod build, the app owns the `ma3ady://` scheme
+ *   declared in `app.json` and `Linking.createURL` returns that.
+ *
+ * The `EXPO_PUBLIC_AUTH_REDIRECT_URI` env var is honored as an explicit
+ * override — useful for tests or when a custom callback path is needed.
+ */
+function resolveRedirectUri(): string {
+  return process.env.EXPO_PUBLIC_AUTH_REDIRECT_URI || Linking.createURL('/auth/callback');
+}
 
 function bytesToBase64Url(bytes: Uint8Array): string {
   let str = '';
@@ -56,9 +71,10 @@ export async function signInWithGoogle(): Promise<void> {
   const verifier = await generatePkceVerifier();
   await SecureStore.setItemAsync(STORAGE_KEY_VERIFIER, verifier);
   const challenge = await challengeFromVerifier(verifier);
-  const authUrl = buildAuthorizeUrl(challenge, REDIRECT_URI as string);
+  const redirectUri = resolveRedirectUri();
+  const authUrl = buildAuthorizeUrl(challenge, redirectUri);
 
-  const result = await WebBrowser.openAuthSessionAsync(authUrl, REDIRECT_URI as string);
+  const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
   if (result.type !== 'success' || !('url' in result) || !result.url) {
     throw new Error('Sign-in cancelled');
   }

@@ -50,3 +50,7 @@ secrets/*.encrypted
 
 expo-env.d.ts
 # @end expo-cli
+
+# Firebase
+google-services.json
+service-account.json
