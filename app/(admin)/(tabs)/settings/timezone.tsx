@@ -1,5 +1,6 @@
 import { router, Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { COMMON_IANA_ZONES } from '@/data/iana-zones';
 import { colors } from '@/design/colors';
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function TimezonePicker({ current, onSelect }: Props) {
+  const { t } = useTranslation();
   const [pending, setPending] = useState<string | null>(null);
   const deviceZone = useMemo(getDeviceTimezone, []);
   const sorted = useMemo(() => {
@@ -40,16 +42,16 @@ export function TimezonePicker({ current, onSelect }: Props) {
         accessibilityLabel={`Use my current timezone, ${deviceZone}`}
         style={[styles.row, styles.devicePin]}
       >
-        <Text style={styles.deviceLabel}>I&apos;m here right now</Text>
+        <Text style={styles.deviceLabel}>{t('admin.tzHereNow')}</Text>
         <Text style={styles.deviceValue}>{deviceZone}</Text>
       </Pressable>
       <Pressable
         onPress={() => choose(null)}
         accessibilityRole="button"
-        accessibilityLabel="Use tenant timezone (no override)"
+        accessibilityLabel={t('admin.tzUseTenantA11y')}
         style={styles.row}
       >
-        <Text style={styles.label}>Tenant timezone (default)</Text>
+        <Text style={styles.label}>{t('admin.tzTenantDefault')}</Text>
         {!current && <Text style={styles.check}>✓</Text>}
       </Pressable>
       <FlatList

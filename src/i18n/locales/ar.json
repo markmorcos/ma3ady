@@ -1,0 +1,73 @@
+{
+  "common": {
+    "tagline": "حجز أبسط.",
+    "yourTime": "وقتك",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "close": "إغلاق",
+    "retry": "إعادة المحاولة",
+    "loading": "جارٍ التحميل…",
+    "ok": "موافق",
+    "yes": "نعم",
+    "no": "لا",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "language": "اللغة",
+    "english": "English",
+    "arabic": "العربيّة"
+  },
+  "errors": {
+    "generic": "حدث خطأ ما. حاول مرة أخرى من فضلك.",
+    "network": "تعذّر الاتصال بالخادم. تحقّق من الإنترنت.",
+    "notFound": "لم نعثر على ما تبحث عنه.",
+    "unauthorized": "ليست لديك صلاحية الوصول.",
+    "validation": "يرجى مراجعة الحقول المظللة.",
+    "notFoundTitle": "هذه الصفحة غير موجودة",
+    "notFoundBody": "قد يكون الرابط معطّلاً أو منتهي الصلاحية.",
+    "goHome": "إلى الرئيسية",
+    "goBack": "رجوع",
+    "restart": "إعادة التشغيل",
+    "appCrashTitle": "حدثت مشكلة في ma3ady",
+    "appCrashBody": "تعذّر إكمال تشغيل التطبيق. أعد التشغيل وحاول مجدداً.",
+    "routeErrorTitle": "حدث خطأ في هذه الصفحة"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "bookings": "الحجوزات",
+    "services": "الخدمات",
+    "team": "الفريق",
+    "settings": "الإعدادات"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج",
+    "withGoogle": "المتابعة بحساب جوجل",
+    "signedOut": "تم تسجيل الخروج.",
+    "sessionExpired": "انتهت الجلسة. الرجاء تسجيل الدخول مجدداً."
+  },
+  "booking": {
+    "bookNow": "احجز الآن",
+    "pickTime": "اختر وقتاً",
+    "confirmTitle": "تأكيد الحجز",
+    "confirmCta": "تأكيد",
+    "manage": "إدارة الحجز",
+    "cancelBooking": "إلغاء الحجز",
+    "reschedule": "تغيير الموعد",
+    "noSlots": "لا توجد مواعيد متاحة."
+  },
+  "admin": {
+    "today": "اليوم",
+    "services": "الخدمات",
+    "team": "الفريق",
+    "settings": "الإعدادات",
+    "addService": "إضافة خدمة",
+    "removeService": "حذف خدمة",
+    "displayTimezone": "المنطقة الزمنية للعرض",
+    "tzHereNow": "أنا هنا الآن",
+    "tzTenantDefault": "المنطقة الزمنية للجهة (الافتراضية)",
+    "tzUseTenantA11y": "استخدام المنطقة الزمنية للجهة (بدون تعديل)"
+  }
+}

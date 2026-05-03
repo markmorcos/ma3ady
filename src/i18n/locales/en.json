@@ -1,0 +1,73 @@
+{
+  "common": {
+    "tagline": "Booking, simplified.",
+    "yourTime": "your time",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "close": "Close",
+    "retry": "Retry",
+    "loading": "Loading…",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "settings": "Settings",
+    "profile": "Profile",
+    "language": "Language",
+    "english": "English",
+    "arabic": "العربيّة"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "We couldn't reach the server. Check your connection.",
+    "notFound": "We couldn't find what you were looking for.",
+    "unauthorized": "You don't have access to this.",
+    "validation": "Please check the highlighted fields.",
+    "notFoundTitle": "This page doesn't exist",
+    "notFoundBody": "The link you followed may be broken or out of date.",
+    "goHome": "Go home",
+    "goBack": "Go back",
+    "restart": "Restart",
+    "appCrashTitle": "ma3ady ran into a problem",
+    "appCrashBody": "The app couldn't finish starting up. Restart and try again.",
+    "routeErrorTitle": "Something went wrong on this page"
+  },
+  "nav": {
+    "home": "Home",
+    "bookings": "Bookings",
+    "services": "Services",
+    "team": "Team",
+    "settings": "Settings"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "withGoogle": "Continue with Google",
+    "signedOut": "You're signed out.",
+    "sessionExpired": "Your session expired. Please sign in again."
+  },
+  "booking": {
+    "bookNow": "Book now",
+    "pickTime": "Pick a time",
+    "confirmTitle": "Confirm your booking",
+    "confirmCta": "Confirm",
+    "manage": "Manage booking",
+    "cancelBooking": "Cancel booking",
+    "reschedule": "Reschedule",
+    "noSlots": "No times available."
+  },
+  "admin": {
+    "today": "Today",
+    "services": "Services",
+    "team": "Team",
+    "settings": "Settings",
+    "addService": "Add service",
+    "removeService": "Remove service",
+    "displayTimezone": "Display timezone",
+    "tzHereNow": "I'm here right now",
+    "tzTenantDefault": "Tenant timezone (default)",
+    "tzUseTenantA11y": "Use tenant timezone (no override)"
+  }
+}

@@ -1,4 +1,5 @@
 import { formatInTimeZone } from 'date-fns-tz';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, type TextProps } from 'react-native';
 import {
   type DisplayContext,
@@ -35,6 +36,7 @@ export function Time({
   style,
   ...rest
 }: Props) {
+  const { t } = useTranslation();
   const zone = useDisplayTimezone(context, { tenantTimezone, adminOverride });
   const date = typeof value === 'string' ? new Date(value) : value;
   const pattern = PATTERNS[fmt];
@@ -61,7 +63,13 @@ export function Time({
   return (
     <Text style={style} {...rest}>
       {primary}
-      <Text style={styles.muted}> (your time: {local})</Text>
+      <Text style={styles.muted}>
+        {' ('}
+        {t('common.yourTime')}
+        {': '}
+        {local}
+        {')'}
+      </Text>
     </Text>
   );
 }

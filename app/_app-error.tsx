@@ -1,4 +1,5 @@
 import * as Updates from 'expo-updates';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/design/colors';
 
@@ -11,17 +12,18 @@ async function restart() {
 }
 
 export default function AppError() {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ma3ady ran into a problem</Text>
-      <Text style={styles.body}>The app couldn&apos;t finish starting up. Restart and try again.</Text>
+      <Text style={styles.title}>{t('errors.appCrashTitle')}</Text>
+      <Text style={styles.body}>{t('errors.appCrashBody')}</Text>
       <Pressable
         onPress={restart}
         accessibilityRole="button"
-        accessibilityLabel="Restart"
+        accessibilityLabel={t('errors.restart')}
         style={styles.cta}
       >
-        <Text style={styles.ctaText}>Restart</Text>
+        <Text style={styles.ctaText}>{t('errors.restart')}</Text>
       </Pressable>
     </View>
   );

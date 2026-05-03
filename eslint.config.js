@@ -1,5 +1,6 @@
 const expoConfig = require('eslint-config-expo/flat');
 const noRawTimeRender = require('./eslint-rules/no-raw-time-render');
+const noLiteralString = require('./eslint-rules/no-literal-string');
 
 module.exports = [
   ...expoConfig,
@@ -12,6 +13,7 @@ module.exports = [
       'ma3ady-rules': {
         rules: {
           'no-raw-time-render': noRawTimeRender,
+          'no-literal-string': noLiteralString,
         },
       },
     },
@@ -42,6 +44,21 @@ module.exports = [
         },
       ],
       'ma3ady-rules/no-raw-time-render': 'error',
+    },
+  },
+  {
+    // Per spec: the no-literal-string rule applies to user-visible component code
+    // under src/components/ and app/. Scripts, hooks, services etc. don't render UI.
+    files: ['src/components/**/*.{ts,tsx}', 'app/**/*.{ts,tsx}'],
+    rules: {
+      'ma3ady-rules/no-literal-string': 'error',
+    },
+  },
+  {
+    // Dev-tools surfaces are developer-only and intentionally English-only.
+    files: ['app/dev/**/*.{ts,tsx}'],
+    rules: {
+      'ma3ady-rules/no-literal-string': 'off',
     },
   },
   {

@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Updates from 'expo-updates';
+import { i18next } from '@/i18n';
 import { colors } from '@/design/colors';
 
 type State = { error: Error | null };
@@ -39,17 +40,19 @@ export class RootErrorBoundary extends Component<Props, State> {
 
   render() {
     if (!this.state.error) return this.props.children;
+    // Class component — read translations via the i18next instance directly.
+    const t = i18next.t.bind(i18next);
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>ma3ady ran into a problem</Text>
+        <Text style={styles.title}>{t('errors.appCrashTitle')}</Text>
         <Text style={styles.body}>{this.state.error.message}</Text>
         <Pressable
           onPress={restart}
           accessibilityRole="button"
-          accessibilityLabel="Restart"
+          accessibilityLabel={t('errors.restart')}
           style={styles.cta}
         >
-          <Text style={styles.ctaText}>Restart</Text>
+          <Text style={styles.ctaText}>{t('errors.restart')}</Text>
         </Pressable>
       </View>
     );

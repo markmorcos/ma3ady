@@ -11,3 +11,15 @@ jest.mock('expo-secure-store', () => ({
   setItemAsync: jest.fn(async () => undefined),
   deleteItemAsync: jest.fn(async () => undefined),
 }));
+
+jest.mock('@react-native-async-storage/async-storage', () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
+jest.mock('expo-localization', () => ({
+  getLocales: () => [
+    { languageTag: 'en-US', languageCode: 'en', regionCode: 'US', textDirection: 'ltr' },
+  ],
+  getCalendars: () => [{ timeZone: 'UTC' }],
+}));

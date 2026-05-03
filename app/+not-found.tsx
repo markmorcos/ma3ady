@@ -1,16 +1,18 @@
 import { Link, Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/design/colors';
 
 export default function NotFound() {
+  const { t } = useTranslation();
   return (
     <>
-      <Stack.Screen options={{ title: 'Not found' }} />
+      <Stack.Screen options={{ title: t('errors.notFoundTitle') }} />
       <View style={styles.container}>
-        <Text style={styles.title}>This page doesn&apos;t exist</Text>
-        <Text style={styles.body}>The link you followed may be broken or out of date.</Text>
+        <Text style={styles.title}>{t('errors.notFoundTitle')}</Text>
+        <Text style={styles.body}>{t('errors.notFoundBody')}</Text>
         <Link href="/" style={styles.link} accessibilityRole="link">
-          Go home
+          {t('errors.goHome')}
         </Link>
       </View>
     </>

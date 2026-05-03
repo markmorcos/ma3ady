@@ -1,9 +1,10 @@
+import { bootstrapI18n } from '@/i18n';
 import { useAuthStore } from '@/state/authStore';
 import { type PhaseRunners } from './bootSequence';
 
 export const defaultRunners: PhaseRunners = {
   i18n: async () => {
-    // i18n bootstrap lands in setup-i18n-en-ar.
+    await bootstrapI18n();
   },
   theme: async () => {
     // theme resolution lands in setup-design-system.

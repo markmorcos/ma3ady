@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { i18next } from '@/i18n';
 import { colors } from '@/design/colors';
 
 type State = { error: Error | null };
@@ -32,16 +33,17 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
   render() {
     if (!this.state.error) return this.props.children;
+    const t = i18next.t.bind(i18next);
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Something went wrong on this page</Text>
+        <Text style={styles.title}>{t('errors.routeErrorTitle')}</Text>
         <Pressable
           onPress={this.goBack}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('errors.goBack')}
           style={styles.cta}
         >
-          <Text style={styles.ctaText}>Go back</Text>
+          <Text style={styles.ctaText}>{t('errors.goBack')}</Text>
         </Pressable>
       </View>
     );
