@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { i18next } from '@/i18n';
 import { colors } from '@/design/colors';
+import { logError } from '@/services/observability/logError';
 
 type State = { error: Error | null };
 type Props = { children: ReactNode };
@@ -16,6 +17,10 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[RouteErrorBoundary]', error, info.componentStack);
+    void logError(error, {
+      kind: 'boundary',
+      context: { source: 'RouteErrorBoundary', componentStack: info.componentStack },
+    });
   }
 
   reset = () => {

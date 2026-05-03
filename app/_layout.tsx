@@ -9,7 +9,10 @@ import { defaultRunners } from '@/boot/defaultRunners';
 import { RootErrorBoundary } from '@/components/RootErrorBoundary';
 import { ToastViewport } from '@/components/Toast';
 import { ThemeProvider, useTheme } from '@/design/ThemeProvider';
+import { setupGlobalHandlers } from '@/services/observability/setupGlobalHandlers';
 import { useAppStore } from '@/state/appStore';
+
+setupGlobalHandlers();
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 

@@ -424,6 +424,12 @@ verify_jwt = false
 [functions.reschedule-appointment]
 verify_jwt = false
 
+# report-client-error accepts both anonymous and authenticated callers — the
+# function reads the JWT itself when present so we still attribute errors to
+# the right user when we have one.
+[functions.report-client-error]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

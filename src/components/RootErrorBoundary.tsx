@@ -3,19 +3,21 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Updates from 'expo-updates';
 import { i18next } from '@/i18n';
 import { colors } from '@/design/colors';
+import { logError } from '@/services/observability/logError';
 
 type State = { error: Error | null };
 
 type Props = { children: ReactNode };
 
 async function reportError(error: Error, info: ErrorInfo) {
-  // The `report-client-error` Edge Function lands in setup-observability.
-  // Until then, log to console; we still want a structured log line so
-  // bug reports include stack + componentStack.
   console.error('[RootErrorBoundary]', {
     message: error.message,
     stack: error.stack,
     componentStack: info.componentStack,
+  });
+  void logError(error, {
+    kind: 'boundary',
+    context: { source: 'RootErrorBoundary', componentStack: info.componentStack },
   });
 }
 

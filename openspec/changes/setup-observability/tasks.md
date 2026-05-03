@@ -1,10 +1,10 @@
 # Tasks
 
-- [ ] 1.1 `make migrate-new NAME=client_errors` → `client_errors.sql`:
+- [x] 1.1 `make migrate-new NAME=client_errors` → `client_errors.sql`:
   - `client_error_kind` enum
   - `client_errors` table with full schema and indexes
   - RLS: deny all inserts from public; admins of `tenant_id` can select; users can select own rows
-- [ ] 1.2 Write Edge Function `supabase/functions/report-client-error/index.ts`:
+- [x] 1.2 Write Edge Function `supabase/functions/report-client-error/index.ts`:
   - Method: POST only
   - Body schema (zod): `{ kind, message, stack?, payload?, app_version, platform, locale }`
   - Reject if body > 8KB
@@ -12,36 +12,36 @@
   - Authenticated requests: extract `user_id` from JWT, also try to read `tenant_id` from body if present (validated against memberships)
   - Insert via service role
   - Log to Edge Function logs with `event: "client_error", kind, ...`
-- [ ] 1.3 Write `supabase/functions/_shared/log.ts`:
+- [x] 1.3 Write `supabase/functions/_shared/log.ts`:
   - `log({ event, level, request_id, ...meta })` — JSON-stringifies to stdout
   - Truncates strings > 2KB to keep logs queryable
-- [ ] 1.4 Write `supabase/functions/_shared/withLogging.ts`:
+- [x] 1.4 Write `supabase/functions/_shared/withLogging.ts`:
   - HOC: `(handler) => async (req) => { ...generates request_id; logs start; runs handler with try/catch; logs end or error with duration; returns response }`
 - [ ] 1.5 Refactor every existing Edge Function to use `withLogging`:
   - `claim-bookings`, `claim-slug`, `invite-member`, `manage-appointment`, `update-appointment-status`, `reschedule-appointment`, `send-appointment-notification`, `delete-account`, `export-my-data`
   - Add `request_id` to every internal `log(...)` call within the handler
-- [ ] 1.6 Write `src/services/observability/logError.ts`:
+- [x] 1.6 Write `src/services/observability/logError.ts`:
   - `logError(error: unknown, opts: { kind: ClientErrorKind, context?: Record<string, unknown> })`
   - Reads `EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE`
   - Always reports if `kind === 'boundary'`; samples otherwise
   - Calls `report-client-error` via `supabase.functions.invoke`
   - Best-effort: catches its own errors (don't crash on the crash reporter)
-- [ ] 1.7 Write `src/services/observability/setupGlobalHandlers.ts`:
+- [x] 1.7 Write `src/services/observability/setupGlobalHandlers.ts`:
   - Installs `ErrorUtils.setGlobalHandler` (RN-specific) calling `logError` with `kind: 'unhandled_rejection'`
   - Wraps `console.error` to also call `logError(..., { kind: 'manual' })` in production builds
-- [ ] 1.8 Wire `setupGlobalHandlers` in `app/_layout.tsx` early in boot
-- [ ] 1.9 Update `<RootErrorBoundary>` and `<RouteErrorBoundary>` (from `setup-app-shell`) to call `logError(err, { kind: 'boundary', context: { route } })`
-- [ ] 1.10 Write `app/(admin)/dev-tools/errors.tsx`:
+- [x] 1.8 Wire `setupGlobalHandlers` in `app/_layout.tsx` early in boot
+- [x] 1.9 Update `<RootErrorBoundary>` and `<RouteErrorBoundary>` (from `setup-app-shell`) to call `logError(err, { kind: 'boundary', context: { route } })`
+- [x] 1.10 Write `app/(admin)/dev-tools/errors.tsx`:
   - Lists last 100 `client_errors` for the current tenant
   - Filters by `kind`, date range
   - Tap → detail view with stack trace, payload
   - Owner/admin only
-- [ ] 1.11 Write `docs/observability.md`:
+- [x] 1.11 Write `docs/observability.md`:
   - Where to find what (Supabase dashboard URLs for log explorer + saved queries)
   - Triage flow: client error → check Edge Function logs by `request_id` → check Postgres logs if a query was implicated
   - Escalation: which Cloudflare DNS records to check, which Supabase tier limits to monitor
   - Common queries (function errors last 24h, RLS denials, slow queries)
-- [ ] 1.12 Add to `.env.example`: `EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=1.0`
+- [x] 1.12 Add to `.env.example`: `EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=1.0`
 - [ ] 1.13 Modify `eas.json`: `production` profile sets `EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=0.1`; `preview` keeps `1.0`
 - [ ] 1.14 Tests:
   - `logError` respects sampling (mock random, assert call counts)
