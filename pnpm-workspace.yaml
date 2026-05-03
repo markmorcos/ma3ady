@@ -1,2 +1,4 @@
 packages:
   - .
+  - tenant-landing
+  - marketing-site

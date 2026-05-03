@@ -1,0 +1,27 @@
+name: deploy-ma3ady-tenant-landing
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - 'tenant-landing/**'
+      - '.github/workflows/deploy-tenant-landing.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger infrastructure deployment
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.INFRASTRUCTURE_PAT }}
+          repository: markmorcos/infrastructure
+          event-type: deploy-ma3ady-tenant-landing
+          client-payload: |-
+            {
+              "repository": "markmorcos/ma3ady",
+              "token": "${{ secrets.DEPLOYMENT_TOKEN }}",
+              "version": "${{ github.sha }}",
+              "config_file": "tenant-landing/deployment.yaml"
+            }

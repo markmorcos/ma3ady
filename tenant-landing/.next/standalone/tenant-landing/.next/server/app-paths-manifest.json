@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/book/submit/route": "app/book/submit/route.js",
+  "/manage/[token]/cancel/route": "app/manage/[token]/cancel/route.js",
+  "/apple-app-site-association/route": "app/apple-app-site-association/route.js",
+  "/.well-known/assetlinks.json/route": "app/.well-known/assetlinks.json/route.js",
+  "/manifest.json/route": "app/manifest.json/route.js",
+  "/book/confirm/page": "app/book/confirm/page.js",
+  "/book/page": "app/book/page.js",
+  "/manage/[token]/page": "app/manage/[token]/page.js",
+  "/page": "app/page.js"
+}

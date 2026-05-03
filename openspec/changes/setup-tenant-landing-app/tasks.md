@@ -1,7 +1,7 @@
 # Tasks
 
-- [ ] 1.1 Create `tenant-landing/` directory
-- [ ] 1.2 Write `tenant-landing/server.ts` — Deno HTTP server using `std/http`:
+- [x] 1.1 Create `tenant-landing/` directory
+- [x] 1.2 Write `tenant-landing/server.ts` — Deno HTTP server using `std/http`:
   - Listens on `0.0.0.0:8080`
   - Routes:
     - `GET /` (any host) — host parsing, tenant lookup, render
@@ -11,25 +11,25 @@
     - `GET /favicon.ico` etc. — static from `public/`
   - Tenant lookup uses `@supabase/supabase-js` with `EXPO_PUBLIC_SUPABASE_URL` + `EXPO_PUBLIC_SUPABASE_ANON_KEY`
   - 60s in-memory cache for tenant lookups (LRU, max 500 entries)
-- [ ] 1.3 Write `tenant-landing/templates/tenant.html` — landing template:
+- [x] 1.3 Write `tenant-landing/templates/tenant.html` — landing template:
   - Tenant brand color in CSS variable
   - Logo (or wordmark fallback) + tenant name
   - "Open in App" button → `ma3ady://t/{slug}` (universal link target)
   - App Store + Play Store badges below
   - Locale switcher (en/ar based on tenant default + ?lang= override)
-- [ ] 1.4 Write `tenant-landing/templates/manage.html`:
+- [x] 1.4 Write `tenant-landing/templates/manage.html`:
   - Tries `ma3ady://manage/{token}` via `<meta http-equiv="refresh">` and a JS fallback
   - After 1.5s shows install CTAs
   - Token never inspected server-side — opaque pass-through
-- [ ] 1.5 Write `tenant-landing/templates/404.html` (en + ar)
-- [ ] 1.6 Write `tenant-landing/Dockerfile` — `FROM denoland/deno:alpine`, copy server + templates + public, expose 8080, healthcheck on `/health`
-- [ ] 1.7 Write `tenant-landing/deployment.yaml` — schema version pinned, `host: '*.ma3ady.com'`, port 8080, env: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-- [ ] 1.8 Write `tenant-landing/public/apple-app-site-association` (no extension, served as JSON):
+- [x] 1.5 Write `tenant-landing/templates/404.html` (en + ar)
+- [x] 1.6 Write `tenant-landing/Dockerfile` — `FROM denoland/deno:alpine`, copy server + templates + public, expose 8080, healthcheck on `/health`
+- [x] 1.7 Write `tenant-landing/deployment.yaml` — schema version pinned, `host: '*.ma3ady.com'`, port 8080, env: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- [x] 1.8 Write `tenant-landing/public/apple-app-site-association` (no extension, served as JSON):
   ```json
   {"applinks":{"details":[{"appIDs":["TEAMID.com.ma3ady.app"],"components":[{"/":"/manage/*"},{"/":"/t/*"}]}]}}
   ```
-- [ ] 1.9 Write `tenant-landing/public/.well-known/assetlinks.json` for Android — populated in the `setup-compliance-and-launch` change when SHA-256 fingerprint is known; placeholder file present here
-- [ ] 1.10 Configure mobile app `app.json` with `associatedDomains: ["applinks:ma3ady.com", "applinks:*.ma3ady.com"]` (declared; effective only in dev client / prod build)
+- [x] 1.9 Write `tenant-landing/public/.well-known/assetlinks.json` for Android — populated in the `setup-compliance-and-launch` change when SHA-256 fingerprint is known; placeholder file present here
+- [x] 1.10 Configure mobile app `app.json` with `associatedDomains: ["applinks:ma3ady.com", "applinks:*.ma3ady.com"]` (declared; effective only in dev client / prod build)
 - [ ] 1.11 Tests:
   - Unknown subdomain renders 404
   - Reserved subdomain (`www`, `app`) redirects to apex

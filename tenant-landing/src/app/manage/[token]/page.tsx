@@ -1,0 +1,132 @@
+import Link from 'next/link';
+import type { Metadata } from 'next';
+import { TenantHeader } from '@/components/TenantHeader';
+import { dirOf, resolveLocale, t, type Locale } from '@/lib/locale';
+import { getServiceClient } from '@/lib/supabase';
+import { currentTenant } from '@/lib/tenant';
+
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Manage booking',
+  robots: { index: false },
+};
+
+type Params = { token: string };
+type SearchParams = { lang?: string; cancelled?: string };
+
+async function loadByToken(token: string): Promise<
+  | {
+      id: string;
+      tenant_id: string;
+      service_id: string;
+      starts_at: string;
+      ends_at: string;
+      status: string;
+    }
+  | null
+> {
+  const sb = getServiceClient();
+  const { data, error } = await sb.rpc('get_appointment_by_token', { p_token: token });
+  if (error || !data) return null;
+  return data as never;
+}
+
+async function loadService(id: string) {
+  const sb = getServiceClient();
+  const { data } = await sb
+    .from('services')
+    .select('id, name, duration_minutes')
+    .eq('id', id)
+    .maybeSingle();
+  return data;
+}
+
+export default async function ManagePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>;
+  searchParams: Promise<SearchParams>;
+}) {
+  const { token } = await params;
+  const sp = await searchParams;
+  const tenant = await currentTenant();
+  const locale: Locale = await resolveLocale(sp, tenant?.default_locale ?? 'en');
+  const dir = dirOf(locale);
+
+  const appt = await loadByToken(token);
+  if (!appt || !tenant) {
+    return (
+      <div dir={dir} lang={locale}>
+        <main className="container">
+          <div className="empty-state">
+            <h1>{t(locale, 'manage.invalidTitle')}</h1>
+            <p>{t(locale, 'manage.invalidBody')}</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+  const service = await loadService(appt.service_id);
+
+  const display = new Intl.DateTimeFormat(locale === 'ar' ? 'ar' : 'en-GB', {
+    timeZone: tenant.timezone,
+    weekday: 'long',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(appt.starts_at));
+
+  const cancelled = appt.status === 'cancelled' || sp.cancelled === '1';
+
+  return (
+    <div dir={dir} lang={locale}>
+      <main className="container">
+        <TenantHeader tenant={tenant} />
+
+        <h1 style={{ fontSize: 24, marginTop: 0 }}>{t(locale, 'manage.title')}</h1>
+        <p className="muted">{t(locale, 'manage.subtitle')}</p>
+
+        {sp.cancelled === '1' ? (
+          <div className="banner">{t(locale, 'manage.cancelled')}</div>
+        ) : null}
+
+        <section className="card">
+          <dl className="summary-grid">
+            <dt>{t(locale, 'confirm.service')}</dt>
+            <dd>{service?.name ?? '—'}</dd>
+            <dt>{t(locale, 'confirm.when')}</dt>
+            <dd>{display}</dd>
+            <dt>{t(locale, 'confirm.duration')}</dt>
+            <dd>{service?.duration_minutes ?? '—'} min</dd>
+          </dl>
+        </section>
+
+        {!cancelled ? (
+          <section className="card">
+            <form method="post" action={`/manage/${token}/cancel`}>
+              <button type="submit" className="button danger full">
+                {t(locale, 'manage.actions.cancel')}
+              </button>
+            </form>
+            {/* Reschedule on web is deferred — the email link points back to
+                 the app. Web reschedule UI lands as a follow-up to keep this
+                 surface focused. */}
+          </section>
+        ) : null}
+
+        <section className="card">
+          <a className="button secondary full" href={`ma3ady://manage/${token}`}>
+            {t(locale, 'confirm.openInApp')}
+          </a>
+        </section>
+
+        <footer className="site-footer">
+          <Link href="/">←</Link>
+        </footer>
+      </main>
+    </div>
+  );
+}

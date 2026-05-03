@@ -1,0 +1,76 @@
+{
+  "tagline": "Booking, simplified.",
+  "openInApp": "Open in the app",
+  "installApp": "Get the ma3ady app",
+  "installAppHint": "Manage all your bookings in one place.",
+  "available": {
+    "title": "Available services",
+    "subtitle": "Pick a service to see times.",
+    "duration": "{{duration}} min"
+  },
+  "book": {
+    "pageTitle": "Book {{tenantName}}",
+    "intro": "Choose a time that works for you. We'll send a confirmation by email.",
+    "service": "Service",
+    "when": "When",
+    "yourDetails": "Your details",
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone (optional)",
+    "notes": "Anything we should know? (optional)",
+    "tos": "I agree to the terms of service",
+    "submit": "Confirm booking",
+    "submitBusy": "Booking…",
+    "noSlots": "No times available in this window.",
+    "tryNextWeek": "Try the next week",
+    "slotTaken": "That slot just got taken — please pick another.",
+    "needService": "Pick a service to start.",
+    "chooseSlot": "Pick a time that works for you.",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "in": "in",
+    "tenantTimezone": "{{tz}} time",
+    "yourTimezone": "your time"
+  },
+  "confirm": {
+    "title": "You're booked!",
+    "subtitle": "We've sent a confirmation to {{email}}.",
+    "service": "Service",
+    "when": "When",
+    "duration": "Duration",
+    "manageTitle": "Need to make changes?",
+    "manageBody": "Use the link below to reschedule or cancel — no account required.",
+    "manageCta": "Manage booking",
+    "addToCalendar": "Add to calendar",
+    "calendarGoogle": "Google Calendar",
+    "calendarApple": "Apple / Outlook (.ics)",
+    "openInApp": "Open in the ma3ady app"
+  },
+  "manage": {
+    "title": "Manage your booking",
+    "invalidTitle": "This link is no longer valid",
+    "invalidBody": "The booking may have been cancelled or the link expired. If you believe this is a mistake, please contact the business directly.",
+    "subtitle": "Cancel or reschedule your booking.",
+    "cancelled": "This booking has been cancelled.",
+    "completed": "This appointment is complete. Thanks for visiting.",
+    "actions": {
+      "reschedule": "Reschedule",
+      "cancel": "Cancel booking",
+      "back": "Back"
+    },
+    "cancelConfirm": {
+      "title": "Cancel this booking?",
+      "body": "This frees the slot and the link will stop working.",
+      "yes": "Yes, cancel",
+      "no": "Keep the booking"
+    },
+    "rescheduleHeader": "Pick a new time",
+    "rescheduleSuccess": "Your booking was rescheduled."
+  },
+  "errors": {
+    "tenantNotFound": "We couldn't find this business.",
+    "tenantNotFoundBody": "The link you followed may be out of date. Try double-checking the address.",
+    "generic": "Something went wrong. Please try again."
+  }
+}
