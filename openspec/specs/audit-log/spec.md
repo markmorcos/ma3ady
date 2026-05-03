@@ -66,16 +66,16 @@ The RLS policy SHALL further restrict `staff` callers to rows where `target_kind
 
 ### Requirement: Audit rows SHALL be correlated with their originating request
 
-Edge Functions SHALL set `app.request_id` (and `app.is_guest_token` when relevant) as transaction-local GUCs; the audit trigger MUST read them into `payload.request_id` and `by_kind` so each row can be matched back to its originating Edge Function log line.
+Edge Functions SHALL set `app.request_id` (and `app.is_guest_token` when relevant) as transaction-local GUCs via the `set_app_context(p_request_id uuid, p_is_guest_token boolean)` SECURITY DEFINER RPC; the audit trigger MUST read them into `payload.request_id` and `by_kind` so each row can be matched back to its originating Edge Function log line. The RPC wraps `pg_catalog.set_config(name, value, is_local := true)` and is granted to `anon`, `authenticated`, and `service_role` so any function role can thread context without exposing raw `set_config` over the network.
 
 #### Scenario: triggered from an Edge Function
-- **GIVEN** an Edge Function sets `app.request_id` GUC at transaction start
+- **GIVEN** an Edge Function calls `set_app_context(p_request_id := <uuid>)` at transaction start
 - **WHEN** the function performs a tenant-scoped mutation triggering an audit row
 - **THEN** the audit row's `payload.request_id` equals the Edge Function's `request_id`
 - **AND** searching Supabase Edge Function logs by that `request_id` returns the originating call
 
 #### Scenario: triggered from a guest manage token
-- **GIVEN** the `manage-appointment` function sets `app.is_guest_token = 'true'`
+- **GIVEN** the `manage-appointment` function calls `set_app_context(p_request_id := <uuid>, p_is_guest_token := true)`
 - **WHEN** a guest cancels via token
 - **THEN** the resulting audit row has `by_user_id = null, by_kind = 'guest_token'`
 

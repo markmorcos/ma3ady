@@ -13,6 +13,16 @@ export async function getTenantBySlug(slug: string): Promise<TenantPublic | null
   return data;
 }
 
+export async function getTenantById(id: string): Promise<TenantPublic | null> {
+  const { data, error } = await supabase
+    .from('tenants')
+    .select('id, slug, name, timezone, default_locale, brand_color')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 export async function getMyMemberships(): Promise<TenantWithRole[]> {
   // Get the caller's user id; RLS on `memberships` allows tenant admins to
   // see all memberships of their tenants, so we explicitly filter to OWN

@@ -1,9 +1,9 @@
 # Tasks
 
-- [ ] 1.1 Install: `pnpm add @tanstack/react-query`
-- [ ] 1.2 Wrap root layout in `<QueryClientProvider>`; configure default `staleTime: 30s`
-- [ ] 1.3 Write `src/services/api/booking.ts` adding `verifyManageToken(token)`, `cancelByToken(token)`, `rescheduleByToken(token, new_starts_at)`
-- [ ] 1.4 Write Edge Function `supabase/functions/manage-appointment/index.ts`:
+- [x] 1.1 Install: `pnpm add @tanstack/react-query`
+- [x] 1.2 Wrap root layout in `<QueryClientProvider>`; configure default `staleTime: 30s`
+- [x] 1.3 Write `src/services/api/booking.ts` adding `verifyManageToken(token)`, `cancelByToken(token)`, `rescheduleByToken(token, new_starts_at)`
+- [x] 1.4 Write Edge Function `supabase/functions/manage-appointment/index.ts`:
   - POST `{ token, action, ...args }`
   - Calls `verify_manage_token(token)` (raises if invalid)
   - For `cancel`: `update appointments set status='cancelled', cancelled_at=now() where id=...`
@@ -11,44 +11,44 @@
   - **Carry-over from setup-tenant-audit-log task 1.7/1.8**: at the start of every DB transaction, call `set_config('app.request_id', '<uuid>', true)` and `set_config('app.is_guest_token', 'true', true)` so audit-log triggers can attribute the action to the originating Edge Function request and record `by_kind = 'guest_token'`.
   - Inserts `appointment_events` rows (already triggered by table triggers, but logs the originator as "guest via token")
   - Returns updated appointment
-- [ ] 1.5 Write `app/(public)/_layout.tsx` (Stack)
-- [ ] 1.6 Write `app/(public)/[tenantSlug]/_layout.tsx`:
+- [x] 1.5 Write `app/(public)/_layout.tsx` (Stack)
+- [x] 1.6 Write `app/(public)/[tenantSlug]/_layout.tsx`:
   - Loads `getTenantBySlug(tenantSlug)` via TanStack Query
   - Renders `<TenantHeader>` with logo + brand color
   - Provides tenant context to children
   - 404 screen if slug not found
-- [ ] 1.7 Write `app/(public)/[tenantSlug]/index.tsx`:
+- [x] 1.7 Write `app/(public)/[tenantSlug]/index.tsx`:
   - Fetches `getActiveServices(tenantSlug)`
   - Renders `<ServiceCard>` list
   - Tap → navigate to `[serviceId]/slots`
-- [ ] 1.8 Write `<DayStrip>` component: horizontal scroll of next 30 days (or up to `max_advance_days`); shows day name, date number, dot indicator if any slots are available
-- [ ] 1.9 Write `<SlotGrid>` component: vertical list of slots for selected day, grouped morning/afternoon/evening if many; shows duration; tap → navigate to book
-- [ ] 1.10 Write `app/(public)/[tenantSlug]/[serviceId]/slots.tsx`:
+- [x] 1.8 Write `<DayStrip>` component: horizontal scroll of next 30 days (or up to `max_advance_days`); shows day name, date number, dot indicator if any slots are available
+- [x] 1.9 Write `<SlotGrid>` component: vertical list of slots for selected day, grouped morning/afternoon/evening if many; shows duration; tap → navigate to book
+- [x] 1.10 Write `app/(public)/[tenantSlug]/[serviceId]/slots.tsx`:
   - Fetches available slots for the visible week via `compute_available_slots`
   - `<DayStrip>` + `<SlotGrid>` for selected day
   - Empty state if no slots in range with "Try next week" CTA
-- [ ] 1.11 Write `app/(public)/[tenantSlug]/[serviceId]/book.tsx`:
+- [x] 1.11 Write `app/(public)/[tenantSlug]/[serviceId]/book.tsx`:
   - Reads `?starts_at=` from query params
   - Renders `<BookingSummary>` (service, date, time, duration)
   - Form: name (required), email (required, RFC 5322 validation), phone (optional, libphonenumber-js validation), notes (optional, 500 char limit), ToS checkbox
   - Submit → `bookAppointment` RPC → success → navigate to `confirmation/[appointmentId]?token=...`
   - "slot_taken" error → show toast and navigate back to slots
-- [ ] 1.12 Write `app/(public)/[tenantSlug]/[serviceId]/confirmation/[appointmentId].tsx`:
+- [x] 1.12 Write `app/(public)/[tenantSlug]/[serviceId]/confirmation/[appointmentId].tsx`:
   - Reads `?token=` from query (the plaintext manage token, never leaves the device beyond this screen except in the email/WhatsApp body sent server-side)
   - Shows confirmation card, manage link (copy to clipboard + share-sheet), "Add to my account" CTA → kicks off Google sign-in flow
   - Disclaimer: "An email and WhatsApp message will be sent shortly"
-- [ ] 1.13 Write `app/manage/[token].tsx`:
+- [x] 1.13 Write `app/manage/[token].tsx`:
   - Reads token from path
   - Calls `verifyManageToken(token)` → if valid, fetch appointment
   - Renders appointment, offers Cancel and Reschedule buttons
   - Cancel → confirmation sheet → calls `cancelByToken`
   - Reschedule → opens slot picker (reuse `<SlotGrid>`) → calls `rescheduleByToken`
   - Token invalid → "this link is no longer valid" empty state
-- [ ] 1.14 Wire deep link in `app.json`: `scheme: "ma3ady"`, associated domains `["applinks:ma3ady.com"]` (declared but only effective in dev client / prod build)
-- [ ] 1.15 Add `<TenantHeader>` component using brand color from tenant
-- [ ] 1.16 Tests:
+- [x] 1.14 Wire deep link in `app.json`: `scheme: "ma3ady"`, associated domains `["applinks:ma3ady.com"]` (declared but only effective in dev client / prod build)
+- [x] 1.15 Add `<TenantHeader>` component using brand color from tenant
+- [x] 1.16 Tests:
   - Successful guest booking
   - Slot collision returns clear UI error
   - Manage token roundtrip: verify, cancel, reschedule
   - Invalid token shows empty state
-- [ ] 1.17 Verify on simulator: full booking flow as guest, then open manage link, then cancel
+- [x] 1.17 Verify on simulator: full booking flow as guest, then open manage link, then cancel

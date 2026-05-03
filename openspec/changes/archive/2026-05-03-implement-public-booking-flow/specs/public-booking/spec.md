@@ -47,34 +47,44 @@ When `book_appointment` returns `slot_taken` (the EXCLUDE constraint losing path
 - **AND** a toast shows "That slot just got taken — please pick another"
 - **AND** the slot S is no longer in the visible list (because availability is refetched)
 
-### Requirement: The confirmation screen SHALL present the manage link
+### Requirement: The confirmation screen SHALL present a Manage booking action
 
-After a successful booking, the confirmation screen SHALL render the appointment summary, the `ma3ady://manage/<token>` deep link with a copy action, an "Add to my account" Google sign-in CTA, and MUST inform the user that email and WhatsApp messages are on the way.
+After a successful booking, the confirmation screen SHALL render the appointment summary, a "Manage booking" primary action that routes internally to `/manage/[token]` (no OS deep-link round-trip), an "Add to my account" Google sign-in CTA, and MUST inform the user that email and WhatsApp messages are on the way. The plaintext `ma3ady://manage/<token>` deep link is reserved for server-rendered email and WhatsApp templates — it is not surfaced as raw text in the in-app confirmation.
 
 #### Scenario: post-booking
 - **GIVEN** a successful booking
 - **WHEN** the confirmation screen renders
 - **THEN** the user sees the appointment summary
-- **AND** the manage link (`ma3ady://manage/<token>`) is presented with a "copy" action
+- **AND** a "Manage booking" button routes to `/manage/[token]` via expo-router
 - **AND** "Add to my account" prompts Google sign-in
 - **AND** a notice tells the user an email and WhatsApp message are on the way
 
 ### Requirement: The manage screen SHALL operate without sign-in via signed token
 
-The `ma3ady://manage/<token>` deep link SHALL open a public manage screen that calls `verify_manage_token` and renders Cancel/Reschedule actions on success; an invalid or cancelled-appointment token MUST show "This link is no longer valid" without exposing details.
+The `ma3ady://manage/<token>` deep link (or in-app navigation to `/manage/[token]`) SHALL open a public manage screen that calls `get_appointment_by_token` — a SECURITY DEFINER RPC that hashes the plaintext token, returns the matching `appointments` row, and raises `appointment_unavailable` if missing or already cancelled — and renders Cancel/Reschedule actions on success; an invalid or cancelled-appointment token MUST show "This link is no longer valid" without exposing details. The RPC bypasses the RLS `appointments_select_self_or_staff` policy so anonymous guests can read their own booking using the token alone.
+
+The `manage-appointment` Edge Function SHALL be configured with `verify_jwt = false` (the manage token IS the auth, validated server-side) and SHALL thread audit context via `set_app_context(p_request_id, p_is_guest_token := true)` so audit triggers can attribute the action to the originating Edge Function request.
 
 #### Scenario: valid token opens manage view
-- **GIVEN** a deep link `ma3ady://manage/<plaintext-token>`
-- **WHEN** the app opens
-- **THEN** `verify_manage_token` is called
-- **AND** if valid, the appointment details and Cancel + Reschedule actions are rendered
+- **GIVEN** a deep link `ma3ady://manage/<plaintext-token>` or internal route `/manage/<plaintext-token>`
+- **WHEN** the screen mounts
+- **THEN** `get_appointment_by_token` is called and returns the appointment row in one round-trip
+- **AND** the appointment details and Cancel + Reschedule actions are rendered
 - **AND** no sign-in prompt appears
 
 #### Scenario: invalid token
 - **GIVEN** the appointment was cancelled previously
 - **WHEN** the manage link is opened
-- **THEN** the screen shows "This link is no longer valid"
+- **THEN** `get_appointment_by_token` raises `appointment_unavailable`
+- **AND** the screen shows "This link is no longer valid"
 - **AND** no appointment details are shown
+
+#### Scenario: post-cancel navigation
+- **GIVEN** a guest who just cancelled their booking
+- **WHEN** the cancel succeeds
+- **THEN** the cached appointment query is removed
+- **AND** the user is routed to `/` (home) so they don't see the now-invalid manage screen
+- **AND** a success toast confirms the cancellation
 
 ### Requirement: Cancellation via manage link SHALL be reversible only by re-booking
 

@@ -1,6 +1,7 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { runBootSequence } from '@/boot/bootSequence';
@@ -28,8 +29,32 @@ function ThemedSafeArea({ children }: { children: ReactNode }) {
   );
 }
 
+function ThemedStack() {
+  const theme = useTheme();
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.colors.bg },
+      }}
+    />
+  );
+}
+
 export default function RootLayout() {
   const bootPhase = useAppStore((s) => s.bootPhase);
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            gcTime: 5 * 60_000,
+            retry: 1,
+          },
+        },
+      }),
+  );
 
   useEffect(() => {
     void runBootSequence(defaultRunners);
@@ -44,14 +69,16 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <RootErrorBoundary>
-        <ThemeProvider>
-          <I18nProvider>
-            <ThemedSafeArea>
-              <Stack screenOptions={{ headerShown: false }} />
-              <ToastViewport />
-            </ThemedSafeArea>
-          </I18nProvider>
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <I18nProvider>
+              <ThemedSafeArea>
+                <ThemedStack />
+                <ToastViewport />
+              </ThemedSafeArea>
+            </I18nProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
       </RootErrorBoundary>
     </SafeAreaProvider>
   );

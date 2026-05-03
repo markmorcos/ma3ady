@@ -34,6 +34,20 @@ export default function Home() {
           <Link href="/settings/timezone" style={styles.devLink} accessibilityRole="link">
             /settings/timezone
           </Link>
+          <Link
+            href="/(public)/demo"
+            style={styles.devLink}
+            accessibilityRole="link"
+          >
+            /demo (public booking)
+          </Link>
+          <Link
+            href="/manage/invalid-token"
+            style={styles.devLink}
+            accessibilityRole="link"
+          >
+            /manage/invalid-token (manage screen)
+          </Link>
         </View>
       )}
     </View>

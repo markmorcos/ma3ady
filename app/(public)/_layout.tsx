@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import { useTheme } from '@/design/ThemeProvider';
 
-export default function AuthLayout() {
+export default function PublicLayout() {
   const theme = useTheme();
   return (
     <RouteErrorBoundary>

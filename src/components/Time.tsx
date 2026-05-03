@@ -1,6 +1,7 @@
 import { formatInTimeZone } from 'date-fns-tz';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, type TextProps } from 'react-native';
+import { useTheme } from '@/design/ThemeProvider';
 import {
   type DisplayContext,
   getDeviceTimezone,
@@ -37,14 +38,16 @@ export function Time({
   ...rest
 }: Props) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const zone = useDisplayTimezone(context, { tenantTimezone, adminOverride });
   const date = typeof value === 'string' ? new Date(value) : value;
   const pattern = PATTERNS[fmt];
   const primary = formatInTimeZone(date, zone, pattern);
+  const colorStyle = { color: theme.colors.text };
 
   if (!secondary) {
     return (
-      <Text style={style} {...rest}>
+      <Text style={[colorStyle, style]} {...rest}>
         {primary}
       </Text>
     );
@@ -53,7 +56,7 @@ export function Time({
   const deviceZone = getDeviceTimezone();
   if (deviceZone === zone) {
     return (
-      <Text style={style} {...rest}>
+      <Text style={[colorStyle, style]} {...rest}>
         {primary}
       </Text>
     );
@@ -61,7 +64,7 @@ export function Time({
 
   const local = formatInTimeZone(date, deviceZone, pattern);
   return (
-    <Text style={style} {...rest}>
+    <Text style={[colorStyle, style]} {...rest}>
       {primary}
       <Text style={styles.muted}>
         {' ('}

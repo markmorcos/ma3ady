@@ -106,3 +106,14 @@ The `verify_manage_token(plaintext)` function SHALL hash the input, look up the 
 - **WHEN** `verify_manage_token(plaintext)` is called with the same token
 - **THEN** the function raises an "appointment unavailable" error
 
+### Requirement: Manage tokens SHALL also resolve to the full appointment row in one round-trip
+
+The `get_appointment_by_token(plaintext)` SECURITY DEFINER function SHALL hash the input, look up the matching `manage_token_hash`, and MUST return the entire `public.appointments` row for non-cancelled appointments — raising "appointment unavailable" otherwise. This bypasses the RLS `appointments_select_self_or_staff` policy so anonymous guests can read their own booking using the token alone, without first authenticating. Execute is granted to `anon` and `authenticated`.
+
+#### Scenario: guest opens a manage link before sign-in
+- **GIVEN** an anonymous guest holding a plaintext manage token
+- **WHEN** `get_appointment_by_token(plaintext)` is called via supabase-js with the anon key
+- **THEN** the function returns the full appointment row (id, tenant_id, service_id, starts_at, ends_at, status, ...)
+- **AND** the RLS select policy on `appointments` is bypassed because the function runs with definer privileges
+- **AND** no further `select * from appointments` query is needed by the client
+
