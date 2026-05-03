@@ -36,3 +36,18 @@ export type AvailableSlot = {
   starts_at: string;
   ends_at: string;
 };
+
+export type Service = Database['public']['Tables']['services']['Row'];
+export type ServiceInsert = Database['public']['Tables']['services']['Insert'];
+
+export type GuestContact = Database['public']['Tables']['guest_contacts']['Row'];
+
+export type Appointment = Database['public']['Tables']['appointments']['Row'];
+export type AppointmentStatus = Database['public']['Enums']['appointment_status'];
+
+export type AppointmentEvent = Database['public']['Tables']['appointment_events']['Row'];
+
+export type BookingResult = {
+  appointment_id: string;
+  manage_token: string;
+};

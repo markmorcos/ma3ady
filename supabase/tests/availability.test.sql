@@ -1,5 +1,9 @@
 -- Availability tests for `compute_available_slots`.
--- Run with: make test-db-availability
+-- Run via `make test-db`.
+--
+-- Note: after define-services-and-appointments lands, the function returns
+-- *tiled slots* (per service.duration_minutes) rather than raw windows. These
+-- tests provision a 30-minute service and assert slot boundaries / TZ behavior.
 
 \set ON_ERROR_STOP on
 
@@ -14,7 +18,7 @@ end;
 $$;
 
 -- ----------------------------------------------------------------------------
--- Setup: a tenant in Berlin with Mon-only rules.
+-- Setup: tenant in Berlin + 30-min service + Monday 09:00–17:00 rule.
 -- ----------------------------------------------------------------------------
 
 begin;
@@ -23,96 +27,101 @@ insert into public.tenants (id, slug, name, timezone, default_locale)
 values ('33333333-3333-3333-3333-333333333333', 'tz-berlin', 'TZ Test', 'Europe/Berlin', 'en')
 on conflict (id) do nothing;
 
--- Monday 09:00–17:00 in Europe/Berlin.
+insert into public.services (id, tenant_id, name, duration_minutes, min_notice_min, max_advance_days)
+values (
+  '33333333-3333-3333-3333-3333aaaaaaaa',
+  '33333333-3333-3333-3333-333333333333',
+  'TZ Test Service',
+  30,
+  0,        -- no min notice for tests
+  3650      -- ~10 years so future-dated tests pass
+)
+on conflict (id) do nothing;
+
 insert into public.availability_rules (tenant_id, day_of_week, start_time, end_time)
 values ('33333333-3333-3333-3333-333333333333', 1, '09:00', '17:00');
 
 commit;
 
 -- ----------------------------------------------------------------------------
--- Test: a Monday in mid-June 2026 produces a window 09:00–17:00 Berlin = 07:00–15:00 UTC.
+-- Test: Monday in mid-June 2026 (Berlin CEST = UTC+2). First slot at 07:00 UTC.
+-- 30 min slots from 09:00 to 17:00 = 16 slots.
 -- ----------------------------------------------------------------------------
 
-\echo '-- rule expansion in tenant TZ --'
+\echo '-- mid-summer Monday --'
 
 do $$
 declare
-  expected_start timestamptz := '2026-06-15 07:00:00+00';
-  expected_end   timestamptz := '2026-06-15 15:00:00+00';
-  found int;
+  count_slots int;
+  first_slot timestamptz;
 begin
-  select count(*) into found
+  select count(*), min(starts_at)
+  into count_slots, first_slot
   from public.compute_available_slots(
-    'tz-berlin', null,
+    'tz-berlin',
+    '33333333-3333-3333-3333-3333aaaaaaaa',
     '2026-06-15 00:00+00'::timestamptz,
     '2026-06-16 00:00+00'::timestamptz
-  )
-  where starts_at = expected_start and ends_at = expected_end;
+  );
 
-  if found <> 1 then
-    raise exception 'expected one window 07:00–15:00 UTC on 2026-06-15, got %', found;
+  if count_slots <> 16 then
+    raise exception 'expected 16 slots on 2026-06-15, got %', count_slots;
+  end if;
+  if first_slot <> '2026-06-15 07:00+00'::timestamptz then
+    raise exception 'expected first slot at 07:00 UTC (Berlin CEST), got %', first_slot;
   end if;
 end;
 $$;
 
 -- ----------------------------------------------------------------------------
--- Test: DST spring-forward day. 2026-03-29 is the spring-forward Sunday in
--- Europe/Berlin (clocks jump 02:00 -> 03:00 CEST). The Monday after, 2026-03-30,
--- is in CEST (UTC+2). 09:00 Berlin = 07:00 UTC.
+-- Test: pre-DST winter Monday (CET = UTC+1). 09:00 Berlin = 08:00 UTC.
 -- ----------------------------------------------------------------------------
 
-\echo '-- DST: monday after spring-forward --'
+\echo '-- winter Monday (CET) --'
 
 do $$
-declare
-  expected_start timestamptz := '2026-03-30 07:00:00+00';
-  found int;
+declare first_slot timestamptz;
 begin
-  select count(*) into found
+  select min(starts_at) into first_slot
   from public.compute_available_slots(
-    'tz-berlin', null,
-    '2026-03-30 00:00+00'::timestamptz,
-    '2026-03-31 00:00+00'::timestamptz
-  )
-  where starts_at = expected_start;
-
-  if found <> 1 then
-    raise exception 'expected window starting 2026-03-30 07:00 UTC (09:00 Berlin CEST), got %', found;
-  end if;
-end;
-$$;
-
--- ----------------------------------------------------------------------------
--- Test: a Monday in mid-January 2026 (CET, UTC+1). 09:00 Berlin = 08:00 UTC.
--- ----------------------------------------------------------------------------
-
-\echo '-- pre-DST winter monday --'
-
-do $$
-declare
-  expected_start timestamptz := '2026-01-19 08:00:00+00';
-  found int;
-begin
-  select count(*) into found
-  from public.compute_available_slots(
-    'tz-berlin', null,
+    'tz-berlin',
+    '33333333-3333-3333-3333-3333aaaaaaaa',
     '2026-01-19 00:00+00'::timestamptz,
     '2026-01-20 00:00+00'::timestamptz
-  )
-  where starts_at = expected_start;
-
-  if found <> 1 then
-    raise exception 'expected window starting 2026-01-19 08:00 UTC (09:00 Berlin CET), got %', found;
+  );
+  if first_slot <> '2026-01-19 08:00+00'::timestamptz then
+    raise exception 'expected first slot at 08:00 UTC (Berlin CET), got %', first_slot;
   end if;
 end;
 $$;
 
 -- ----------------------------------------------------------------------------
--- Test: block exception subtracts a chunk out of the rule window.
--- Block 12:00–13:00 Berlin on 2026-06-15 → expect two windows: 09–12 and 13–17.
+-- Test: post-DST Monday (CEST after spring-forward). 09:00 Berlin = 07:00 UTC.
 -- ----------------------------------------------------------------------------
 
-\echo '-- block exception splits window --'
+\echo '-- post-DST Monday (CEST) --'
+
+do $$
+declare first_slot timestamptz;
+begin
+  select min(starts_at) into first_slot
+  from public.compute_available_slots(
+    'tz-berlin',
+    '33333333-3333-3333-3333-3333aaaaaaaa',
+    '2026-03-30 00:00+00'::timestamptz,
+    '2026-03-31 00:00+00'::timestamptz
+  );
+  if first_slot <> '2026-03-30 07:00+00'::timestamptz then
+    raise exception 'expected first slot at 07:00 UTC (Berlin CEST), got %', first_slot;
+  end if;
+end;
+$$;
+
+-- ----------------------------------------------------------------------------
+-- Test: block exception removes 12:00–13:00 Berlin → loses 2 slots out of 16.
+-- ----------------------------------------------------------------------------
+
+\echo '-- block exception removes its slots --'
 
 begin;
 
@@ -126,17 +135,17 @@ values (
 );
 
 do $$
-declare
-  windows int;
+declare count_slots int;
 begin
-  select count(*) into windows
+  select count(*) into count_slots
   from public.compute_available_slots(
-    'tz-berlin', null,
+    'tz-berlin',
+    '33333333-3333-3333-3333-3333aaaaaaaa',
     '2026-06-15 00:00+00'::timestamptz,
     '2026-06-16 00:00+00'::timestamptz
   );
-  if windows <> 2 then
-    raise exception 'expected 2 windows after block, got %', windows;
+  if count_slots <> 14 then
+    raise exception 'expected 14 slots after lunch block, got %', count_slots;
   end if;
 end;
 $$;
@@ -144,15 +153,13 @@ $$;
 rollback;
 
 -- ----------------------------------------------------------------------------
--- Test: extra exception adds availability outside the weekly grid.
--- Tuesday is not in rules; an extra on Tuesday should produce a window.
+-- Test: extra exception adds slots outside the weekly grid (Tuesday 14–16).
 -- ----------------------------------------------------------------------------
 
-\echo '-- extra exception adds a window --'
+\echo '-- extra exception adds slots --'
 
 begin;
 
--- Tuesday 2026-06-16 (rules don't cover Tuesday). Extra 14:00–16:00 Berlin.
 insert into public.availability_exceptions (tenant_id, kind, starts_at, ends_at)
 values (
   '33333333-3333-3333-3333-333333333333',
@@ -162,17 +169,18 @@ values (
 );
 
 do $$
-declare
-  windows int;
+declare count_slots int;
 begin
-  select count(*) into windows
+  select count(*) into count_slots
   from public.compute_available_slots(
-    'tz-berlin', null,
+    'tz-berlin',
+    '33333333-3333-3333-3333-3333aaaaaaaa',
     '2026-06-16 00:00+00'::timestamptz,
     '2026-06-17 00:00+00'::timestamptz
   );
-  if windows <> 1 then
-    raise exception 'expected exactly 1 extra-derived window on Tuesday, got %', windows;
+  -- 2 hours / 30 min = 4 slots.
+  if count_slots <> 4 then
+    raise exception 'expected 4 extra-derived slots on Tuesday, got %', count_slots;
   end if;
 end;
 $$;
@@ -180,7 +188,7 @@ $$;
 rollback;
 
 -- ----------------------------------------------------------------------------
--- Test: anonymous client can call the function (it's SECURITY DEFINER).
+-- Test: anonymous client can call the function (SECURITY DEFINER).
 -- ----------------------------------------------------------------------------
 
 \echo '-- anon can call --'
@@ -192,7 +200,8 @@ set local role anon;
 select pg_temp.assert(
   exists (
     select 1 from public.compute_available_slots(
-      'tz-berlin', null,
+      'tz-berlin',
+      '33333333-3333-3333-3333-3333aaaaaaaa',
       '2026-06-15 00:00+00'::timestamptz,
       '2026-06-16 00:00+00'::timestamptz
     )
@@ -203,13 +212,12 @@ select pg_temp.assert(
 rollback;
 
 -- ----------------------------------------------------------------------------
--- Test: anonymous client cannot insert availability_rules (RLS).
+-- Test: anon cannot insert availability_rules (RLS).
 -- ----------------------------------------------------------------------------
 
 \echo '-- anon cannot write rules --'
 
 begin;
-
 set local role anon;
 
 do $$
@@ -218,11 +226,7 @@ begin
   values ('33333333-3333-3333-3333-333333333333', 2, '10:00', '12:00');
   raise exception 'anon should not be able to insert into availability_rules';
 exception when insufficient_privilege then null;
-  when others then
-    -- RLS may surface as 42501 (insufficient_privilege) or as a row count of 0;
-    -- either is acceptable. If we somehow reached here without an exception,
-    -- the previous raise already fired.
-    null;
+  when others then null;
 end;
 $$;
 
@@ -234,6 +238,7 @@ rollback;
 
 delete from public.availability_rules where tenant_id = '33333333-3333-3333-3333-333333333333';
 delete from public.availability_exceptions where tenant_id = '33333333-3333-3333-3333-333333333333';
+delete from public.services where tenant_id = '33333333-3333-3333-3333-333333333333';
 delete from public.tenants where id = '33333333-3333-3333-3333-333333333333';
 
 \echo 'OK — availability tests passed.'

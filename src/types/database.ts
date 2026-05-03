@@ -34,6 +34,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_events: {
+        Row: {
+          appointment_id: string
+          by_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          appointment_id: string
+          by_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+        }
+        Update: {
+          appointment_id?: string
+          by_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_events_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          cancelled_at: string | null
+          cancelled_by_user_id: string | null
+          created_at: string
+          ends_at: string
+          guest_contact_id: string | null
+          id: string
+          manage_token_hash: string
+          notes: string | null
+          service_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          tenant_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          cancelled_by_user_id?: string | null
+          created_at?: string
+          ends_at: string
+          guest_contact_id?: string | null
+          id?: string
+          manage_token_hash: string
+          notes?: string | null
+          service_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          tenant_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          cancelled_by_user_id?: string | null
+          created_at?: string
+          ends_at?: string
+          guest_contact_id?: string | null
+          id?: string
+          manage_token_hash?: string
+          notes?: string | null
+          service_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_guest_contact_id_fkey"
+            columns: ["guest_contact_id"]
+            isOneToOne: false
+            referencedRelation: "guest_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       availability_exceptions: {
         Row: {
           created_at: string
@@ -66,6 +174,13 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "availability_exceptions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "availability_exceptions_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -111,7 +226,58 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "availability_rules_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "availability_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_contacts: {
+        Row: {
+          claimed_by_user_id: string | null
+          created_at: string
+          email: string
+          id: string
+          locale: string | null
+          name: string
+          phone: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          claimed_by_user_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          locale?: string | null
+          name: string
+          phone?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          claimed_by_user_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          locale?: string | null
+          name?: string
+          phone?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_contacts_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -190,6 +356,62 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          active: boolean
+          buffer_after_min: number
+          buffer_before_min: number
+          created_at: string
+          daily_cap: number | null
+          description: string | null
+          duration_minutes: number
+          id: string
+          max_advance_days: number
+          min_notice_min: number
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          buffer_after_min?: number
+          buffer_before_min?: number
+          created_at?: string
+          daily_cap?: number | null
+          description?: string | null
+          duration_minutes: number
+          id?: string
+          max_advance_days?: number
+          min_notice_min?: number
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          buffer_after_min?: number
+          buffer_before_min?: number
+          created_at?: string
+          daily_cap?: number | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          max_advance_days?: number
+          min_notice_min?: number
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           brand_color: string | null
@@ -229,6 +451,20 @@ export type Database = {
     }
     Functions: {
       assert_slug_available: { Args: { p_slug: string }; Returns: undefined }
+      book_appointment: {
+        Args: {
+          p_guest_email: string
+          p_guest_name: string
+          p_guest_phone?: string
+          p_service_id: string
+          p_starts_at: string
+          p_tenant_slug: string
+        }
+        Returns: {
+          appointment_id: string
+          manage_token: string
+        }[]
+      }
       compute_available_slots: {
         Args: {
           p_range_end: string
@@ -250,8 +486,15 @@ export type Database = {
         Returns: Database["public"]["Enums"]["tenant_role"]
       }
       tenant_id_from_slug: { Args: { p_slug: string }; Returns: string }
+      verify_manage_token: { Args: { p_token: string }; Returns: string }
     }
     Enums: {
+      appointment_status:
+        | "pending"
+        | "confirmed"
+        | "cancelled"
+        | "completed"
+        | "no_show"
       availability_exception_kind: "block" | "extra"
       tenant_role: "owner" | "admin" | "staff" | "customer"
     }
@@ -384,6 +627,13 @@ export const Constants = {
   },
   public: {
     Enums: {
+      appointment_status: [
+        "pending",
+        "confirmed",
+        "cancelled",
+        "completed",
+        "no_show",
+      ],
       availability_exception_kind: ["block", "extra"],
       tenant_role: ["owner", "admin", "staff", "customer"],
     },
