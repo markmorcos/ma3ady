@@ -1,15 +1,14 @@
 import { router, Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { COMMON_IANA_ZONES } from '@/data/iana-zones';
-import { colors } from '@/design/colors';
+import { useTheme } from '@/design/ThemeProvider';
 import { getDeviceTimezone } from '@/hooks/useDisplayTimezone';
+import { useThemedHeaderOptions } from '@/hooks/useThemedHeader';
 
-// The persistent admin timezone override lives in `profiles.display_timezone_override`,
-// which is added to the schema in define-tenancy-model. Until that lands, this screen
-// reads/writes a local placeholder and won't round-trip — wiring it up is the first
-// task in implement-admin-mobile-dashboard.
 type Props = {
   current: string | null;
   onSelect: (zone: string | null) => Promise<void> | void;
@@ -17,6 +16,7 @@ type Props = {
 
 export function TimezonePicker({ current, onSelect }: Props) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [pending, setPending] = useState<string | null>(null);
   const deviceZone = useMemo(getDeviceTimezone, []);
   const sorted = useMemo(() => {
@@ -34,25 +34,30 @@ export function TimezonePicker({ current, onSelect }: Props) {
     }
   };
 
+  const rowBorder = { borderBottomColor: theme.colors.border };
+  const checkColor = theme.colors.brand[500];
+
   return (
     <View style={styles.container}>
       <Pressable
         onPress={() => choose(deviceZone)}
         accessibilityRole="button"
-        accessibilityLabel={`Use my current timezone, ${deviceZone}`}
-        style={[styles.row, styles.devicePin]}
+        accessibilityLabel={`${t('admin.tzHereNow')} ${deviceZone}`}
+        style={[styles.row, styles.devicePin, { backgroundColor: theme.colors.brandTint }]}
       >
-        <Text style={styles.deviceLabel}>{t('admin.tzHereNow')}</Text>
-        <Text style={styles.deviceValue}>{deviceZone}</Text>
+        <Text variant="bodyStrong">{t('admin.tzHereNow')}</Text>
+        <Text variant="caption" color="muted">
+          {deviceZone}
+        </Text>
       </Pressable>
       <Pressable
         onPress={() => choose(null)}
         accessibilityRole="button"
         accessibilityLabel={t('admin.tzUseTenantA11y')}
-        style={styles.row}
+        style={[styles.row, rowBorder]}
       >
-        <Text style={styles.label}>{t('admin.tzTenantDefault')}</Text>
-        {!current && <Text style={styles.check}>✓</Text>}
+        <Text variant="body">{t('admin.tzTenantDefault')}</Text>
+        {!current && <Icon name="check" size={18} colorHex={checkColor} />}
       </Pressable>
       <FlatList
         data={sorted}
@@ -62,10 +67,12 @@ export function TimezonePicker({ current, onSelect }: Props) {
             onPress={() => choose(zone)}
             accessibilityRole="button"
             accessibilityLabel={zone}
-            style={styles.row}
+            style={[styles.row, rowBorder]}
           >
-            <Text style={styles.label}>{zone}</Text>
-            {(current === zone || pending === zone) && <Text style={styles.check}>✓</Text>}
+            <Text variant="body">{zone}</Text>
+            {(current === zone || pending === zone) && (
+              <Icon name="check" size={18} colorHex={checkColor} />
+            )}
           </Pressable>
         )}
       />
@@ -74,21 +81,24 @@ export function TimezonePicker({ current, onSelect }: Props) {
 }
 
 export default function TimezoneSettingsScreen() {
+  const { t } = useTranslation();
+  const headerOptions = useThemedHeaderOptions(t('admin.settingsDisplayTimezone'));
   const [current, setCurrent] = useState<string | null>(null);
   const onSelect = async (zone: string | null) => {
     setCurrent(zone);
-    // Persistence to profiles.display_timezone_override lands in implement-admin-mobile-dashboard.
+    // Persistence to profiles.display_timezone_override lands as a follow-up.
   };
   return (
     <>
       <Stack.Screen
         options={{
-          title: 'Display timezone',
-          headerBackVisible: true,
+          ...headerOptions,
           headerLeft: () =>
             router.canGoBack() ? (
               <Pressable onPress={() => router.back()} accessibilityRole="button">
-                <Text style={styles.back}>Back</Text>
+                <Text variant="bodyStrong" color="brand.500" style={styles.back}>
+                  {t('common.back')}
+                </Text>
               </Pressable>
             ) : null,
         }}
@@ -101,18 +111,17 @@ export default function TimezoneSettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   row: {
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
   },
-  label: { fontSize: 16 },
-  check: { fontSize: 16, color: colors.brand500, fontWeight: '600' },
-  devicePin: { backgroundColor: colors.brandTint, borderRadius: 12, marginBottom: 8 },
-  deviceLabel: { fontSize: 14, fontWeight: '600' },
-  deviceValue: { fontSize: 14, opacity: 0.7 },
-  back: { fontSize: 14, color: colors.brand500, paddingHorizontal: 12 },
+  devicePin: {
+    borderRadius: 12,
+    marginBottom: 8,
+    borderBottomWidth: 0,
+  },
+  back: { paddingHorizontal: 12 },
 });

@@ -10,6 +10,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { Text } from '@/components/Text';
 import { Time } from '@/components/Time';
 import { useTheme } from '@/design/ThemeProvider';
+import { useThemedHeaderOptions } from '@/hooks/useThemedHeader';
 import { updateAppointmentStatus } from '@/services/api/admin';
 import { getAppointment } from '@/services/api/appointments';
 import { getService } from '@/services/api/services';
@@ -22,6 +23,7 @@ export default function CustomerBookingDetailScreen() {
   const queryClient = useQueryClient();
   const { id } = useLocalSearchParams<{ id: string }>();
   const showToast = useToastStore((s) => s.show);
+  const headerOptions = useThemedHeaderOptions(t('app.bookingTitle'));
   const [confirmingCancel, setConfirmingCancel] = useState(false);
 
   const appt = useQuery({
@@ -66,7 +68,7 @@ export default function CustomerBookingDetailScreen() {
   if (!appt.data) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: true, title: t('app.bookingTitle') }} />
+        <Stack.Screen options={headerOptions} />
         <View style={styles.center}>
           <EmptyState icon="alert-triangle" title={t('admin.appointmentNotFound')} />
         </View>
@@ -80,7 +82,7 @@ export default function CustomerBookingDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: t('app.bookingTitle') }} />
+      <Stack.Screen options={headerOptions} />
       <ScrollView contentContainerStyle={styles.content}>
         <Card>
           <View style={styles.headerRow}>

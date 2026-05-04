@@ -255,7 +255,7 @@
     "upcomingEmpty": "No upcoming appointments",
     "statTodayCount": "Today",
     "statWeekConfirmed": "This week",
-    "statNoShowRate": "No-show rate (30d)",
+    "statNoShowRate": "No-shows · 30d",
     "status": {
       "pending": "Pending",
       "confirmed": "Confirmed",
@@ -300,6 +300,7 @@
     "teamInvite": "Invite teammate",
     "teamInviteSend": "Send invite",
     "teamInviteSent": "Invite sent",
+    "teamPending": "Pending — they haven't signed in yet",
     "teamRole": "Role",
     "teamForbiddenRole": "You can't grant that role",
     "role": {
@@ -343,6 +344,15 @@
     "bandAdd": "Add another band",
     "exceptionsHeading": "Exceptions",
     "exceptionsEmpty": "No upcoming exceptions",
+    "exceptionAddBlock": "Block time",
+    "exceptionAddExtra": "Add extra hours",
+    "exceptionHint": "Use YYYY-MM-DDTHH:MM (24-hour, your local time)",
+    "exceptionStart": "Starts at",
+    "exceptionEnd": "Ends at",
+    "exceptionReason": "Reason (optional)",
+    "exceptionReasonHint": "Christmas Day, training, …",
+    "exceptionSaved": "Exception saved",
+    "exceptionDeleted": "Exception removed",
     "exceptionKind": {
       "block": "Blocked",
       "extra": "Extra hours"

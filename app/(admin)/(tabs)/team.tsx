@@ -24,10 +24,12 @@ import { useToastStore } from '@/state/toastStore';
 import { type TenantRole } from '@/types/db';
 
 type MemberRow = {
-  user_id: string;
+  key: string;
+  user_id: string | null;
   role: TenantRole;
   email: string | null;
   display_name: string | null;
+  pending: boolean;
 };
 
 type MembershipRowRaw = {
@@ -39,21 +41,49 @@ type MembershipRowRaw = {
     | null;
 };
 
+type PendingRowRaw = {
+  email: string;
+  role: TenantRole;
+};
+
 async function getMembers(tenantId: string): Promise<MemberRow[]> {
-  const { data, error } = await supabase
-    .from('memberships')
-    .select('user_id, role, profiles(full_name)')
-    .eq('tenant_id', tenantId);
-  if (error) throw error;
-  return ((data ?? []) as unknown as MembershipRowRaw[]).map((row) => {
-    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-    return {
-      user_id: row.user_id,
+  const [memberships, pending] = await Promise.all([
+    supabase
+      .from('memberships')
+      .select('user_id, role, profiles(full_name)')
+      .eq('tenant_id', tenantId),
+    supabase
+      .from('pending_memberships')
+      .select('email, role')
+      .eq('tenant_id', tenantId),
+  ]);
+  if (memberships.error) throw memberships.error;
+  if (pending.error) throw pending.error;
+
+  const accepted = ((memberships.data ?? []) as unknown as MembershipRowRaw[]).map(
+    (row): MemberRow => {
+      const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+      return {
+        key: `m:${row.user_id}`,
+        user_id: row.user_id,
+        role: row.role,
+        email: null,
+        display_name: profile?.full_name ?? null,
+        pending: false,
+      };
+    },
+  );
+  const invited = ((pending.data ?? []) as unknown as PendingRowRaw[]).map(
+    (row): MemberRow => ({
+      key: `p:${row.email}`,
+      user_id: null,
       role: row.role,
-      email: null,
-      display_name: profile?.full_name ?? null,
-    };
-  });
+      email: row.email,
+      display_name: null,
+      pending: true,
+    }),
+  );
+  return [...accepted, ...invited];
 }
 
 const ROLE_RANK: Record<TenantRole, number> = {
@@ -127,42 +157,64 @@ export default function TeamScreen() {
   }
 
   const others = (data ?? []).filter((m) => m.user_id !== myUserId);
+  const sortedOthers = [...others].sort((a, b) => {
+    if (a.pending !== b.pending) return a.pending ? 1 : -1;
+    return (a.display_name ?? a.email ?? '').localeCompare(b.display_name ?? b.email ?? '');
+  });
 
   return (
     <View style={styles.flex}>
-      {others.length === 0 ? (
+      {sortedOthers.length === 0 ? (
         <View style={styles.center}>
           <EmptyState icon="users" title={t('admin.teamEmpty')} />
         </View>
       ) : (
         <FlatList
-          data={others}
-          keyExtractor={(m) => m.user_id}
+          data={sortedOthers}
+          keyExtractor={(m) => m.key}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <Card style={styles.memberCard}>
-              <View style={styles.memberHeader}>
-                <View style={styles.flex}>
-                  <Text variant="bodyStrong">{item.display_name ?? item.email ?? '—'}</Text>
-                  {item.email && item.display_name ? (
-                    <Text variant="caption" color="muted">
-                      {item.email}
+          renderItem={({ item }) => {
+            const primary = item.display_name ?? item.email ?? '—';
+            const secondary = item.display_name && item.email ? item.email : null;
+            return (
+              <Card style={styles.memberCard}>
+                <View style={styles.memberHeader}>
+                  <View style={styles.flex}>
+                    <Text variant="bodyStrong">{primary}</Text>
+                    {secondary ? (
+                      <Text variant="caption" color="muted">
+                        {secondary}
+                      </Text>
+                    ) : null}
+                    {item.pending ? (
+                      <Text variant="caption" color="muted" style={styles.pendingHint}>
+                        {t('admin.teamPending')}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <View
+                    style={[
+                      styles.roleChip,
+                      {
+                        backgroundColor: item.pending
+                          ? theme.colors.muted + '20'
+                          : theme.colors.brand[500] + '20',
+                      },
+                    ]}
+                  >
+                    <Text
+                      variant="label"
+                      style={{
+                        color: item.pending ? theme.colors.muted : theme.colors.brand[500],
+                      }}
+                    >
+                      {t(`admin.role.${item.role}`)}
                     </Text>
-                  ) : null}
+                  </View>
                 </View>
-                <View
-                  style={[
-                    styles.roleChip,
-                    { backgroundColor: theme.colors.brand[500] + '20' },
-                  ]}
-                >
-                  <Text variant="label" style={{ color: theme.colors.brand[500] }}>
-                    {t(`admin.role.${item.role}`)}
-                  </Text>
-                </View>
-              </View>
-            </Card>
-          )}
+              </Card>
+            );
+          }}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}
@@ -238,6 +290,7 @@ const styles = StyleSheet.create({
   memberCard: {},
   memberHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   roleChip: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  pendingHint: { marginTop: 4 },
   separator: { height: 8 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
   fab: {

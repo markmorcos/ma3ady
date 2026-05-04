@@ -3,6 +3,7 @@ import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ServiceForm, type ServiceFormValues } from '@/features/admin/ServiceForm';
+import { useThemedHeaderOptions } from '@/hooks/useThemedHeader';
 import { upsertService } from '@/services/api/services';
 import { useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
@@ -14,6 +15,7 @@ export default function NewServiceScreen() {
     s.tenants.find((tt) => tt.id === s.currentTenantId),
   );
   const showToast = useToastStore((s) => s.show);
+  const headerOptions = useThemedHeaderOptions(t('admin.serviceCreate'));
   const [saving, setSaving] = useState(false);
 
   const create = useMutation({
@@ -42,7 +44,7 @@ export default function NewServiceScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: t('admin.serviceCreate') }} />
+      <Stack.Screen options={headerOptions} />
       <ServiceForm
         saving={saving}
         submitLabel={t('admin.serviceCreate')}

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, View } from 'react-native';
 import { ServiceForm, type ServiceFormValues } from '@/features/admin/ServiceForm';
 import { useTheme } from '@/design/ThemeProvider';
+import { useThemedHeaderOptions } from '@/hooks/useThemedHeader';
 import { getService, upsertService } from '@/services/api/services';
 import { useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
@@ -51,10 +52,13 @@ export default function EditServiceScreen() {
     update.mutate(values);
   };
 
+  const headerTitle = service?.name ?? t('admin.serviceEdit');
+  const headerOptions = useThemedHeaderOptions(headerTitle);
+
   if (isLoading || !service) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: true, title: t('admin.serviceEdit') }} />
+        <Stack.Screen options={headerOptions} />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <ActivityIndicator color={theme.colors.brand[500]} />
         </View>
@@ -64,7 +68,7 @@ export default function EditServiceScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: service.name }} />
+      <Stack.Screen options={headerOptions} />
       <ServiceForm
         initial={service}
         saving={saving}

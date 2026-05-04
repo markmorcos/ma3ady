@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { SlotGrid } from '@/components/SlotGrid';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
+import { useThemedHeaderOptions } from '@/hooks/useThemedHeader';
 import { getAppointmentDetail } from '@/services/api/admin';
 import { rescheduleAppointmentAuthed } from '@/services/api/appointments';
 import { getAvailableSlots } from '@/services/api/availability';
@@ -35,6 +36,7 @@ export default function AdminRescheduleScreen() {
     s.tenants.find((tt) => tt.id === s.currentTenantId),
   );
   const showToast = useToastStore((s) => s.show);
+  const headerOptions = useThemedHeaderOptions(t('booking.rescheduleTitle'));
 
   const [windowStart] = useState(() => new Date());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -119,7 +121,7 @@ export default function AdminRescheduleScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: t('booking.rescheduleTitle') }} />
+      <Stack.Screen options={headerOptions} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text variant="h2">{appt.data?.service?.name ?? ''}</Text>
         <Text variant="caption" color="muted">

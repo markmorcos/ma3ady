@@ -255,7 +255,7 @@
     "upcomingEmpty": "لا مواعيد قادمة",
     "statTodayCount": "اليوم",
     "statWeekConfirmed": "هذا الأسبوع",
-    "statNoShowRate": "نسبة عدم الحضور (٣٠ يوم)",
+    "statNoShowRate": "عدم الحضور · ٣٠ يوم",
     "status": {
       "pending": "قيد الانتظار",
       "confirmed": "مؤكد",
@@ -300,6 +300,7 @@
     "teamInvite": "دعوة زميل",
     "teamInviteSend": "إرسال الدعوة",
     "teamInviteSent": "تم إرسال الدعوة",
+    "teamPending": "قيد الانتظار — لم يسجّل الدخول بعد",
     "teamRole": "الدور",
     "teamForbiddenRole": "لا يمكنك منح هذا الدور",
     "role": {
@@ -343,6 +344,15 @@
     "bandAdd": "إضافة فترة أخرى",
     "exceptionsHeading": "الاستثناءات",
     "exceptionsEmpty": "لا استثناءات قادمة",
+    "exceptionAddBlock": "حجب وقت",
+    "exceptionAddExtra": "إضافة ساعات إضافية",
+    "exceptionHint": "استخدم صيغة YYYY-MM-DDTHH:MM (٢٤ ساعة، بتوقيتك المحلي)",
+    "exceptionStart": "يبدأ في",
+    "exceptionEnd": "ينتهي في",
+    "exceptionReason": "السبب (اختياري)",
+    "exceptionReasonHint": "عيد الميلاد، تدريب، …",
+    "exceptionSaved": "تم حفظ الاستثناء",
+    "exceptionDeleted": "تم إزالة الاستثناء",
     "exceptionKind": {
       "block": "محجوب",
       "extra": "ساعات إضافية"

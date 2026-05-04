@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { Text } from '@/components/Text';
 import { Time } from '@/components/Time';
 import { useTheme } from '@/design/ThemeProvider';
+import { useThemedHeaderOptions } from '@/hooks/useThemedHeader';
 import {
   getAppointmentDetail,
   getAppointmentEvents,
@@ -37,6 +38,7 @@ export default function AppointmentDetailScreen() {
     s.tenants.find((tt) => tt.id === s.currentTenantId),
   );
   const showToast = useToastStore((s) => s.show);
+  const headerOptions = useThemedHeaderOptions(t('admin.appointment'));
   const [auditOpen, setAuditOpen] = useState(false);
 
   const appt = useQuery({
@@ -78,7 +80,7 @@ export default function AppointmentDetailScreen() {
   if (!appt.data) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: true, title: t('admin.appointment') }} />
+        <Stack.Screen options={headerOptions} />
         <View style={styles.center}>
           <EmptyState icon="alert-triangle" title={t('admin.appointmentNotFound')} />
         </View>
@@ -92,9 +94,7 @@ export default function AppointmentDetailScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{ headerShown: true, title: t('admin.appointment') }}
-      />
+      <Stack.Screen options={headerOptions} />
       <ScrollView contentContainerStyle={styles.content}>
         <Card>
           <View style={styles.headerRow}>

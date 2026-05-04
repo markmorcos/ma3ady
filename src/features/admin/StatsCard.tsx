@@ -10,11 +10,11 @@ type Props = {
 export function StatsCard({ label, value }: Props) {
   return (
     <View style={styles.wrap}>
-      <Card>
-        <Text variant="label" color="muted">
+      <Card style={styles.card}>
+        <Text variant="label" color="muted" numberOfLines={1}>
           {label}
         </Text>
-        <Text variant="h2" style={styles.value}>
+        <Text variant="h2" style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
           {value}
         </Text>
       </Card>
@@ -24,5 +24,6 @@ export function StatsCard({ label, value }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
+  card: { minHeight: 92, justifyContent: 'space-between' },
   value: { marginTop: 4 },
 });

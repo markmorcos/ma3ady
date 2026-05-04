@@ -1,4 +1,4 @@
-name: deploy-ma3ady-marketing
+name: deploy-ma3ady
 
 on:
   workflow_dispatch: {}
@@ -17,7 +17,7 @@ jobs:
         with:
           token: ${{ secrets.INFRASTRUCTURE_PAT }}
           repository: markmorcos/infrastructure
-          event-type: deploy-ma3ady-marketing
+          event-type: deploy-ma3ady
           client-payload: |-
             {
               "repository": "markmorcos/ma3ady",

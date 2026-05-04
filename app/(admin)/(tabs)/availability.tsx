@@ -20,8 +20,12 @@ import { useTheme } from '@/design/ThemeProvider';
 import { overlay } from '@/design/tokens';
 import {
   bulkReplaceRulesForDay,
+  deleteException,
   getExceptionsForTenant,
   getRulesForTenant,
+  upsertException,
+  type AvailabilityException,
+  type AvailabilityExceptionKind,
   type Band,
 } from '@/services/api/availability';
 import { useTenantStore } from '@/state/tenantStore';
@@ -46,6 +50,12 @@ function formatBand(b: Band): string {
   return `${b.start_time.slice(0, 5)}–${b.end_time.slice(0, 5)}`;
 }
 
+function toLocalInput(d: Date): string {
+  // Format as YYYY-MM-DDTHH:MM in local time for the datetime-style picker.
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export default function AvailabilityScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -60,6 +70,13 @@ export default function AvailabilityScreen() {
   const [editing, setEditing] = useState<{
     dayIndex: number;
     bands: Band[];
+  } | null>(null);
+  const [exceptionDraft, setExceptionDraft] = useState<{
+    id?: string;
+    kind: AvailabilityExceptionKind;
+    starts_at: string;
+    ends_at: string;
+    reason: string;
   } | null>(null);
 
   const rules = useQuery({
@@ -100,6 +117,59 @@ export default function AvailabilityScreen() {
       });
     },
   });
+
+  const saveException = useMutation({
+    mutationFn: async (input: typeof exceptionDraft) => {
+      if (!tenant || !input) throw new Error('no tenant');
+      return upsertException({
+        id: input.id,
+        tenant_id: tenant.id,
+        service_id: null,
+        kind: input.kind,
+        starts_at: new Date(input.starts_at).toISOString(),
+        ends_at: new Date(input.ends_at).toISOString(),
+        reason: input.reason.trim() || null,
+      });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin-exceptions', tenant?.id] });
+      showToast({ kind: 'success', message: t('admin.exceptionSaved') });
+      setExceptionDraft(null);
+    },
+    onError: (err) => {
+      showToast({
+        kind: 'danger',
+        message: err instanceof Error ? err.message : 'unknown',
+      });
+    },
+  });
+
+  const removeException = useMutation({
+    mutationFn: (id: string) => deleteException(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin-exceptions', tenant?.id] });
+      showToast({ kind: 'success', message: t('admin.exceptionDeleted') });
+    },
+    onError: (err) => {
+      showToast({
+        kind: 'danger',
+        message: err instanceof Error ? err.message : 'unknown',
+      });
+    },
+  });
+
+  const openNewException = (kind: AvailabilityExceptionKind) => {
+    const start = new Date();
+    start.setMinutes(0, 0, 0);
+    start.setHours(start.getHours() + 1);
+    const end = new Date(start.getTime() + 60 * 60_000);
+    setExceptionDraft({
+      kind,
+      starts_at: toLocalInput(start),
+      ends_at: toLocalInput(end),
+      reason: '',
+    });
+  };
 
   const seedTemplate = async () => {
     if (!tenant) return;
@@ -200,6 +270,20 @@ export default function AvailabilityScreen() {
       <Text variant="bodyStrong" style={styles.heading}>
         {t('admin.exceptionsHeading')}
       </Text>
+      {canEdit && (
+        <View style={styles.exceptionCtas}>
+          <Button
+            label={t('admin.exceptionAddBlock')}
+            variant="secondary"
+            onPress={() => openNewException('block')}
+          />
+          <Button
+            label={t('admin.exceptionAddExtra')}
+            variant="ghost"
+            onPress={() => openNewException('extra')}
+          />
+        </View>
+      )}
       {(exceptions.data ?? []).length === 0 ? (
         <Card>
           <Text variant="caption" color="muted">
@@ -207,7 +291,7 @@ export default function AvailabilityScreen() {
           </Text>
         </Card>
       ) : (
-        (exceptions.data ?? []).map((e) => (
+        (exceptions.data ?? []).map((e: AvailabilityException) => (
           <Card key={e.id}>
             <View style={styles.row}>
               <View style={styles.flex}>
@@ -237,9 +321,31 @@ export default function AvailabilityScreen() {
                   </Text>
                 ) : null}
               </View>
+              {canEdit && (
+                <View style={styles.exceptionActions}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('common.delete')}
+                    onPress={() => removeException.mutate(e.id)}
+                    hitSlop={8}
+                  >
+                    <Icon name="trash" size={18} color="danger" />
+                  </Pressable>
+                </View>
+              )}
             </View>
           </Card>
         ))
+      )}
+
+      {exceptionDraft && (
+        <ExceptionEditorModal
+          draft={exceptionDraft}
+          saving={saveException.isPending}
+          onCancel={() => setExceptionDraft(null)}
+          onChange={(next) => setExceptionDraft(next)}
+          onSave={() => saveException.mutate(exceptionDraft)}
+        />
       )}
 
       {editing && (
@@ -364,11 +470,88 @@ function BandEditorModal({
   );
 }
 
+type ExceptionDraft = {
+  id?: string;
+  kind: AvailabilityExceptionKind;
+  starts_at: string;
+  ends_at: string;
+  reason: string;
+};
+
+function ExceptionEditorModal({
+  draft,
+  saving,
+  onChange,
+  onCancel,
+  onSave,
+}: {
+  draft: ExceptionDraft;
+  saving: boolean;
+  onChange: (next: ExceptionDraft) => void;
+  onCancel: () => void;
+  onSave: () => void;
+}) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const valid =
+    !!draft.starts_at &&
+    !!draft.ends_at &&
+    new Date(draft.ends_at).getTime() > new Date(draft.starts_at).getTime();
+  return (
+    <Modal visible animationType="slide" transparent>
+      <View style={styles.modalBackdrop}>
+        <View style={[styles.modal, { backgroundColor: theme.colors.surface }]}>
+          <Text variant="h3">
+            {draft.kind === 'block'
+              ? t('admin.exceptionAddBlock')
+              : t('admin.exceptionAddExtra')}
+          </Text>
+          <Text variant="caption" color="muted">
+            {t('admin.exceptionHint')}
+          </Text>
+          <Input
+            label={t('admin.exceptionStart')}
+            value={draft.starts_at}
+            onChangeText={(starts_at) => onChange({ ...draft, starts_at })}
+            placeholder="2026-12-25T09:00"
+            autoCapitalize="none"
+          />
+          <Input
+            label={t('admin.exceptionEnd')}
+            value={draft.ends_at}
+            onChangeText={(ends_at) => onChange({ ...draft, ends_at })}
+            placeholder="2026-12-26T17:00"
+            autoCapitalize="none"
+          />
+          <Input
+            label={t('admin.exceptionReason')}
+            value={draft.reason}
+            onChangeText={(reason) => onChange({ ...draft, reason })}
+            placeholder={t('admin.exceptionReasonHint')}
+          />
+          <View style={styles.modalActions}>
+            <Button label={t('common.cancel')} variant="ghost" onPress={onCancel} />
+            <Button
+              label={t('common.save')}
+              variant="primary"
+              loading={saving}
+              disabled={!valid}
+              onPress={onSave}
+            />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 12 },
   flex: { flex: 1 },
   row: { marginTop: 4 },
   exceptionTimes: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
+  exceptionCtas: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  exceptionActions: { flexDirection: 'row', alignItems: 'flex-start', padding: 4 },
   dayHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
