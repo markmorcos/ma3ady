@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { TenantHeader } from '@/components/TenantHeader';
 import { dirOf, resolveLocale, t, type Locale } from '@/lib/locale';
 import { getServiceClient } from '@/lib/supabase';
-import { currentTenant } from '@/lib/tenant';
+import { type Tenant } from '@/lib/tenant';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
@@ -41,6 +41,16 @@ async function loadService(id: string) {
   return data;
 }
 
+async function loadTenantById(id: string): Promise<Tenant | null> {
+  const sb = getServiceClient();
+  const { data } = await sb
+    .from('tenants')
+    .select('id, slug, name, timezone, default_locale, brand_color')
+    .eq('id', id)
+    .maybeSingle();
+  return (data as Tenant | null) ?? null;
+}
+
 export default async function ManagePage({
   params,
   searchParams,
@@ -50,11 +60,12 @@ export default async function ManagePage({
 }) {
   const { token } = await params;
   const sp = await searchParams;
-  const tenant = await currentTenant();
+
+  const appt = await loadByToken(token);
+  const tenant = appt ? await loadTenantById(appt.tenant_id) : null;
   const locale: Locale = await resolveLocale(sp, tenant?.default_locale ?? 'en');
   const dir = dirOf(locale);
 
-  const appt = await loadByToken(token);
   if (!appt || !tenant) {
     return (
       <div dir={dir} lang={locale}>

@@ -12,7 +12,7 @@ export function MarketingHome({ locale }: Props) {
   const altHome = isAr ? '/' : '/ar/';
   const privacyHref = isAr ? '/ar/privacy/' : '/en/privacy/';
   const termsHref = isAr ? '/ar/terms/' : '/en/terms/';
-  const demoUrl = isAr ? 'https://demo.ma3ady.com/?lang=ar' : 'https://demo.ma3ady.com/';
+  const demoUrl = isAr ? '/t/demo?lang=ar' : '/t/demo';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'MobileApplication',

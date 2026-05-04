@@ -1,7 +1,7 @@
 version: 0.4.7
 
 namespace: ma3ady
-project: ma3ady-tenant-landing
+project: ma3ady
 
 services:
   - name: tenant-landing
@@ -21,14 +21,6 @@ services:
       - name: NODE_ENV
         value: production
 
-    # The chart's ingress template only takes a single `host:` and issues a
-    # non-wildcard TLS cert via HTTP-01. So this Deployment serves the apex
-    # (ma3ady.com) — which is the marketing surface plus the legal pages,
-    # /robots.txt, /sitemap.xml. The booking surface for tenant subdomains
-    # (<slug>.ma3ady.com) requires a wildcard TLS cert, which needs a
-    # cert-manager DNS-01 issuer set up separately; that lands when the
-    # first tenant goes live. Until then `slugFromHost(host)` returns null
-    # for ma3ady.com and the app renders <MarketingHome>.
     ingress:
       host: ma3ady.com
       path: /

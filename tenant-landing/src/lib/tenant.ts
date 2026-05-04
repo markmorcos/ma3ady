@@ -1,5 +1,3 @@
-import { headers } from 'next/headers';
-import { env } from './env';
 import { getAnonClient } from './supabase';
 
 export type Tenant = {
@@ -11,28 +9,38 @@ export type Tenant = {
   brand_color: string | null;
 };
 
-const RESERVED = new Set(['www', 'app', 'auth', 'api', 'admin', 'mail', 'cdn']);
+const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/;
+const RESERVED = new Set([
+  // path segments at the apex that must never resolve as a tenant slug
+  't',
+  'manage',
+  'book',
+  'en',
+  'ar',
+  'privacy',
+  'terms',
+  'sitemap.xml',
+  'robots.txt',
+  'api',
+  'admin',
+  'app',
+  'auth',
+  'manifest.json',
+  'apple-app-site-association',
+  '.well-known',
+]);
 
 const cache = new Map<string, { tenant: Tenant | null; expiresAt: number }>();
 const TTL_MS = 60_000;
 
-export function slugFromHost(host: string | null): string | null {
-  if (!host) return null;
-  const cleaned = host.split(':')[0]!.toLowerCase();
-  if (cleaned === env.APEX_HOST || cleaned.endsWith('.' + env.APEX_HOST) === false) {
-    if (env.ALLOW_LOCALHOST_DEMO && (cleaned === 'localhost' || cleaned === '127.0.0.1')) {
-      return 'demo';
-    }
-    if (cleaned === env.APEX_HOST) return null;
-    if (!cleaned.endsWith('.' + env.APEX_HOST)) return null;
-  }
-  const slug = cleaned.replace('.' + env.APEX_HOST, '');
-  if (!slug || slug.includes('.')) return null;
-  if (RESERVED.has(slug)) return null;
-  return slug;
+export function isValidSlug(slug: string): boolean {
+  if (!slug) return false;
+  if (RESERVED.has(slug)) return false;
+  return SLUG_RE.test(slug);
 }
 
 export async function resolveTenantBySlug(slug: string): Promise<Tenant | null> {
+  if (!isValidSlug(slug)) return null;
   const now = Date.now();
   const cached = cache.get(slug);
   if (cached && cached.expiresAt > now) return cached.tenant;
@@ -46,12 +54,4 @@ export async function resolveTenantBySlug(slug: string): Promise<Tenant | null> 
   const tenant = error || !data ? null : (data as Tenant);
   cache.set(slug, { tenant, expiresAt: now + TTL_MS });
   return tenant;
-}
-
-export async function currentTenant(): Promise<Tenant | null> {
-  const h = await headers();
-  const host = h.get('x-forwarded-host') ?? h.get('host');
-  const slug = slugFromHost(host);
-  if (!slug) return null;
-  return resolveTenantBySlug(slug);
 }
