@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { DateTimeField } from '@/components/DateTimeField';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { Input } from '@/components/Input';
 import { Text } from '@/components/Text';
 import { Time } from '@/components/Time';
+import { TimeField } from '@/components/TimeField';
 import { useTheme } from '@/design/ThemeProvider';
 import { overlay } from '@/design/tokens';
 import {
@@ -418,25 +420,21 @@ function BandEditorModal({
           {draft.map((d, idx) => (
             <View key={idx} style={styles.bandEditRow}>
               <View style={styles.flex}>
-                <Input
+                <TimeField
                   label={t('admin.bandStart')}
                   value={d.start}
-                  onChangeText={(v) =>
+                  onChange={(v) =>
                     setDraft((arr) => arr.map((b, i) => (i === idx ? { ...b, start: v } : b)))
                   }
-                  placeholder="09:00"
-                  autoCapitalize="none"
                 />
               </View>
               <View style={styles.flex}>
-                <Input
+                <TimeField
                   label={t('admin.bandEnd')}
                   value={d.end}
-                  onChangeText={(v) =>
+                  onChange={(v) =>
                     setDraft((arr) => arr.map((b, i) => (i === idx ? { ...b, end: v } : b)))
                   }
-                  placeholder="17:00"
-                  autoCapitalize="none"
                 />
               </View>
               <Pressable
@@ -506,22 +504,15 @@ function ExceptionEditorModal({
               ? t('admin.exceptionAddBlock')
               : t('admin.exceptionAddExtra')}
           </Text>
-          <Text variant="caption" color="muted">
-            {t('admin.exceptionHint')}
-          </Text>
-          <Input
+          <DateTimeField
             label={t('admin.exceptionStart')}
             value={draft.starts_at}
-            onChangeText={(starts_at) => onChange({ ...draft, starts_at })}
-            placeholder="2026-12-25T09:00"
-            autoCapitalize="none"
+            onChange={(starts_at) => onChange({ ...draft, starts_at })}
           />
-          <Input
+          <DateTimeField
             label={t('admin.exceptionEnd')}
             value={draft.ends_at}
-            onChangeText={(ends_at) => onChange({ ...draft, ends_at })}
-            placeholder="2026-12-26T17:00"
-            autoCapitalize="none"
+            onChange={(ends_at) => onChange({ ...draft, ends_at })}
           />
           <Input
             label={t('admin.exceptionReason')}

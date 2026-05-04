@@ -54,6 +54,29 @@ export async function setServiceActive(id: string, active: boolean): Promise<Ser
   return data;
 }
 
+export class ServiceInUseError extends Error {
+  constructor() {
+    super('service_in_use');
+    this.name = 'ServiceInUseError';
+  }
+}
+
+/**
+ * Hard-deletes a service. Throws ServiceInUseError when at least one
+ * appointment references the service (the FK is `on delete restrict`); the
+ * caller's expected fallback is to deactivate instead.
+ */
+export async function deleteService(id: string): Promise<void> {
+  const { error } = await supabase.from('services').delete().eq('id', id);
+  if (error) {
+    // Postgres foreign-key violation surfaces as code 23503.
+    if (error.code === '23503' || error.message?.includes('foreign key')) {
+      throw new ServiceInUseError();
+    }
+    throw error;
+  }
+}
+
 export async function upsertService(
   service: ServiceInsert & { id?: string },
 ): Promise<Service> {

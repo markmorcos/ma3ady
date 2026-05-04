@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/state/authStore';
 import { useSessionPrefsStore } from '@/state/sessionPrefsStore';
 
 export type DisplayContext = 'public-booking' | 'admin' | 'customer-bookings';
@@ -34,5 +35,13 @@ export function resolveDisplayTimezone(
 
 export function useDisplayTimezone(context: DisplayContext, resolver: Resolver = {}): string {
   const sessionOverride = useSessionPrefsStore((s) => s.displayTimezoneOverride);
-  return resolveDisplayTimezone(context, sessionOverride, resolver);
+  // Auto-pull the persistent admin override from the authed profile when the
+  // caller didn't supply one. Admin surfaces are expected to honor the
+  // user's saved preference without each screen wiring it manually.
+  const profileOverride = useAuthStore((s) => s.profile?.display_timezone_override ?? null);
+  const merged: Resolver = {
+    ...resolver,
+    adminOverride: resolver.adminOverride ?? profileOverride,
+  };
+  return resolveDisplayTimezone(context, sessionOverride, merged);
 }

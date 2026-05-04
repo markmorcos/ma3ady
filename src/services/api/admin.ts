@@ -60,6 +60,22 @@ export async function getUpcomingAppointments(
   return (data ?? []) as unknown as AdminAppointment[];
 }
 
+export async function getPastAppointments(
+  tenantId: string,
+  limit = 100,
+): Promise<AdminAppointment[]> {
+  const now = new Date();
+  const { data, error } = await supabase
+    .from('appointments')
+    .select(ADMIN_APPT_SELECT)
+    .eq('tenant_id', tenantId)
+    .lt('starts_at', now.toISOString())
+    .order('starts_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as unknown as AdminAppointment[];
+}
+
 export async function getAppointmentDetail(id: string): Promise<AdminAppointment | null> {
   const { data, error } = await supabase
     .from('appointments')

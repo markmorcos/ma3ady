@@ -112,6 +112,14 @@ export default function AdminSettingsScreen() {
           <Text variant="body">{t('admin.settingsAuditLog')}</Text>
           <Icon name="chevron-right" size={18} color="muted" />
         </Pressable>
+        <Pressable
+          onPress={() => router.push('/(app)/tenants/picker')}
+          accessibilityRole="button"
+          style={styles.linkRow}
+        >
+          <Text variant="body">{t('admin.settingsSwitchTenant')}</Text>
+          <Icon name="chevron-right" size={18} color="muted" />
+        </Pressable>
       </Card>
 
       <Button

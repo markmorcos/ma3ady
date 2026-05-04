@@ -8,6 +8,9 @@ import { COMMON_IANA_ZONES } from '@/data/iana-zones';
 import { useTheme } from '@/design/ThemeProvider';
 import { getDeviceTimezone } from '@/hooks/useDisplayTimezone';
 import { useThemedHeaderOptions } from '@/hooks/useThemedHeader';
+import { supabase } from '@/services/api/supabase';
+import { useAuthStore } from '@/state/authStore';
+import { useToastStore } from '@/state/toastStore';
 
 type Props = {
   current: string | null;
@@ -83,10 +86,30 @@ export function TimezonePicker({ current, onSelect }: Props) {
 export default function TimezoneSettingsScreen() {
   const { t } = useTranslation();
   const headerOptions = useThemedHeaderOptions(t('admin.settingsDisplayTimezone'));
-  const [current, setCurrent] = useState<string | null>(null);
+  const profile = useAuthStore((s) => s.profile);
+  const setProfile = useAuthStore((s) => s.setProfile);
+  const showToast = useToastStore((s) => s.show);
+  const [current, setCurrent] = useState<string | null>(
+    profile?.display_timezone_override ?? null,
+  );
+
   const onSelect = async (zone: string | null) => {
+    if (!profile) return;
+    const previous = current;
     setCurrent(zone);
-    // Persistence to profiles.display_timezone_override lands as a follow-up.
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ display_timezone_override: zone })
+      .eq('id', profile.id)
+      .select('*')
+      .single();
+    if (error) {
+      setCurrent(previous);
+      showToast({ kind: 'danger', message: error.message });
+      return;
+    }
+    setProfile(data);
+    showToast({ kind: 'success', message: t('admin.settingsSaved') });
   };
   return (
     <>

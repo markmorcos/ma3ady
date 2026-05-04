@@ -21,6 +21,8 @@ type Props = {
   saving: boolean;
   submitLabel: string;
   onSubmit: (values: ServiceFormValues) => void;
+  /** Optional content rendered below the submit button (e.g. delete CTA). */
+  footer?: React.ReactNode;
 };
 
 const empty: ServiceFormValues = {
@@ -39,7 +41,7 @@ function num(s: string, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-export function ServiceForm({ initial, saving, submitLabel, onSubmit }: Props) {
+export function ServiceForm({ initial, saving, submitLabel, onSubmit, footer }: Props) {
   const { t } = useTranslation();
   const [v, setV] = useState<ServiceFormValues>(() =>
     initial
@@ -138,6 +140,7 @@ export function ServiceForm({ initial, saving, submitLabel, onSubmit }: Props) {
         disabled={!canSubmit || saving}
         onPress={() => onSubmit(v)}
       />
+      {footer}
     </ScrollView>
   );
 }
