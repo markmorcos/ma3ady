@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Modal,
   Pressable,
@@ -35,10 +36,6 @@ type MemberRow = {
 type MembershipRowRaw = {
   user_id: string;
   role: TenantRole;
-  profiles:
-    | { full_name: string | null }
-    | { full_name: string | null }[]
-    | null;
 };
 
 type PendingRowRaw = {
@@ -50,7 +47,7 @@ async function getMembers(tenantId: string): Promise<MemberRow[]> {
   const [memberships, pending] = await Promise.all([
     supabase
       .from('memberships')
-      .select('user_id, role, profiles(full_name)')
+      .select('user_id, role')
       .eq('tenant_id', tenantId),
     supabase
       .from('pending_memberships')
@@ -60,18 +57,30 @@ async function getMembers(tenantId: string): Promise<MemberRow[]> {
   if (memberships.error) throw memberships.error;
   if (pending.error) throw pending.error;
 
+  // Fetch display names separately. memberships.user_id references auth.users
+  // (not profiles directly), so PostgREST can't auto-embed across the two — we
+  // resolve the join in the client.
+  const userIds = (memberships.data ?? []).map((row) => row.user_id);
+  const profilesById = new Map<string, string | null>();
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', userIds);
+    for (const p of profiles ?? []) {
+      profilesById.set(p.id, p.full_name);
+    }
+  }
+
   const accepted = ((memberships.data ?? []) as unknown as MembershipRowRaw[]).map(
-    (row): MemberRow => {
-      const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-      return {
-        key: `m:${row.user_id}`,
-        user_id: row.user_id,
-        role: row.role,
-        email: null,
-        display_name: profile?.full_name ?? null,
-        pending: false,
-      };
-    },
+    (row): MemberRow => ({
+      key: `m:${row.user_id}`,
+      user_id: row.user_id,
+      role: row.role,
+      email: null,
+      display_name: profilesById.get(row.user_id) ?? null,
+      pending: false,
+    }),
   );
   const invited = ((pending.data ?? []) as unknown as PendingRowRaw[]).map(
     (row): MemberRow => ({
@@ -116,6 +125,83 @@ export default function TeamScreen() {
     queryFn: () => getMembers(tenant?.id ?? ''),
     enabled: !!tenant?.id,
   });
+
+  const removeMember = useMutation({
+    mutationFn: async (userId: string) => {
+      if (!tenant) throw new Error('no tenant');
+      const { error } = await supabase
+        .from('memberships')
+        .delete()
+        .eq('tenant_id', tenant.id)
+        .eq('user_id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin-team', tenant?.id] });
+      showToast({ kind: 'success', message: t('admin.teamMemberRemoved') });
+    },
+    onError: (err) => {
+      showToast({
+        kind: 'danger',
+        message: err instanceof Error ? err.message : 'unknown',
+      });
+    },
+  });
+
+  const cancelInvite = useMutation({
+    mutationFn: async (email: string) => {
+      if (!tenant) throw new Error('no tenant');
+      const { error } = await supabase
+        .from('pending_memberships')
+        .delete()
+        .eq('tenant_id', tenant.id)
+        .eq('email', email);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin-team', tenant?.id] });
+      showToast({ kind: 'success', message: t('admin.teamInviteCancelled') });
+    },
+    onError: (err) => {
+      showToast({
+        kind: 'danger',
+        message: err instanceof Error ? err.message : 'unknown',
+      });
+    },
+  });
+
+  const confirmRemove = (member: MemberRow) => {
+    if (member.pending && member.email) {
+      Alert.alert(
+        t('admin.teamCancelInviteTitle'),
+        t('admin.teamCancelInviteBody', { email: member.email }),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('admin.teamCancelInviteConfirm'),
+            style: 'destructive',
+            onPress: () => cancelInvite.mutate(member.email!),
+          },
+        ],
+      );
+      return;
+    }
+    if (!member.user_id) return;
+    Alert.alert(
+      t('admin.teamRemoveMemberTitle'),
+      t('admin.teamRemoveMemberBody', {
+        name: member.display_name ?? member.email ?? '—',
+      }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('admin.teamRemoveMemberConfirm'),
+          style: 'destructive',
+          onPress: () => removeMember.mutate(member.user_id!),
+        },
+      ],
+    );
+  };
 
   const invite = useMutation({
     mutationFn: async () => {
@@ -211,6 +297,21 @@ export default function TeamScreen() {
                       {t(`admin.role.${item.role}`)}
                     </Text>
                   </View>
+                  {canManage ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        item.pending
+                          ? t('admin.teamCancelInvite')
+                          : t('admin.teamRemoveMember')
+                      }
+                      onPress={() => confirmRemove(item)}
+                      hitSlop={8}
+                      style={styles.removeBtn}
+                    >
+                      <Icon name="trash" size={18} color="danger" />
+                    </Pressable>
+                  ) : null}
                 </View>
               </Card>
             );
@@ -291,6 +392,7 @@ const styles = StyleSheet.create({
   memberHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   roleChip: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   pendingHint: { marginTop: 4 },
+  removeBtn: { padding: 4 },
   separator: { height: 8 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
   fab: {

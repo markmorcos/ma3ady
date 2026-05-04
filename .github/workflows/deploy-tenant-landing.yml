@@ -1,4 +1,4 @@
-name: deploy-ma3ady
+name: deploy-ma3ady-landing
 
 on:
   workflow_dispatch: {}

@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
@@ -20,8 +20,12 @@ export default function AdminSettingsScreen() {
     s.tenants.find((tt) => tt.id === s.currentTenantId),
   );
   const refreshTenants = useTenantStore((s) => s.refresh);
+  const profile = useAuthStore((s) => s.profile);
   const signOut = useAuthStore((s) => s.signOut);
   const showToast = useToastStore((s) => s.show);
+
+  const adminOverride = profile?.display_timezone_override ?? null;
+  const effectiveTz = adminOverride ?? tenant?.timezone ?? '—';
 
   const [name, setName] = useState(tenant?.name ?? '');
   const [brandColor, setBrandColor] = useState(tenant?.brand_color ?? '');
@@ -81,7 +85,7 @@ export default function AdminSettingsScreen() {
           autoCapitalize="none"
         />
         <Text variant="caption" color="muted" style={styles.row}>
-          {t('admin.settingsTimezoneLabel')}: {tenant?.timezone ?? '—'}
+          {t('admin.settingsTenantTimezone')}: {tenant?.timezone ?? '—'}
         </Text>
         {canEdit && (
           <Button
@@ -101,7 +105,15 @@ export default function AdminSettingsScreen() {
           accessibilityRole="button"
           style={styles.linkRow}
         >
-          <Text variant="body">{t('admin.settingsDisplayTimezone')}</Text>
+          <View style={styles.flex}>
+            <Text variant="body">{t('admin.settingsDisplayTimezone')}</Text>
+            <Text variant="caption" color="muted">
+              {effectiveTz}
+              {adminOverride
+                ? ` · ${t('admin.tzBadgeOverride')}`
+                : ` · ${t('admin.tzBadgeTenantDefault')}`}
+            </Text>
+          </View>
           <Icon name="chevron-right" size={18} color="muted" />
         </Pressable>
         <Pressable
@@ -137,6 +149,7 @@ export default function AdminSettingsScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
+  flex: { flex: 1 },
   row: { marginTop: 4 },
   linkRow: {
     flexDirection: 'row',

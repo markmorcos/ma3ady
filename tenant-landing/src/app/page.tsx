@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
+import { MarketingHome } from '@/components/MarketingHome';
 import { TenantHeader } from '@/components/TenantHeader';
+import { env } from '@/lib/env';
 import { dirOf, resolveLocale, t, type Locale } from '@/lib/locale';
 import { getAnonClient } from '@/lib/supabase';
-import { currentTenant } from '@/lib/tenant';
+import { currentTenant, slugFromHost } from '@/lib/tenant';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +20,30 @@ type Service = {
 type SearchParams = { lang?: string | string[] };
 
 export async function generateMetadata(): Promise<Metadata> {
+  const h = await headers();
+  const host = h.get('x-forwarded-host') ?? h.get('host');
+  const slug = slugFromHost(host);
+  if (!slug) {
+    return {
+      title: 'ma3ady — Booking, simplified',
+      description:
+        'A bilingual appointment app for small businesses. Customers book in seconds; you spend less time on the phone.',
+      openGraph: {
+        title: 'ma3ady — Booking, simplified',
+        description: 'Bilingual booking for clinics, salons, tutors and service pros.',
+        type: 'website',
+        url: `https://${env.APEX_HOST}/`,
+      },
+      alternates: {
+        canonical: `https://${env.APEX_HOST}/`,
+        languages: {
+          en: `https://${env.APEX_HOST}/`,
+          ar: `https://${env.APEX_HOST}/ar/`,
+        },
+      },
+      robots: { index: true, follow: true },
+    };
+  }
   const tenant = await currentTenant();
   if (!tenant) return { title: 'ma3ady', robots: { index: false } };
   return {
@@ -47,8 +74,16 @@ export default async function TenantLanding({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
+  const h = await headers();
+  const host = h.get('x-forwarded-host') ?? h.get('host');
+  const slug = slugFromHost(host);
   const tenant = await currentTenant();
   const locale: Locale = await resolveLocale(params, tenant?.default_locale ?? 'en');
+
+  // Apex host (no slug) → marketing surface, not tenant landing.
+  if (!slug) {
+    return <MarketingHome locale={locale} />;
+  }
 
   if (!tenant) {
     return (

@@ -480,3 +480,307 @@ footer.site-footer {
     padding-block: 24px;
   }
 }
+
+/* ============================================================
+   Marketing surface (apex ma3ady.com). Scoped under `.marketing`
+   so the booking surface above is unaffected.
+   ============================================================ */
+
+.marketing .container {
+  max-width: 960px;
+  padding-block: 0;
+  padding-inline: 1.5rem;
+  margin-inline: auto;
+}
+
+.marketing .hero {
+  position: relative;
+  padding: 4rem 0 3rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(94, 234, 212, 0.18), transparent 60%),
+    radial-gradient(circle at 80% 100%, rgba(15, 118, 110, 0.12), transparent 60%);
+}
+
+.marketing .hero-lang {
+  position: absolute;
+  top: 1.25rem;
+  inset-inline-end: 1.25rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.marketing .hero-lang a {
+  color: var(--muted);
+  margin: 0 0.35rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.marketing .hero-lang a.active {
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.marketing .hero-lang span {
+  opacity: 0.4;
+}
+
+.marketing .hero-logo {
+  display: block;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  border-radius: 22%;
+  background: linear-gradient(135deg, var(--brand) 0%, #0B5A55 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 12px 30px rgba(15, 118, 110, 0.3);
+}
+
+.marketing .hero h1 {
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.marketing .hero .tagline {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  margin: 0 auto 1rem;
+  font-weight: 500;
+  color: var(--muted);
+  max-width: 32rem;
+}
+
+.marketing .hero .sub {
+  font-size: 1rem;
+  margin: 0 auto 2rem;
+  color: var(--muted);
+  max-width: 30rem;
+}
+
+.marketing .cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.marketing .cta-store {
+  margin-top: 2rem;
+}
+
+.marketing .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.85rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.marketing .btn-primary {
+  background: var(--brand);
+  color: #fff;
+}
+
+.marketing .btn-disabled {
+  background: rgba(120, 113, 108, 0.08);
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.marketing section {
+  padding: 4rem 0;
+}
+
+.marketing section h2 {
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.marketing section .lede {
+  text-align: center;
+  color: var(--muted);
+  max-width: 36rem;
+  margin: 0 auto 2.5rem;
+}
+
+.marketing .alt-bg {
+  background: rgba(120, 113, 108, 0.04);
+}
+
+.marketing .tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.marketing .tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+
+.marketing .tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand);
+}
+
+.marketing .tile .icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.marketing .tile h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.25rem;
+}
+
+.marketing .tile p {
+  font-size: 0.9rem;
+  margin: 0;
+  color: var(--muted);
+}
+
+.marketing .feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.marketing .feature {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.75rem;
+}
+
+.marketing .feature h3 {
+  font-size: 1.15rem;
+  margin: 0 0 0.5rem;
+  color: var(--brand);
+}
+
+.marketing .feature p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.marketing .screenshot-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.marketing .screenshot-row figure {
+  margin: 0;
+  text-align: center;
+}
+
+.marketing .screenshot-row .placeholder {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 9/19;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(120, 113, 108, 0.08), var(--border));
+  display: block;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(12, 10, 9, 0.06);
+}
+
+.marketing .screenshot-row figcaption {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 0.75rem;
+}
+
+.marketing .faq-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.marketing .faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  position: relative;
+  padding-inline-end: 24px;
+}
+
+.marketing .faq-item summary::after {
+  content: '+';
+  position: absolute;
+  inset-inline-end: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.marketing .faq-item[open] summary::after {
+  content: '−';
+}
+
+.marketing .faq-item p {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+}
+
+.marketing .cta-band {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.marketing .cta-band h2 {
+  margin-bottom: 0.5rem;
+}
+
+.marketing .cta-band p {
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+}
+
+.marketing .site-footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.marketing .site-footer .links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.marketing .site-footer .links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.marketing .site-footer .meta {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}

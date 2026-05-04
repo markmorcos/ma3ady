@@ -21,7 +21,13 @@ services:
       - name: NODE_ENV
         value: production
 
+    # Single Next.js image serves both the apex (marketing surface) and every
+    # tenant subdomain (booking surface). Host-header routing happens inside
+    # the app: slugFromHost() returns null for the apex and renders
+    # MarketingHome; otherwise it renders the tenant landing.
     ingress:
-      host: '*.ma3ady.com'
+      hosts:
+        - ma3ady.com
+        - '*.ma3ady.com'
       path: /
       pathType: Prefix
