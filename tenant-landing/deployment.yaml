@@ -11,11 +11,20 @@ services:
 
     env:
       - name: SUPABASE_URL
-        valueFromSecret: supabase-url
+        valueFrom:
+          secretKeyRef:
+            name: supabase-url
+            key: SUPABASE_URL
       - name: SUPABASE_ANON_KEY
-        valueFromSecret: supabase-anon-key
+        valueFrom:
+          secretKeyRef:
+            name: supabase-anon-key
+            key: SUPABASE_ANON_KEY
       - name: SUPABASE_SERVICE_ROLE_KEY
-        valueFromSecret: supabase-service-role-key
+        valueFrom:
+          secretKeyRef:
+            name: supabase-service-role-key
+            key: SUPABASE_SERVICE_ROLE_KEY
       - name: APEX_HOST
         value: ma3ady.com
       - name: NODE_ENV
