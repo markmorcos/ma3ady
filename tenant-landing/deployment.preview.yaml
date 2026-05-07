@@ -1,0 +1,27 @@
+version: 0.4.7
+
+namespace: ma3ady-preview
+project: ma3ady
+
+services:
+  - name: tenant-landing
+    context: tenant-landing
+    image: ghcr.io/markmorcos/ma3ady-tenant-landing
+    port: 8080
+
+    env:
+      - name: SUPABASE_URL
+        valueFromSecret: supabase-url
+      - name: SUPABASE_ANON_KEY
+        valueFromSecret: supabase-anon-key
+      - name: SUPABASE_SERVICE_ROLE_KEY
+        valueFromSecret: supabase-service-role-key
+      - name: APEX_HOST
+        value: preview.ma3ady.com
+      - name: NODE_ENV
+        value: production
+
+    ingress:
+      host: preview.ma3ady.com
+      path: /
+      pathType: Prefix
