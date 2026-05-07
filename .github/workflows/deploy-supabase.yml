@@ -14,8 +14,9 @@ concurrency:
   group: deploy-supabase-${{ github.ref }}
   cancel-in-progress: false
 
-# `SUPABASE_DB_PASSWORD` and `SUPABASE_PROJECT_REF` are scoped to each
-# GitHub Environment (preview, production), so the same unsuffixed name
+# Both `SUPABASE_DB_PASSWORD` (Secret) and `SUPABASE_PROJECT_REF`
+# (Variable — refs aren't sensitive, they're in the dashboard URL) are
+# scoped to each GitHub Environment, so the same unsuffixed name
 # resolves to the correct value per job. Repo-level secrets remain
 # `SUPABASE_ACCESS_TOKEN` (single PAT spans both projects).
 
@@ -26,7 +27,7 @@ jobs:
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
@@ -44,7 +45,7 @@ jobs:
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
