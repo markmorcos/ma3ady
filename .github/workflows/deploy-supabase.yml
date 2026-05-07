@@ -30,9 +30,15 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+      - run: pnpm install --frozen-lockfile
       - name: Push migrations
         run: make deploy-migrations PROJECT=preview ASSUME_YES=1
       - name: Deploy functions
@@ -48,9 +54,15 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+      - run: pnpm install --frozen-lockfile
       - name: Push migrations
         run: make deploy-migrations PROJECT=prod ASSUME_YES=1
       - name: Deploy functions
