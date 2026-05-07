@@ -37,7 +37,7 @@ export function compareToSchema(
   return { ok: issues.length === 0, issues };
 }
 
-const OPTIONAL_TOP_LEVEL_SECTIONS = new Set(['dns', 'k8s']);
+const OPTIONAL_TOP_LEVEL_SECTIONS = new Set(['dns', 'k8s', 'supabase_auth']);
 
 function walk(
   schema: Record<string, unknown>,
@@ -89,7 +89,7 @@ function mustBeNonEmpty(pathParts: string[], schemaVal: unknown): boolean {
   if (schemaVal !== '') {
     return false;
   }
-  if (pathParts[0] === 'dns' || pathParts[0] === 'k8s') return false;
+  if (OPTIONAL_TOP_LEVEL_SECTIONS.has(pathParts[0] ?? '')) return false;
   return true;
 }
 
