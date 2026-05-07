@@ -43,7 +43,7 @@
   - Validates the state transition (allowed transitions defined in the `implement-reschedule-and-cancel` change)
   - Updates status (and `cancelled_at`/`cancelled_by_user_id` when cancelling)
   - Returns updated row
-- [ ] 1.16 Tests:
+- [x] 1.16 Tests:
   - RLS: customer cannot read another tenant's appointments
   - Status transition validation (no `cancelled → confirmed`)
   - Stats calculation correctness on a fixture

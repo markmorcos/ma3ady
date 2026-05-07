@@ -41,6 +41,7 @@ test-db: ## Run all SQL-based DB tests. Requires local Supabase to be up.
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/booking.test.sql
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/audit.test.sql
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/onboarding.test.sql
+	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/admin.test.sql
 
 expo-start: ## Start Expo dev server (Expo Go)
 	pnpm exec expo start
