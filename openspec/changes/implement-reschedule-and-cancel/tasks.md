@@ -21,7 +21,7 @@
   - On select → confirms, calls `reschedule-appointment` Edge Function with auth (no token)
 - [x] 1.7 Write `app/(admin)/appointment/[id]/reschedule.tsx` (twin of customer flow with admin auth)
 - [x] 1.8 Update `update-appointment-status` to set `cancelled_at = now(), cancelled_by_user_id = auth.uid()` when the new status is `cancelled`
-- [ ] 1.9 Tests:
+- [x] 1.9 Tests:
   - Allowed transitions per the enum table
   - Disallowed transitions return `invalid_transition` with no row mutation
   - Admin reschedule
