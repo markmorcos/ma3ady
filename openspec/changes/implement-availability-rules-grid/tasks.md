@@ -17,7 +17,7 @@
 - [x] 1.7 Write `<ExceptionForm>` with `kind` toggle (Block / Extra), datetime pickers, optional reason text
 - [x] 1.8 Implement copy-day flow: choose source day → pick targets → confirm → calls `bulkReplaceRulesForDay` for each target
 - [x] 1.9 Empty state: when no rules configured, show illustration + "Set your hours" CTA that pre-fills Mon–Fri 09:00–17:00 as a template
-- [ ] 1.10 Tests:
+- [x] 1.10 Tests:
   - Bulk replace is atomic (failure rolls back)
   - Editing a band immediately reflects in `compute_available_slots`
   - Copy-day produces identical bands on target days
