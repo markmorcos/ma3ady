@@ -38,6 +38,17 @@ export default function CustomerSettingsScreen() {
         </Pressable>
       </Card>
 
+      <Card>
+        <Pressable
+          onPress={() => router.push('/(app)/data-and-privacy' as never)}
+          accessibilityRole="button"
+          style={styles.linkRow}
+        >
+          <Text variant="body">{t('app.settingsDataPrivacy')}</Text>
+          <Icon name="chevron-right" size={18} color="muted" />
+        </Pressable>
+      </Card>
+
       <Button
         label={t('admin.signOut')}
         variant="ghost"

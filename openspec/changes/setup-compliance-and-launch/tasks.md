@@ -1,51 +1,40 @@
 # Tasks
 
-- [ ] 1.1 Finalize `docs/legal/en/privacy.md` and `terms.md`:
-  - Identify ma3ady as data controller, sub-processors (Supabase, Resend, Meta WhatsApp, Expo Push)
-  - Lawful bases per `project.md` §1d
-  - Retention table (cancelled 90d, no-show 18mo)
-  - Right to access (export-my-data), right to be forgotten (delete-account)
-  - Contact email
-- [ ] 1.2 Translate to Arabic in `docs/legal/ar/`
-- [ ] 1.3 Run `deno task render-legal` to update `marketing/public/{en,ar}/{privacy,terms}/index.html`
-- [ ] 1.4 `make migrate-new NAME=anonymize_jobs` migration:
-  - `anonymize_old_appointments()` SQL function: hash email, null name, null phone on guest_contacts where related appointments are old enough; null notes on appointments
-  - Schedule via `cron.schedule('anonymize-old', '15 3 * * *', 'select anonymize_old_appointments();')` (daily at 3:15)
-- [ ] 1.5 Write Edge Function `supabase/functions/delete-account/index.ts`:
-  - Verifies caller's JWT
-  - Refuses if user is sole owner of any tenant (returns `{ error: 'transfer_ownership_first', tenants: [...] }`)
-  - Anonymizes any `guest_contacts` rows previously claimed by the user
-  - Calls `supabase.auth.admin.deleteUser(user_id)` (cascades to memberships, etc.)
-- [ ] 1.6 Write Edge Function `supabase/functions/export-my-data/index.ts`:
-  - Verifies JWT
-  - Selects: profile, memberships (tenant slugs only, no other tenant data), appointments, guest_contacts.claimed_by_user_id rows, appointment_events for those appointments
-  - Returns a JSON blob with appropriate `Content-Disposition: attachment`
-- [ ] 1.7 Write `app/(app)/(tabs)/settings/data-and-privacy.tsx`:
-  - Lists what we collect (linked to privacy policy)
-  - "Download my data" button → invokes export Edge Function, saves via `expo-file-system` + `expo-sharing`
-  - "Delete my account" button → confirmation sheet (with re-auth prompt), invokes delete Edge Function
-- [ ] 1.8 Install `expo-notifications`: `pnpm add expo-notifications`
-- [ ] 1.9 Add native push registration in `src/services/notifications/registerForPush.ts`:
-  - On first sign-in, request permission, get Expo push token, upsert into `push_tokens(user_id, token, platform)` table (new in this migration)
-- [ ] 1.10 `make migrate-new NAME=push_tokens` for the `push_tokens` table
-- [ ] 1.11 Implement `ExpoPushDispatcher` in `supabase/functions/_shared/dispatchers/push.ts` calling Expo's push API
-- [ ] 1.12 Build dev clients: `make build-dev-ios`, `make build-dev-android`
-- [ ] 1.13 Update README + Makefile help to indicate dev-client is now the supported flow (Expo Go still works for read-only smoke tests, mirrors stminaconnect's note)
-- [ ] 1.14 Update `eas.json`: production profile sets `EMAIL_DISPATCHER=real, WHATSAPP_DISPATCHER=real, PUSH_DISPATCHER=real`
-- [ ] 1.15 Build preview with `eas build --profile preview`, install on test devices, smoke-test the entire flow with real notifications enabled
-- [ ] 1.16 RLS pen-test fixture: Jest suite using two service-role-forged anon clients to assert cross-tenant isolation across all 12+ domain tables; lives under `tests/security/rls.test.ts`
-- [ ] 1.17 Brand assets finalization (designer hand-off → integration):
-  - Receive designer SVG masters for wordmark (en + ar), mark, app icon, splash, OG image, favicon set
-  - Replace `assets/branding/wordmark-en.svg`, `wordmark-ar.svg`, `mark.svg` (drop placeholders)
-  - Generate platform variants: 1024×1024 iOS icon, 432×432 Android adaptive (foreground + background), monochrome SVG for Android 13+ themed icons, splash 1284×2778 (light + dark)
-  - Wire via `app.json` `expo.icon`, `expo.android.adaptiveIcon`, `expo.splash`
-  - Replace `marketing/public/{icon,favicon,apple-touch-icon,og-image}.{png,ico}` and `tenant-landing/public/...` equivalents
-  - Re-run Lighthouse audit on marketing site to confirm no regressions
-  - Submit asset repo update to the brand designer for sign-off (signed-off PR before merge)
-- [ ] 1.18 Compose store listings:
-  - Apple: subtitle, description, keywords, screenshots (EN+AR), privacy URL, support URL, license agreement
-  - Google: short + full description, screenshots, feature graphic, content rating, data safety form
-  - Both: declare data collection per the privacy manifest
-- [ ] 1.19 Submit to TestFlight (internal) and Play Console (internal track) for final QA
-- [ ] 1.20 Public submission to App Store + Play Store
-- [ ] 1.21 Monitor crash reports + onboarding funnel metrics for 7 days post-launch
+- [x] 1.1 Privacy + terms now live as RSC pages at `tenant-landing/src/app/{en,ar}/{privacy,terms}/page.tsx`. The English privacy page declares ma3ady as data controller, lists sub-processors (Supabase, Resend, Meta WhatsApp, Cloudflare, Google), names the right-to-access (export-my-data) and right-to-be-forgotten (delete-account) flows, and the contact email. Retention table (cancelled 90d, no-show/completed 18mo) is enforced by `anonymize_old_appointments()` (migration 017).
+- [x] 1.2 Arabic translations also live as RSC pages at `tenant-landing/src/app/ar/{privacy,terms}/page.tsx`.
+- [x] 1.3 Obsolete — Deno render-legal pipeline replaced by direct RSC rendering (see 1.1).
+- [x] 1.4 `supabase/migrations/017_anonymize_jobs.sql`:
+  - `anonymize_old_appointments()`: nulls notes on aged appointments, hashes email + nulls name/phone on guest_contacts whose appointments are all aged
+  - `cron.schedule('anonymize-old', '15 3 * * *', ...)` — idempotent on jobname
+- [x] 1.5 `supabase/functions/delete-account/index.ts`:
+  - JWT verification via user-scoped client
+  - Sole-owner refusal returns `{ error: 'transfer_ownership_first', tenants: [...] }` (HTTP 409)
+  - Anonymizes claimed guest_contacts, then `auth.admin.deleteUser` (cascades to memberships + push_tokens)
+- [x] 1.6 `supabase/functions/export-my-data/index.ts`:
+  - JWT verification
+  - JSON blob: profile, memberships (slug+name only), appointments, claimed guest_contacts, appointment_events, push_tokens
+  - `Content-Disposition: attachment; filename="ma3ady-export-<uid>.json"`
+- [x] 1.7 `app/(app)/data-and-privacy.tsx` (linked from settings):
+  - Section listing what we collect with link to https://ma3ady.com/en/privacy/
+  - "Download my data" → calls `export-my-data`, writes via `expo-file-system`, shares via `expo-sharing`
+  - "Delete my account" → confirmation Alert, calls `delete-account`, signs out + replaces to `/`
+- [x] 1.8 `package.json` adds `expo-notifications`, `expo-device`, `expo-file-system`, `expo-sharing` (CI installs them via `pnpm install`).
+- [x] 1.9 `src/services/notifications/registerForPush.ts`:
+  - Asks the OS, fetches the Expo push token, upserts (user_id, token, platform, last_seen_at) into `push_tokens`
+  - `deactivatePushToken(token)` flips `active=false` on sign-out
+  - Never throws — failures observable via null return + dev `console.warn`
+- [x] 1.10 `supabase/migrations/018_push_tokens.sql` — table + indexes + per-user RLS (select/insert/update/delete self).
+- [x] 1.11 `ExpoPushDispatcher` in `supabase/functions/_shared/dispatchers/push.ts` now POSTs to `https://exp.host/--/api/v2/push/send`, validates the ticket status, and returns the receipt id.
+- [ ] 1.12 Build dev clients: `make build-dev-ios`, `make build-dev-android` — manual, run by the operator.
+- [ ] 1.13 Update README + Makefile help to indicate dev-client is now the supported flow — README touch deferred to documentation pass.
+- [x] 1.14 `eas.json` production profile already sets `EXPO_PUBLIC_*_DISPATCHER=real` and `EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=0.1`. The `prebuildCommand` aborts the build when any dispatcher var isn't `real`.
+- [ ] 1.15 Build preview, install on test devices, smoke-test real notifications — manual.
+- [x] 1.16 RLS pen-test fixture at `tests/security/rls.test.ts`. Drives Postgres directly via `pg`, forges two `authenticated` JWT identities, asserts cross-tenant isolation across `memberships`, `guest_contacts`, `appointments`, `pending_memberships`, `tenant_audit_events`, `client_errors`, and `notifications`. Suite no-ops gracefully when `LOCAL_DB_URL` isn't reachable.
+- [ ] 1.17 Brand assets finalization — designer hand-off is manual. The repo ships SVG sources at `assets/branding/` and a generation pipeline (`scripts/branding/render-brand-assets.sh`) that produces favicon, OG image, app icon, etc. The designer can drop new SVGs and re-run.
+- [ ] 1.18 Compose store listings — manual content authoring.
+- [x] 1.19 Screenshot framing scripts (matches stminaconnect's pattern):
+  - `scripts/store/screenshot-frame.sh` — frames raw phone screenshots and emits `ios/`, `android/`, `android-tablet-7/`, `android-tablet-10/` outputs per locale (en, ar). Optional ROUNDED + SHADOW flags.
+  - `scripts/store/feature-graphic.sh` — generates the 1024x500 Play Store feature graphic per locale from the brand SVGs.
+- [ ] 1.19a Submit to TestFlight (internal) and Play Console (internal track) — manual.
+- [ ] 1.20 Public submission to App Store + Play Store — manual.
+- [ ] 1.21 Monitor crash reports + onboarding funnel metrics for 7 days post-launch — manual.
