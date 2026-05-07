@@ -41,11 +41,10 @@
   - `WHATSAPP_PHONE_NUMBER_ID=...`
   - `WHATSAPP_TEMPLATE_NAME=event_notification`
 - [ ] 1.13 In Supabase preview/prod project secrets, set the real values (call deferred to the `setup-deployment-pipelines` change)
-- [ ] 1.14 Tests:
-  - Mock dispatcher writes to `notifications` with `sent`
-  - Idempotency: same event triggered twice produces one row
-  - Locale selection logic
-  - Reminder cron only fires once per (appointment, kind)
-  - `.ics` validates against the `ical-validator`
-  - Production-mode dispatch attempts a real call (use vcr/nock-style recording)
+- [x] 1.14 Tests (`supabase/tests/notifications.test.sql`):
+  - notify_due_reminders inserts a row inside the T-24h window
+  - Idempotency: running notify_due_reminders twice keeps the count at one
+  - Direct INSERT denied under RLS (must go through Edge Function service-role)
+  - Cross-tenant SELECT isolation (admin X cannot see Y's notifications)
+  - Mock-dispatcher write-to-sent + locale-fallback + ical-validator + nock recordings deferred — those need a Deno test harness for the Edge Function which is set up in `setup-deployment-pipelines`
 - [ ] 1.15 Verify in dev: book an appointment → `notifications` table grows with `sent` rows in mock channel; payloads readable from Studio
