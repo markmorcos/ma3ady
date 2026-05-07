@@ -30,7 +30,7 @@
   ```
 - [x] 1.9 Write `tenant-landing/public/.well-known/assetlinks.json` for Android — populated in the `setup-compliance-and-launch` change when SHA-256 fingerprint is known; placeholder file present here
 - [x] 1.10 Configure mobile app `app.json` with `associatedDomains: ["applinks:ma3ady.com", "applinks:*.ma3ady.com"]` (declared; effective only in dev client / prod build)
-- [ ] 1.11 Tests:
+- [x] 1.11 Tests:
   - Unknown subdomain renders 404
   - Reserved subdomain (`www`, `app`) redirects to apex
   - Known tenant renders with brand color

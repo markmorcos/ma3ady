@@ -37,5 +37,28 @@ module.exports = {
       testEnvironment: 'node',
       testMatch: ['<rootDir>/eslint-rules/__tests__/**/*.test.js'],
     },
+    {
+      displayName: 'tenant-landing',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/tenant-landing/src/**/*.test.{ts,tsx}'],
+      transform: {
+        '^.+\\.tsx?$': [
+          'ts-jest',
+          {
+            tsconfig: {
+              module: 'commonjs',
+              jsx: 'react-jsx',
+              esModuleInterop: true,
+              moduleResolution: 'node',
+              baseUrl: './tenant-landing',
+              paths: { '@/*': ['./src/*'] },
+            },
+          },
+        ],
+      },
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/tenant-landing/src/$1',
+      },
+    },
   ],
 };
