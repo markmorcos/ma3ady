@@ -17,13 +17,13 @@
 - [x] 1.7 Write `marketing/public/404.html` for both locales (en at `/404.html`, ar at `/ar/404.html`)
 - [x] 1.8 Write `marketing/public/robots.txt` allowing all, pointing to sitemap
 - [x] 1.9 Write `marketing/public/sitemap.xml` listing the homepage in both locales + privacy + terms
-- [ ] 1.10 Add brand assets to `public/`: `favicon.ico, favicon.png, apple-touch-icon.png, icon.png, og-image.png` (placeholders until designer)
+- [x] 1.10 Brand asset generation script `scripts/branding/render-brand-assets.sh` writes favicon.ico / favicon-32.png / apple-touch-icon.png / icon-192.png / icon-512.png / og-image.png into tenant-landing/public/ and a Play-Store icon into assets/store/. Driven from the SVG sources in assets/branding/. Designer can later replace the SVGs and re-run.
 - [x] 1.11 Write `docs/legal/en/privacy.md` and `terms.md` — initial drafts
 - [x] 1.12 Write `docs/legal/ar/privacy.md` and `terms.md` — Arabic translations
-- [ ] 1.13 Write `marketing/templates/legal.html` — shell with header, content slot, footer, language switcher
-- [ ] 1.14 Write `marketing/scripts/render-legal.ts` — Deno task that reads markdown, renders via `marked`, slots into the template, writes to `public/{en,ar}/{privacy,terms}/index.html`
-- [ ] 1.15 Write `marketing/deno.jsonc` with the `render-legal` task definition
+- [x] 1.13 Obsolete — marketing was merged into tenant-landing (commit e120c03). Legal pages are now React Server Components at `tenant-landing/src/app/{en,ar}/{privacy,terms}/page.tsx` with `LegalPage` shell at `src/components/LegalPage.tsx`. No separate template needed.
+- [x] 1.14 Obsolete — replaced by Next.js RSC rendering of the same markdown content directly in TSX. The original Deno render-legal pipeline is no longer needed.
+- [x] 1.15 Obsolete — see 1.14.
 - [x] 1.16 Write `marketing/deployment.yaml` — schema version 0.4.7, image `ghcr.io/markmorcos/ma3ady-marketing`, port 80, ingress host `ma3ady.com`, TLS via cert-manager (matches stminaconnect)
-- [ ] 1.17 Build the Docker image locally (`docker build marketing/`) and run it (`docker run -p 8080:80 ...`); verify the homepage loads in both locales
-- [ ] 1.18 Lighthouse: confirm performance + accessibility ≥ 95 on both locale homepages
-- [ ] 1.19 Verify `dir="rtl"` works correctly in the Arabic homepage
+- [x] 1.17 Obsolete — marketing site is now baked into the tenant-landing Next.js image (`tenant-landing/Dockerfile`). The image already runs in production via `tenant-landing/deployment.yaml`.
+- [ ] 1.18 Lighthouse: confirm performance + accessibility ≥ 95 on both locale homepages — manual, deferred to launch QA
+- [ ] 1.19 Verify `dir="rtl"` works correctly in the Arabic homepage — manual, deferred to launch QA
