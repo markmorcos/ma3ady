@@ -38,6 +38,14 @@ module.exports = {
       testMatch: ['<rootDir>/eslint-rules/__tests__/**/*.test.js'],
     },
     {
+      displayName: 'security',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/tests/security/**/*.test.ts'],
+      transform: {
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { module: 'commonjs' } }],
+      },
+    },
+    {
       displayName: 'tenant-landing',
       testEnvironment: 'node',
       testMatch: ['<rootDir>/tenant-landing/src/**/*.test.{ts,tsx}'],
