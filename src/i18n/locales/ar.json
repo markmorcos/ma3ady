@@ -2,6 +2,7 @@
   "common": {
     "tagline": "حجز أبسط.",
     "yourTime": "وقتك",
+    "dash": "—",
     "cancel": "إلغاء",
     "save": "حفظ",
     "delete": "حذف",
@@ -236,9 +237,62 @@
     },
     "signedInAs": "مسجَّل الدخول باسم",
     "settingsLanguage": "اللغة",
+    "settingsDataPrivacy": "البيانات والخصوصية",
     "bookingTitle": "الحجز",
     "bookingReschedule": "تغيير الموعد",
     "rescheduleSuccess": "تم تغيير الموعد"
+  },
+  "dataPrivacy": {
+    "title": "البيانات والخصوصية",
+    "collectTitle": "ما الذي نجمعه",
+    "collectBody": "تفاصيل الحجز (الاسم، البريد، الهاتف، الخدمة، الوقت)، وبيانات الحساب (الاسم، البريد، اللغة)، وبيانات تشخيص الأخطاء. لا نستخدم أدوات تتبع خارجية.",
+    "readPolicy": "اقرأ سياسة الخصوصية كاملة",
+    "exportTitle": "تنزيل بياناتي",
+    "exportBody": "احصل على نسخة JSON من ملفك الشخصي وحجوزاتك وسجل الأحداث.",
+    "exportCta": "تنزيل بياناتي",
+    "exportingCta": "جاري التصدير…",
+    "deleteTitle": "حذف حسابي",
+    "deleteBody": "يُزيل ملفك الشخصي ويجعل حجوزاتك السابقة مجهولة الهوية. إن كنت المالك الوحيد لحساب تجاري، انقل الملكية أولاً.",
+    "deleteCta": "حذف حسابي",
+    "deletingCta": "جاري الحذف…",
+    "deleteConfirmTitle": "حذف حسابك؟",
+    "deleteConfirmBody": "سيؤدي هذا إلى حذف ملفك الشخصي بشكل نهائي وجعل حجوزاتك السابقة مجهولة. سيتم تسجيل خروجك.",
+    "deleteConfirmAction": "حذف",
+    "deleteTransferTitle": "انقل الملكية أولاً",
+    "deleteTransferBody": "أنت المالك الوحيد لـ: {{tenants}}. رقِّ عضواً آخر إلى مالك قبل حذف حسابك.",
+    "exportFailed": "فشل التصدير",
+    "deleteFailed": "فشل الحذف",
+    "exportSavedTitle": "تم حفظ التصدير",
+    "exportSavedBody": "تم الحفظ في {{path}}"
+  },
+  "errorViewer": {
+    "title": "الأخطاء",
+    "filterAll": "الكل",
+    "kind": {
+      "all": "الكل",
+      "boundary": "حدّ",
+      "unhandled_rejection": "غير ملتقَط",
+      "manual": "يدوي",
+      "network": "شبكة",
+      "rls_denied": "rls"
+    },
+    "range": {
+      "day": "٢٤ س",
+      "week": "٧ أيام",
+      "month": "٣٠ يوم"
+    },
+    "empty": "لا توجد أخطاء في هذه النافذة",
+    "notFound": "غير موجود.",
+    "fields": {
+      "when": "متى",
+      "kind": "النوع",
+      "platform": "المنصّة",
+      "appVersion": "إصدار التطبيق",
+      "locale": "اللغة",
+      "message": "الرسالة",
+      "stack": "التتبّع",
+      "payload": "الحمولة"
+    }
   },
   "admin": {
     "tabs": {

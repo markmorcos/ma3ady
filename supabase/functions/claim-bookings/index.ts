@@ -12,6 +12,7 @@
 
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { withLogging } from '../_shared/withLogging.ts';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -30,7 +31,8 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve(
+  withLogging('claim-bookings', async (req: Request) => {
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'method_not_allowed' }, 405);
   }
@@ -109,4 +111,5 @@ Deno.serve(async (req: Request) => {
     claimed_appointments: claimedAppointments,
   };
   return jsonResponse(result);
-});
+  }),
+);

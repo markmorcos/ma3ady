@@ -2,6 +2,7 @@
   "common": {
     "tagline": "Booking, simplified.",
     "yourTime": "your time",
+    "dash": "—",
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
@@ -236,9 +237,62 @@
     },
     "signedInAs": "Signed in as",
     "settingsLanguage": "Language",
+    "settingsDataPrivacy": "Data & privacy",
     "bookingTitle": "Booking",
     "bookingReschedule": "Reschedule",
     "rescheduleSuccess": "Rescheduled"
+  },
+  "dataPrivacy": {
+    "title": "Data & Privacy",
+    "collectTitle": "What we collect",
+    "collectBody": "Booking details (name, email, phone, service, time), account profile (name, email, locale), and crash telemetry. No third-party trackers.",
+    "readPolicy": "Read full privacy policy",
+    "exportTitle": "Download my data",
+    "exportBody": "Get a JSON export of your profile, bookings, and event history.",
+    "exportCta": "Download my data",
+    "exportingCta": "Exporting…",
+    "deleteTitle": "Delete my account",
+    "deleteBody": "Removes your profile and anonymizes past bookings. If you are the only owner of a tenant, transfer ownership first.",
+    "deleteCta": "Delete my account",
+    "deletingCta": "Deleting…",
+    "deleteConfirmTitle": "Delete your account?",
+    "deleteConfirmBody": "This permanently removes your profile and anonymizes past bookings. You will be signed out.",
+    "deleteConfirmAction": "Delete",
+    "deleteTransferTitle": "Transfer ownership first",
+    "deleteTransferBody": "You are the only owner of: {{tenants}}. Promote another member to owner before deleting your account.",
+    "exportFailed": "Export failed",
+    "deleteFailed": "Delete failed",
+    "exportSavedTitle": "Export saved",
+    "exportSavedBody": "Saved to {{path}}"
+  },
+  "errorViewer": {
+    "title": "Errors",
+    "filterAll": "All",
+    "kind": {
+      "all": "all",
+      "boundary": "boundary",
+      "unhandled_rejection": "unhandled",
+      "manual": "manual",
+      "network": "network",
+      "rls_denied": "rls"
+    },
+    "range": {
+      "day": "24h",
+      "week": "7d",
+      "month": "30d"
+    },
+    "empty": "No errors in this window",
+    "notFound": "Not found.",
+    "fields": {
+      "when": "When",
+      "kind": "Kind",
+      "platform": "Platform",
+      "appVersion": "App version",
+      "locale": "Locale",
+      "message": "Message",
+      "stack": "Stack",
+      "payload": "Payload"
+    }
   },
   "admin": {
     "tabs": {

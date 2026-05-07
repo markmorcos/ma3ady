@@ -7,6 +7,7 @@
 
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { withLogging } from '../_shared/withLogging.ts';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -33,7 +34,8 @@ function jsonResponse(body: unknown, status = 200): Response {
 const ROLES = new Set(['admin', 'staff', 'customer']);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-Deno.serve(async (req: Request) => {
+Deno.serve(
+  withLogging('invite-member', async (req: Request) => {
   if (req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -129,4 +131,5 @@ Deno.serve(async (req: Request) => {
 
   const result: InviteResult = { status: 'invited', email };
   return jsonResponse(result);
-});
+  }),
+);

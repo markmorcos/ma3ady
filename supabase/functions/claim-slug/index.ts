@@ -7,6 +7,7 @@
 
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { withLogging } from '../_shared/withLogging.ts';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -49,7 +50,8 @@ function isValidIanaZone(z: string): boolean {
   }
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve(
+  withLogging('claim-slug', async (req: Request) => {
   if (req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -141,4 +143,5 @@ Deno.serve(async (req: Request) => {
   }
 
   return jsonResponse({ tenant });
-});
+  }),
+);

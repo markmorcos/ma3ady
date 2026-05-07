@@ -45,6 +45,7 @@ test-db: ## Run all SQL-based DB tests. Requires local Supabase to be up.
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/availability_rules_grid.test.sql
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/reschedule_cancel.test.sql
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/notifications.test.sql
+	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/observability.test.sql
 
 expo-start: ## Start Expo dev server (Expo Go)
 	pnpm exec expo start
