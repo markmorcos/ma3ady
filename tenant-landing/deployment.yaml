@@ -11,9 +11,9 @@ services:
 
     env:
       - name: SUPABASE_URL
-        value: $SUPABASE_URL
+        valueFromSecret: supabase-url
       - name: SUPABASE_ANON_KEY
-        value: $SUPABASE_ANON_KEY
+        valueFromSecret: supabase-anon-key
       - name: SUPABASE_SERVICE_ROLE_KEY
         valueFromSecret: supabase-service-role-key
       - name: APEX_HOST
