@@ -31,10 +31,19 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            { "scheme": "https", "host": "ma3ady.com" },
-            { "scheme": "https", "host": "preview.ma3ady.com" }
+            {
+              "scheme": "https",
+              "host": "ma3ady.com"
+            },
+            {
+              "scheme": "https",
+              "host": "preview.ma3ady.com"
+            }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -49,6 +58,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7073f76a-c362-46ea-90ed-928ffaa7a470"
+      }
+    },
+    "owner": "markmorcos"
   }
 }
