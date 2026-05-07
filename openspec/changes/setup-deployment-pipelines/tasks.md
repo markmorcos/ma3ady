@@ -1,9 +1,6 @@
 # Tasks
 
-- [x] 1.1 `.github/workflows/ci.yml`:
-  - Triggers `pull_request` and `push: branches: [main]`
-  - Jobs: `lint`, `typecheck`, `test` (jest --ci --coverage), `db-lint` (validates migration filename pattern + applies every migration into a throwaway Postgres), `validate-secrets-schema`
-  - All jobs use Node 20 LTS with pnpm cache
+- [ ] 1.1 `.github/workflows/ci.yml` — dropped by request; quality gates run via pre-commit hook (`pnpm lint:fix` + `tsc --noEmit`) and `make test-db` locally.
 - [x] 1.2 Marketing was merged into tenant-landing (commit e120c03); the `deploy-marketing.yml` placeholder is no longer needed. Tenant-landing covers it.
 - [x] 1.3 `.github/workflows/deploy-tenant-landing.yml` rebuilt: dispatches `deployment.preview.yaml` first then `deployment.yaml`, gated by preview success. Manual `target=preview|production|both` input.
 - [x] 1.4 `.github/workflows/deploy-supabase.yml`:
