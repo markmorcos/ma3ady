@@ -38,7 +38,24 @@ export function MarketingHome({ locale }: Props) {
           </Link>
         </nav>
         <div className="container">
-          <div className="hero-logo" aria-hidden="true" />
+          <div className="hero-logo" aria-hidden="true">
+            <svg
+              viewBox="0 0 64 64"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx={32} cy={32} r={26} />
+              <line x1={32} y1={6} x2={32} y2={12} />
+              <line x1={58} y1={32} x2={52} y2={32} />
+              <line x1={32} y1={58} x2={32} y2={52} />
+              <line x1={6} y1={32} x2={12} y2={32} />
+              <line x1={32} y1={32} x2={32} y2={20} />
+              <line x1={32} y1={32} x2={44} y2={36} />
+            </svg>
+          </div>
           <h1>ma3ady</h1>
           <p className="tagline">{t(locale, 'marketing.tagline')}</p>
           <p className="sub">{t(locale, 'marketing.sub')}</p>

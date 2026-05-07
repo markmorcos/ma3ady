@@ -527,13 +527,21 @@ footer.site-footer {
 }
 
 .marketing .hero-logo {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 80px;
   height: 80px;
   margin: 0 auto 1.5rem;
   border-radius: 22%;
   background: linear-gradient(135deg, var(--brand) 0%, #0B5A55 100%);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 12px 30px rgba(15, 118, 110, 0.3);
+  color: #ffffff;
+}
+
+.marketing .hero-logo svg {
+  width: 56%;
+  height: 56%;
 }
 
 .marketing .hero h1 {
