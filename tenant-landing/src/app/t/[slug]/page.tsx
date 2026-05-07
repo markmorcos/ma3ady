@@ -16,7 +16,7 @@ type Service = {
 };
 
 type Params = { slug: string };
-type SearchParams = { lang?: string | string[] };
+type SearchParams = { lang?: string | string[]; cancelled?: string };
 
 export async function generateMetadata({
   params,
@@ -73,6 +73,10 @@ export default async function TenantLanding({
     <div dir={dirOf(locale)} lang={locale}>
       <main className="container">
         <TenantHeader tenant={tenant} />
+
+        {sp.cancelled === '1' ? (
+          <div className="banner">{t(locale, 'manage.cancelled')}</div>
+        ) : null}
 
         <section className="hero">
           <div
