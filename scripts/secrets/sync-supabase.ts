@@ -20,10 +20,12 @@ export function buildSupabaseArgs(env: Env, projectRef: string, kvs: Record<stri
 
 export function runSyncSupabase(envOverride?: Env, secrets = loadSecrets()) {
   const env = envOverride ?? readEnv();
-  const refKey = env === 'preview' ? 'SUPABASE_PROJECT_REF_PREVIEW' : 'SUPABASE_PROJECT_REF_PROD';
-  const projectRef = secrets.github[refKey];
+  const projectRef = process.env.SUPABASE_PROJECT_REF;
   if (!projectRef) {
-    throw new Error(`secrets.github.${refKey} is empty; required to address Supabase project`);
+    throw new Error(
+      `SUPABASE_PROJECT_REF env var not set. ` +
+        `Export the ${env} project ref from app.supabase.com/project/<ref> before running.`,
+    );
   }
   const kvs = secrets.supabase[env];
   const args = buildSupabaseArgs(env, projectRef, kvs);

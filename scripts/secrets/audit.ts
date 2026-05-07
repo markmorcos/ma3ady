@@ -8,15 +8,6 @@ type Diff = {
   extra: string[];
 };
 
-function listGithubSecrets(): Set<string> {
-  const r = spawnSync('gh', ['secret', 'list', '--json', 'name'], { encoding: 'utf8' });
-  if (r.status !== 0) {
-    throw new Error('gh secret list failed');
-  }
-  const arr = JSON.parse(r.stdout) as { name: string }[];
-  return new Set(arr.map((x) => x.name));
-}
-
 function listSupabaseSecrets(projectRef: string): Set<string> {
   const r = spawnSync('supabase', ['secrets', 'list', '--project-ref', projectRef], {
     encoding: 'utf8',
@@ -65,15 +56,16 @@ function printDiff(d: Diff) {
 }
 
 export function runAudit(secrets = loadSecrets()) {
-  const githubMaster = new Set(Object.keys(secrets.github));
-  const githubDeployed = listGithubSecrets();
-  printDiff(computeDiff('[github]', githubMaster, githubDeployed));
+  // GitHub Actions secrets are managed manually via the GitHub UI; the
+  // sync flow doesn't touch them, so the audit can't either. Diff
+  // Supabase + EAS only.
 
   for (const env of ['preview', 'production'] as const) {
-    const refKey = env === 'preview' ? 'SUPABASE_PROJECT_REF_PREVIEW' : 'SUPABASE_PROJECT_REF_PROD';
-    const ref = secrets.github[refKey];
+    const refEnvVar =
+      env === 'preview' ? 'SUPABASE_PROJECT_REF_PREVIEW' : 'SUPABASE_PROJECT_REF_PROD';
+    const ref = process.env[refEnvVar] ?? process.env.SUPABASE_PROJECT_REF;
     if (!ref) {
-      console.log(`[supabase.${env}]: skipped (no project ref configured)`);
+      console.log(`[supabase.${env}]: skipped (export ${refEnvVar} or SUPABASE_PROJECT_REF)`);
       continue;
     }
     const master = new Set(Object.keys(secrets.supabase[env]));

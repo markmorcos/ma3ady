@@ -4,9 +4,9 @@ import * as TOML from '@iarna/toml';
 
 export type SecretsTree = {
   schema_version: string;
-  github: Record<string, string>;
   supabase: { preview: Record<string, string>; production: Record<string, string> };
   eas: { preview: Record<string, string>; production: Record<string, string> };
+  k8s?: { preview?: Record<string, string>; production?: Record<string, string> };
   dns?: { production?: Record<string, string> };
 };
 
@@ -37,7 +37,7 @@ export function compareToSchema(
   return { ok: issues.length === 0, issues };
 }
 
-const OPTIONAL_TOP_LEVEL_SECTIONS = new Set(['dns']);
+const OPTIONAL_TOP_LEVEL_SECTIONS = new Set(['dns', 'k8s']);
 
 function walk(
   schema: Record<string, unknown>,
@@ -89,7 +89,7 @@ function mustBeNonEmpty(pathParts: string[], schemaVal: unknown): boolean {
   if (schemaVal !== '') {
     return false;
   }
-  if (pathParts[0] === 'dns') return false;
+  if (pathParts[0] === 'dns' || pathParts[0] === 'k8s') return false;
   return true;
 }
 

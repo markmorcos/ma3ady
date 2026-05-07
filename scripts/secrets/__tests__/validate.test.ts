@@ -15,9 +15,6 @@ describe('validateExample', () => {
     const file = tmpFile(`
 schema_version = "1"
 
-[github]
-EXPO_TOKEN = ""
-
 [supabase.preview]
 RESEND_API_KEY = ""
 EMAIL_DISPATCHER = "mock"
@@ -39,11 +36,8 @@ EXPO_PUBLIC_SUPABASE_URL = ""
     const file = tmpFile(`
 schema_version = "1"
 
-[github]
-EXPO_TOKEN = "actually_a_token"
-
 [supabase.preview]
-RESEND_API_KEY = ""
+RESEND_API_KEY = "actually_a_key"
 
 [supabase.production]
 RESEND_API_KEY = ""
@@ -55,25 +49,23 @@ EXPO_PUBLIC_SUPABASE_URL = ""
 EXPO_PUBLIC_SUPABASE_URL = ""
 `);
     const errors = validateExample(file);
-    expect(errors.some((e) => e.includes('github.EXPO_TOKEN'))).toBe(true);
+    expect(errors.some((e) => e.includes('supabase.preview.RESEND_API_KEY'))).toBe(true);
   });
 
   it('rejects a missing top-level section', () => {
     const file = tmpFile(`
 schema_version = "1"
 
-[github]
-EXPO_TOKEN = ""
+[supabase.preview]
+RESEND_API_KEY = ""
 `);
     const errors = validateExample(file);
-    expect(errors).toContain('missing top-level section: [supabase]');
+    expect(errors).toContain('missing top-level section: [eas]');
   });
 
   it('rejects a wrong schema_version', () => {
     const file = tmpFile(`
 schema_version = "2"
-
-[github]
 
 [supabase.preview]
 

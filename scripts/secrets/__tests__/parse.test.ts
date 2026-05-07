@@ -4,16 +4,12 @@ import { compareToSchema, type SecretsTree } from '../parse';
 const schema = TOML.parse(`
 schema_version = "1"
 
-[github]
-EXPO_TOKEN = ""
-SUPABASE_PROJECT_REF_PREVIEW = ""
-
 [supabase.preview]
-GOOGLE_CLIENT_ID = ""
+RESEND_API_KEY = ""
 EMAIL_DISPATCHER = "mock"
 
 [supabase.production]
-GOOGLE_CLIENT_ID = ""
+RESEND_API_KEY = ""
 EMAIL_DISPATCHER = "real"
 
 [eas.preview]
@@ -31,15 +27,11 @@ describe('compareToSchema', () => {
     const master = TOML.parse(`
 schema_version = "1"
 
-[github]
-SUPABASE_PROJECT_REF_PREVIEW = "ref"
-
 [supabase.preview]
-GOOGLE_CLIENT_ID = "cid"
 EMAIL_DISPATCHER = "mock"
 
 [supabase.production]
-GOOGLE_CLIENT_ID = "cid"
+RESEND_API_KEY = "rk"
 EMAIL_DISPATCHER = "real"
 
 [eas.preview]
@@ -51,23 +43,22 @@ EXPO_PUBLIC_SUPABASE_URL = "url"
 
     const { ok, issues } = compareToSchema(master, schema);
     expect(ok).toBe(false);
-    expect(issues).toContainEqual({ kind: 'missing', pathParts: ['github', 'EXPO_TOKEN'] });
+    expect(issues).toContainEqual({
+      kind: 'missing',
+      pathParts: ['supabase', 'preview', 'RESEND_API_KEY'],
+    });
   });
 
   it('accepts a fully populated master', () => {
     const master = TOML.parse(`
 schema_version = "1"
 
-[github]
-EXPO_TOKEN = "tok"
-SUPABASE_PROJECT_REF_PREVIEW = "ref"
-
 [supabase.preview]
-GOOGLE_CLIENT_ID = "cid"
+RESEND_API_KEY = "rk"
 EMAIL_DISPATCHER = "mock"
 
 [supabase.production]
-GOOGLE_CLIENT_ID = "cid"
+RESEND_API_KEY = "rk"
 EMAIL_DISPATCHER = "real"
 
 [eas.preview]
@@ -86,16 +77,12 @@ EXPO_PUBLIC_SUPABASE_URL = "url"
     const master = TOML.parse(`
 schema_version = "1"
 
-[github]
-EXPO_TOKEN = ""
-SUPABASE_PROJECT_REF_PREVIEW = "ref"
-
 [supabase.preview]
-GOOGLE_CLIENT_ID = "cid"
+RESEND_API_KEY = ""
 EMAIL_DISPATCHER = "mock"
 
 [supabase.production]
-GOOGLE_CLIENT_ID = "cid"
+RESEND_API_KEY = "rk"
 EMAIL_DISPATCHER = "real"
 
 [eas.preview]
@@ -107,24 +94,23 @@ EXPO_PUBLIC_SUPABASE_URL = "url"
 
     const { ok, issues } = compareToSchema(master, schema);
     expect(ok).toBe(false);
-    expect(issues).toContainEqual({ kind: 'empty', pathParts: ['github', 'EXPO_TOKEN'] });
+    expect(issues).toContainEqual({
+      kind: 'empty',
+      pathParts: ['supabase', 'preview', 'RESEND_API_KEY'],
+    });
   });
 
   it('flags an extra key not in the schema', () => {
     const master = TOML.parse(`
 schema_version = "1"
 
-[github]
-EXPO_TOKEN = "tok"
-SUPABASE_PROJECT_REF_PREVIEW = "ref"
+[supabase.preview]
+RESEND_API_KEY = "rk"
+EMAIL_DISPATCHER = "mock"
 ROGUE_KEY = "bad"
 
-[supabase.preview]
-GOOGLE_CLIENT_ID = "cid"
-EMAIL_DISPATCHER = "mock"
-
 [supabase.production]
-GOOGLE_CLIENT_ID = "cid"
+RESEND_API_KEY = "rk"
 EMAIL_DISPATCHER = "real"
 
 [eas.preview]
@@ -134,7 +120,11 @@ EXPO_PUBLIC_SUPABASE_URL = "url"
 EXPO_PUBLIC_SUPABASE_URL = "url"
 `) as unknown as SecretsTree;
 
-    const { issues } = compareToSchema(master, schema);
-    expect(issues).toContainEqual({ kind: 'extra', pathParts: ['github', 'ROGUE_KEY'] });
+    const { ok, issues } = compareToSchema(master, schema);
+    expect(ok).toBe(false);
+    expect(issues).toContainEqual({
+      kind: 'extra',
+      pathParts: ['supabase', 'preview', 'ROGUE_KEY'],
+    });
   });
 });

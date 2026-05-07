@@ -15,7 +15,7 @@ export function validateExample(file = EXAMPLE_PATH): string[] {
   if ((tree as unknown as { schema_version?: string }).schema_version !== '1') {
     errors.push('schema_version must be "1"');
   }
-  for (const required of ['github', 'supabase', 'eas']) {
+  for (const required of ['supabase', 'eas']) {
     if (!(required in (tree as unknown as Record<string, unknown>))) {
       errors.push(`missing top-level section: [${required}]`);
     }
