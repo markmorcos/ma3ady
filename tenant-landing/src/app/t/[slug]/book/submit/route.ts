@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { publicUrl } from '@/lib/publicUrl';
 import { getServiceClient } from '@/lib/supabase';
 import { resolveTenantBySlug } from '@/lib/tenant';
 
@@ -8,7 +9,7 @@ export async function POST(req: Request, ctx: { params: Promise<Params> }) {
   const { slug } = await ctx.params;
   const tenant = await resolveTenantBySlug(slug);
   if (!tenant) {
-    return NextResponse.redirect(new URL('/', req.url), 303);
+    return NextResponse.redirect(publicUrl(req, '/'), 303);
   }
 
   const form = await req.formData();
@@ -20,7 +21,7 @@ export async function POST(req: Request, ctx: { params: Promise<Params> }) {
   const tos = form.get('tos');
 
   const errBack = (err: string) => {
-    const url = new URL(`/t/${slug}/book`, req.url);
+    const url = publicUrl(req, `/t/${slug}/book`);
     if (serviceId) url.searchParams.set('service', serviceId);
     if (startsAt) url.searchParams.set('starts_at', startsAt);
     url.searchParams.set('err', err);
@@ -51,7 +52,7 @@ export async function POST(req: Request, ctx: { params: Promise<Params> }) {
   if (!rows.length) return errBack('generic');
   const { appointment_id, manage_token } = rows[0]!;
 
-  const url = new URL(`/t/${slug}/book/confirm`, req.url);
+  const url = publicUrl(req, `/t/${slug}/book/confirm`);
   url.searchParams.set('id', appointment_id);
   url.searchParams.set('token', manage_token);
   url.searchParams.set('starts_at', startsAt);
