@@ -1,43 +1,30 @@
 # Tasks
 
-- [ ] 1.1 Create `.github/workflows/ci.yml`:
-  - Triggers: `pull_request`, `push: branches: [main]`
-  - Jobs: `lint` (eslint), `typecheck` (tsc --noEmit), `test` (jest --ci --coverage), `db-lint` (validates migration filenames + parseable SQL via `pg_restore --schema-only`)
-  - Cache pnpm store + node_modules
-  - Use Node 20 LTS
-- [ ] 1.2 Create `.github/workflows/deploy-marketing.yml`:
-  - Trigger: `push: branches: [main], paths: ['marketing/**']` + `workflow_dispatch`
-  - Steps: checkout → docker login GHCR → `docker build -t ghcr.io/markmorcos/ma3ady-marketing:${SHA} marketing/` → push → `peter-evans/repository-dispatch@v2` to `markmorcos/infrastructure` with `event-type: deploy-ma3ady-marketing`, payload `{repository, token, version: ${SHA}, config_file: marketing/deployment.yaml}`
-- [ ] 1.3 Create `.github/workflows/deploy-tenant-landing.yml` mirroring marketing
-- [ ] 1.4 Create `.github/workflows/deploy-supabase.yml`:
-  - Trigger: `push: branches: [main], paths: ['supabase/migrations/**','supabase/functions/**']`
-  - Job 1 `deploy-preview`: `supabase/setup-cli@v1` → `supabase link --project-ref ${SUPABASE_PROJECT_REF_PREVIEW}` → `supabase db push --password ${SUPABASE_DB_PASSWORD}` → `supabase functions deploy ${FUNCTIONS}` (env var listing all function names, comma-separated)
-  - Job 2 `deploy-production` `needs: deploy-preview`: same but with prod project ref
-  - `FUNCTIONS` env: `claim-bookings claim-slug invite-member manage-appointment update-appointment-status reschedule-appointment send-appointment-notification`
-- [ ] 1.5 Create `.github/workflows/build-mobile.yml`:
-  - Trigger: `workflow_dispatch`
-  - Inputs: `profile` (development|preview|production), `platform` (android|ios|all)
-  - Steps: `pnpm install` → `expo/expo-github-action@v8` with `eas-version: latest, token: ${EXPO_TOKEN}` → `eas build --profile ${profile} --platform ${platform} --non-interactive --no-wait`
-- [ ] 1.6 Add to `eas.json` (created in the `setup-monorepo-and-tooling` change) the production-profile pre-build hook script that asserts `EXPO_PUBLIC_*_DISPATCHER === 'real'`
-- [ ] 1.7 Write `docs/deployment.md`:
-  - Initial setup: Supabase project creation, infrastructure repo deploy.yaml entry, Cloudflare zone bootstrap
-  - Rollback procedure for marketing/tenant-landing (re-dispatch with previous SHA)
-  - Rollback procedure for Supabase (revert PR + redeploy; for migrations, write a new compensating migration)
-  - Mobile rollback: revert in EAS Update; native bundle revert via re-submit
-- [ ] 1.8 Write `docs/dns-setup.md` covering Cloudflare records for ma3ady.com:
-  - **A/CNAME**: apex → ingress IP, `www` → apex (CNAME), `auth` → ingress, `*` (wildcard) → ingress
-  - **SPF (TXT @)**: `v=spf1 include:_spf.resend.com -all` (single record; merge if other senders ever join)
-  - **DKIM (TXT resend._domainkey)**: paste the public key string Resend provides on domain verification
-  - **DMARC (TXT _dmarc)**: `v=DMARC1; p=quarantine; rua=mailto:dmarc@ma3ady.com; ruf=mailto:dmarc@ma3ady.com; fo=1; pct=100; aspf=r; adkim=r`
-  - **MX**: only if/when receiving email at @ma3ady.com (deferred — no inbound mail in v1; outbound only)
-  - Verification commands: `dig TXT ma3ady.com +short`, `dig TXT resend._domainkey.ma3ady.com +short`, `dig TXT _dmarc.ma3ady.com +short`
-  - Resend dashboard "Verified" check before flipping `EMAIL_DISPATCHER=real`
-- [ ] 1.9 Add to Resend dashboard: configure `ma3ady.com` as a verified sending domain; copy the DKIM public key into Cloudflare per 1.8
-- [ ] 1.10 Add Makefile targets:
-  - `deploy-functions PROJECT_REF=...` (calls `supabase functions deploy ${FUNCTIONS} --project-ref $$PROJECT_REF`)
-  - `db-diff` (generates a candidate migration from local schema diff against preview)
-  - `dns-check` — runs the dig commands from 1.8, asserts each record matches the expected value, exits non-zero on drift
-- [ ] 1.11 Test: Open a PR touching `marketing/public/index.html` and verify CI passes; merge to main and verify the marketing deploy workflow runs (in dry-run mode if infra repo not yet wired)
-- [ ] 1.12 Test: Open a PR touching `supabase/migrations/`, verify CI db-lint passes; merge and verify supabase deploy workflow runs preview then prod
-- [ ] 1.13 Manual run: `gh workflow run build-mobile.yml -f profile=preview -f platform=ios` and verify EAS build queued
-- [ ] 1.14 Send a test email from preview to a Gmail and Outlook inbox; confirm SPF + DKIM + DMARC all show `pass` in the message headers
+- [x] 1.1 `.github/workflows/ci.yml`:
+  - Triggers `pull_request` and `push: branches: [main]`
+  - Jobs: `lint`, `typecheck`, `test` (jest --ci --coverage), `db-lint` (validates migration filename pattern + applies every migration into a throwaway Postgres), `validate-secrets-schema`
+  - All jobs use Node 20 LTS with pnpm cache
+- [x] 1.2 Marketing was merged into tenant-landing (commit e120c03); the `deploy-marketing.yml` placeholder is no longer needed. Tenant-landing covers it.
+- [x] 1.3 `.github/workflows/deploy-tenant-landing.yml` rebuilt: dispatches `deployment.preview.yaml` first then `deployment.yaml`, gated by preview success. Manual `target=preview|production|both` input.
+- [x] 1.4 `.github/workflows/deploy-supabase.yml`:
+  - Triggers on `supabase/migrations/**` or `supabase/functions/**`
+  - `deploy-preview` → `deploy-production` (sequential, gated)
+  - Uses `make deploy-migrations PROJECT=preview|prod` and `make deploy-functions PROJECT=...`
+  - Each job inherits its env-scoped `SUPABASE_DB_PASSWORD_*` via GitHub environments
+- [x] 1.5 `.github/workflows/build-mobile.yml`:
+  - `workflow_dispatch` only with `profile` + `platform` inputs
+  - `expo/expo-github-action@v8` + `eas build --non-interactive --no-wait`
+- [x] 1.6 `eas.json` production profile already runs `node scripts/assert-real-dispatchers.js` as `prebuildCommand`; verified to fail when any of `EXPO_PUBLIC_*_DISPATCHER` is not `real`. Sample-rate added per `setup-observability` task 1.13.
+- [x] 1.7 `docs/deployment.md` covers initial bootstrap, per-surface deploy flow, and rollback procedures (tenant-landing, Supabase, mobile).
+- [x] 1.8 `docs/dns-setup.md` covers Cloudflare record table, Resend DKIM, DMARC, and the verification commands. The "deliverability gate" section forbids `EMAIL_DISPATCHER=real` until `make dns-check` exits zero.
+- [ ] 1.9 Resend dashboard configuration — manual; run by the operator once the DNS records in `docs/dns-setup.md` are live.
+- [x] 1.10 Makefile targets:
+  - `deploy-migrations PROJECT=preview|prod`
+  - `deploy-functions PROJECT=preview|prod`
+  - `deploy-supabase` (both above, in order)
+  - `dns-check` (runs `scripts/dns/dns-check.sh` against ma3ady.com SPF/DKIM/DMARC)
+  - `db-diff` deferred — can be added later once schema diffing is needed in practice
+- [ ] 1.11 Live PR test — deferred; run after the workflow is wired in CI for real
+- [ ] 1.12 Live Supabase migrations PR test — deferred; run after the workflow is wired
+- [ ] 1.13 Manual `gh workflow run build-mobile.yml` — the user runs this when they're ready to cut the first internal build
+- [ ] 1.14 Live email deliverability test from preview to Gmail/Outlook — manual; gated on Resend domain verification

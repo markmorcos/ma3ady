@@ -1,4 +1,4 @@
-.PHONY: help install dev-up dev-down migrate-new migrate-up seed test-db expo-start expo-start-dev-client build-dev-ios build-dev-android build-preview build-prod lint typecheck test test-coverage secrets-validate secrets-sync-github secrets-sync-supabase secrets-sync-eas secrets-sync secrets-audit
+.PHONY: help install dev-up dev-down migrate-new migrate-up seed test-db expo-start expo-start-dev-client build-dev-ios build-dev-android build-preview build-prod lint typecheck test test-coverage secrets-validate secrets-sync-github secrets-sync-supabase secrets-sync-eas secrets-sync secrets-audit deploy-migrations deploy-functions deploy-supabase dns-check
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}'
@@ -104,3 +104,66 @@ secrets-sync: secrets-validate ## Validate then fan out to GH + Supabase + EAS. 
 
 secrets-audit: ## Read-only diff between master file and deployed secrets
 	pnpm tsx scripts/secrets/audit.ts
+
+# -------------------------------------------------------------------
+# Supabase deploys (CI canonical; targets exist for local debugging)
+# -------------------------------------------------------------------
+
+PROJECT ?= preview
+
+# Edge Functions deployed in lockstep. Keep in sync with deploy-supabase.yml.
+SUPABASE_FUNCTIONS := \
+	claim-bookings \
+	claim-slug \
+	invite-member \
+	manage-appointment \
+	update-appointment-status \
+	reschedule-appointment \
+	send-appointment-notification \
+	report-client-error
+
+_project-ref:
+	@if [ "$(PROJECT)" = "prod" ]; then \
+		if [ -z "$(SUPABASE_PROJECT_REF_PROD)" ]; then \
+			echo "ERROR: SUPABASE_PROJECT_REF_PROD env var not set" >&2; exit 1; \
+		fi; \
+		echo "$(SUPABASE_PROJECT_REF_PROD)"; \
+	elif [ "$(PROJECT)" = "preview" ]; then \
+		if [ -z "$(SUPABASE_PROJECT_REF_PREVIEW)" ]; then \
+			echo "ERROR: SUPABASE_PROJECT_REF_PREVIEW env var not set" >&2; exit 1; \
+		fi; \
+		echo "$(SUPABASE_PROJECT_REF_PREVIEW)"; \
+	else \
+		echo "ERROR: PROJECT must be 'preview' or 'prod' (got '$(PROJECT)')" >&2; exit 1; \
+	fi
+
+_confirm-prod:
+	@if [ "$(PROJECT)" = "prod" ] && [ -t 0 ] && [ "$$ASSUME_YES" != "1" ]; then \
+		read -p "About to operate on the PROD Supabase project. Continue? [y/N] " ans; \
+		if [ "$$ans" != "y" ] && [ "$$ans" != "Y" ]; then echo "Aborted."; exit 1; fi; \
+	fi
+
+deploy-migrations: ## Push migrations: make deploy-migrations PROJECT=preview|prod
+	@$(MAKE) -s _confirm-prod
+	@REF=$$($(MAKE) -s _project-ref); \
+	echo "Linking to $$REF"; \
+	pnpm exec supabase link --project-ref $$REF; \
+	echo "Pushing migrations to $$REF"; \
+	pnpm exec supabase db push
+
+deploy-functions: ## Deploy Edge Functions: make deploy-functions PROJECT=preview|prod
+	@$(MAKE) -s _confirm-prod
+	@REF=$$($(MAKE) -s _project-ref); \
+	echo "Linking to $$REF"; \
+	pnpm exec supabase link --project-ref $$REF; \
+	echo "Deploying $(SUPABASE_FUNCTIONS)"; \
+	pnpm exec supabase functions deploy $(SUPABASE_FUNCTIONS) --project-ref $$REF
+
+deploy-supabase: deploy-migrations deploy-functions ## Push migrations + deploy all Edge Functions
+
+# -------------------------------------------------------------------
+# DNS sanity check
+# -------------------------------------------------------------------
+
+dns-check: ## Verify SPF, DKIM, DMARC records on ma3ady.com
+	@bash scripts/dns/dns-check.sh

@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-secrets-schema:
     runs-on: ubuntu-latest
@@ -18,3 +22,68 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Validate secrets.example.toml schema
         run: pnpm tsx scripts/secrets/validate.ts
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test -- --ci --coverage
+
+  db-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate migration filenames
+        run: |
+          set -euo pipefail
+          bad=$(ls supabase/migrations/ 2>/dev/null | grep -vE '^[0-9]{3}_[a-z][a-z0-9_]*\.sql$' || true)
+          if [ -n "$bad" ]; then
+            echo "Bad migration filenames:"
+            echo "$bad"
+            exit 1
+          fi
+      - name: Boot Postgres + apply migrations
+        run: |
+          set -euo pipefail
+          docker run -d --name pg \
+            -e POSTGRES_PASSWORD=postgres \
+            -p 5432:5432 \
+            postgres:15-alpine
+          for i in {1..30}; do
+            docker exec pg pg_isready -U postgres >/dev/null 2>&1 && break
+            sleep 1
+          done
+          for f in $(ls supabase/migrations/*.sql | sort); do
+            echo "Applying $f"
+            docker exec -i pg psql -U postgres -v ON_ERROR_STOP=1 < "$f"
+          done

@@ -1,0 +1,49 @@
+name: Deploy Supabase backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/functions/**'
+      - 'Makefile'
+      - '.github/workflows/deploy-supabase.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-supabase-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    environment: preview
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PREVIEW }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Push migrations
+        run: make deploy-migrations PROJECT=preview ASSUME_YES=1
+      - name: Deploy functions
+        run: make deploy-functions PROJECT=preview ASSUME_YES=1
+
+  deploy-production:
+    needs: deploy-preview
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Push migrations
+        run: make deploy-migrations PROJECT=prod ASSUME_YES=1
+      - name: Deploy functions
+        run: make deploy-functions PROJECT=prod ASSUME_YES=1
