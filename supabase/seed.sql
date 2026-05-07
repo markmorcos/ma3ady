@@ -1,42 +1,56 @@
--- Local-only seed. Idempotent. Truncate-and-insert per table.
--- Loaded by `supabase db reset` (per config.toml) and by `make seed`.
+-- Local-only seed. Idempotent. Loaded by `supabase db reset` (per
+-- config.toml) and by `make seed`.
+--
+-- Touches only the `demo` tenant + its child rows so re-running after
+-- you've manually created other tenants in the dev stack doesn't wipe
+-- them. Mirrors supabase/preview-seed.sql — the same SQL works locally
+-- and against the cloud projects.
+--
 -- Runs as postgres so RLS doesn't apply.
 
-truncate
-  public.appointment_events,
-  public.appointments,
-  public.guest_contacts,
-  public.services,
-  public.availability_exceptions,
-  public.availability_rules,
-  public.tenants
-restart identity cascade;
+\set ON_ERROR_STOP on
 
--- Demo tenant.
-with t as (
-  insert into public.tenants (slug, name, timezone, default_locale, brand_color)
-  values ('demo', 'Demo Clinic', 'Europe/Berlin', 'en', '#0F766E')
-  returning id
-)
--- Mon–Fri 09:00–17:00 (day_of_week 1–5; Sunday is 0 per Postgres' extract(dow)).
-insert into public.availability_rules (tenant_id, day_of_week, start_time, end_time)
-select t.id, dow, '09:00'::time, '17:00'::time
-from t, generate_series(1, 5) as dow;
+begin;
 
--- Christmas Day 2026 block.
-insert into public.availability_exceptions (tenant_id, kind, starts_at, ends_at, reason)
-select
-  id, 'block',
-  ('2026-12-25 00:00'::timestamp at time zone 'Europe/Berlin'),
-  ('2026-12-26 00:00'::timestamp at time zone 'Europe/Berlin'),
-  'Christmas Day'
-from public.tenants where slug = 'demo';
+insert into public.tenants (slug, name, timezone, default_locale, brand_color)
+values ('demo', 'Demo Clinic', 'Europe/Berlin', 'en', '#0F766E')
+on conflict (slug) do update set
+  name           = excluded.name,
+  timezone       = excluded.timezone,
+  default_locale = excluded.default_locale,
+  brand_color    = excluded.brand_color;
 
--- Two services.
-insert into public.services (tenant_id, name, description, duration_minutes, min_notice_min, max_advance_days)
-select id, 'Consultation', '30-minute initial consultation.', 30, 60, 60
-from public.tenants where slug = 'demo';
+do $$
+declare v_tenant uuid;
+begin
+  select id into v_tenant from public.tenants where slug = 'demo';
 
-insert into public.services (tenant_id, name, description, duration_minutes, buffer_after_min, daily_cap)
-select id, 'Long Session', '60-minute focused session.', 60, 15, 4
-from public.tenants where slug = 'demo';
+  delete from public.availability_exceptions where tenant_id = v_tenant;
+  delete from public.availability_rules     where tenant_id = v_tenant;
+  -- services delete fails if live appointments reference them (FK is
+  -- `on delete restrict`). If you've booked the demo locally and want to
+  -- reseed, run `supabase db reset` instead.
+  delete from public.services               where tenant_id = v_tenant;
+
+  insert into public.availability_rules (tenant_id, day_of_week, start_time, end_time)
+  select v_tenant, dow, '09:00'::time, '17:00'::time
+  from generate_series(1, 5) as dow;
+
+  insert into public.availability_exceptions (tenant_id, kind, starts_at, ends_at, reason)
+  values (
+    v_tenant,
+    'block',
+    ('2026-12-25 00:00'::timestamp at time zone 'Europe/Berlin'),
+    ('2026-12-26 00:00'::timestamp at time zone 'Europe/Berlin'),
+    'Christmas Day'
+  );
+
+  insert into public.services (tenant_id, name, description, duration_minutes, min_notice_min, max_advance_days)
+  values (v_tenant, 'Consultation', '30-minute initial consultation.', 30, 60, 60);
+
+  insert into public.services (tenant_id, name, description, duration_minutes, buffer_after_min, daily_cap)
+  values (v_tenant, 'Long Session', '60-minute focused session.', 60, 15, 4);
+end;
+$$;
+
+commit;
