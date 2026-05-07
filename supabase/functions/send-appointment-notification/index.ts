@@ -253,8 +253,14 @@ Deno.serve(
 
     // WhatsApp — only if we have a phone number.
     if (recipient.phone && !sentChannels.has('whatsapp')) {
-      const params = whatsappParams(body.event, vars);
-      const templateName = Deno.env.get('WHATSAPP_TEMPLATE_NAME') ?? 'event_notification';
+      const params = whatsappParams(body.event, recipient.locale, vars);
+      // Meta-side templates are submitted under separate names per language
+      // ('event_notification' for en, 'event_notification_ar' for ar) rather
+      // than as translations under one name. Suffix the base from the env.
+      const baseTemplate =
+        Deno.env.get('WHATSAPP_TEMPLATE_NAME') ?? 'event_notification';
+      const templateName =
+        recipient.locale === 'ar' ? `${baseTemplate}_ar` : baseTemplate;
       const { data: row } = await admin
         .from('notifications')
         .insert({

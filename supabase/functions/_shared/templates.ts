@@ -76,10 +76,39 @@ export function emailContent(event: string, locale: Locale, vars: DispatchVars) 
   return { subject, text, html: htmlWrap(text) };
 }
 
-export function whatsappParams(event: string, vars: DispatchVars): string[] {
-  // Mapping for the existing `event_notification` template:
-  //   {{1}} action, {{2}} tenant_name, {{3}} appointment_date_time
-  return [event, vars.tenant_name, vars.starts_at_display];
+// Localized event keyword for the WhatsApp template's {{1}} slot. Keeps the
+// rest of the system using the canonical English event ids (`booked`,
+// `cancelled`, …) while the message body reads correctly per recipient.
+const WHATSAPP_EVENT_KEYWORD: Record<Locale, Record<string, string>> = {
+  en: {
+    booked: 'booked',
+    confirmed: 'confirmed',
+    cancelled: 'cancelled',
+    rescheduled: 'rescheduled',
+    reminder_24h: 'a reminder',
+    reminder_1h: 'a reminder',
+  },
+  ar: {
+    booked: 'محجوز',
+    confirmed: 'مؤكَّد',
+    cancelled: 'ملغى',
+    rescheduled: 'تم تغييره',
+    reminder_24h: 'تذكير',
+    reminder_1h: 'تذكير',
+  },
+};
+
+export function whatsappParams(
+  event: string,
+  locale: Locale,
+  vars: DispatchVars,
+): string[] {
+  // Template body (matches what's submitted to Meta for both en + ar):
+  //   {{1}} localized event keyword
+  //   {{2}} tenant_name
+  //   {{3}} appointment_date_time
+  const keyword = WHATSAPP_EVENT_KEYWORD[locale][event] ?? event;
+  return [keyword, vars.tenant_name, vars.starts_at_display];
 }
 
 export function pushContent(event: string, locale: Locale, vars: DispatchVars) {
