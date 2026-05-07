@@ -56,7 +56,7 @@ Push to `main` touching `supabase/migrations/**` or `supabase/functions/**` runs
 1. `deploy-preview` — `make deploy-migrations PROJECT=preview` then `make deploy-functions PROJECT=preview`.
 2. `deploy-production` — same, gated by preview success, with `PROJECT=prod`.
 
-Both jobs inherit `SUPABASE_ACCESS_TOKEN` and the env-scoped `SUPABASE_DB_PASSWORD_*` secret via the `preview` / `production` GitHub environments.
+Both jobs inherit `SUPABASE_ACCESS_TOKEN` (repo-level — single PAT spans both projects) plus `SUPABASE_DB_PASSWORD` and `SUPABASE_PROJECT_REF`, both stored unsuffixed under the `preview` / `production` GitHub Environments so the same name resolves to the right value per job.
 
 ### Rollback
 

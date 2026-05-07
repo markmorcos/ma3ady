@@ -122,19 +122,15 @@ SUPABASE_FUNCTIONS := \
 	send-appointment-notification \
 	report-client-error
 
-_project-ref:
-	@if [ "$(PROJECT)" = "prod" ]; then \
-		if [ -z "$(SUPABASE_PROJECT_REF_PROD)" ]; then \
-			echo "ERROR: SUPABASE_PROJECT_REF_PROD env var not set" >&2; exit 1; \
-		fi; \
-		echo "$(SUPABASE_PROJECT_REF_PROD)"; \
-	elif [ "$(PROJECT)" = "preview" ]; then \
-		if [ -z "$(SUPABASE_PROJECT_REF_PREVIEW)" ]; then \
-			echo "ERROR: SUPABASE_PROJECT_REF_PREVIEW env var not set" >&2; exit 1; \
-		fi; \
-		echo "$(SUPABASE_PROJECT_REF_PREVIEW)"; \
-	else \
-		echo "ERROR: PROJECT must be 'preview' or 'prod' (got '$(PROJECT)')" >&2; exit 1; \
+# Project ref + DB password come from the env (CI sets them per GitHub
+# Environment with the unsuffixed names; locally export them in your
+# shell before running these targets).
+_require-ref:
+	@if [ -z "$(SUPABASE_PROJECT_REF)" ]; then \
+		echo "ERROR: SUPABASE_PROJECT_REF env var not set" >&2; \
+		echo "  CI sets this from the per-environment secret of the same name." >&2; \
+		echo "  Locally: export SUPABASE_PROJECT_REF=<ref> before running." >&2; \
+		exit 1; \
 	fi
 
 _confirm-prod:
@@ -143,21 +139,19 @@ _confirm-prod:
 		if [ "$$ans" != "y" ] && [ "$$ans" != "Y" ]; then echo "Aborted."; exit 1; fi; \
 	fi
 
-deploy-migrations: ## Push migrations: make deploy-migrations PROJECT=preview|prod
+deploy-migrations: _require-ref ## Push migrations: make deploy-migrations PROJECT=preview|prod
 	@$(MAKE) -s _confirm-prod
-	@REF=$$($(MAKE) -s _project-ref); \
-	echo "Linking to $$REF"; \
-	pnpm exec supabase link --project-ref $$REF; \
-	echo "Pushing migrations to $$REF"; \
-	pnpm exec supabase db push
+	@echo "Linking to $(SUPABASE_PROJECT_REF)"
+	@pnpm exec supabase link --project-ref $(SUPABASE_PROJECT_REF)
+	@echo "Pushing migrations to $(SUPABASE_PROJECT_REF)"
+	@pnpm exec supabase db push
 
-deploy-functions: ## Deploy Edge Functions: make deploy-functions PROJECT=preview|prod
+deploy-functions: _require-ref ## Deploy Edge Functions: make deploy-functions PROJECT=preview|prod
 	@$(MAKE) -s _confirm-prod
-	@REF=$$($(MAKE) -s _project-ref); \
-	echo "Linking to $$REF"; \
-	pnpm exec supabase link --project-ref $$REF; \
-	echo "Deploying $(SUPABASE_FUNCTIONS)"; \
-	pnpm exec supabase functions deploy $(SUPABASE_FUNCTIONS) --project-ref $$REF
+	@echo "Linking to $(SUPABASE_PROJECT_REF)"
+	@pnpm exec supabase link --project-ref $(SUPABASE_PROJECT_REF)
+	@echo "Deploying $(SUPABASE_FUNCTIONS)"
+	@pnpm exec supabase functions deploy $(SUPABASE_FUNCTIONS) --project-ref $(SUPABASE_PROJECT_REF)
 
 deploy-supabase: deploy-migrations deploy-functions ## Push migrations + deploy all Edge Functions
 
