@@ -38,31 +38,39 @@ fi
 BG="#0F766E"   # brand teal
 FG="#FFFFFF"   # mark color (white on brand)
 
-# Draw the clock mark on a square brand backdrop.
+# Draw the clock mark on a canvas. Pass `transparent` as the backdrop arg
+# to render the mark on alpha (used for assets that pair with an
+# Expo-controlled backgroundColor: adaptive-icon foreground + splash).
 #   $1: size in px
 #   $2: foreground inset as a percent of size (controls mark scale)
 #   $3: output path
+#   $4: backdrop — hex color (e.g. "#0F766E") or "transparent"
 render_mark() {
-  local size=$1 pad_pct=$2 out=$3
+  local size=$1 pad_pct=$2 out=$3 backdrop=${4:-$BG}
 
-  # Compute the mark's bounding box inside the canvas. The source SVG is
-  # 64x64; we scale geometry from that reference.
   local inset=$((size * pad_pct / 100))
-  local box=$((size - 2 * inset))            # mark bounding box (px)
-  local cx=$((size / 2))                     # canvas center
+  local box=$((size - 2 * inset))
+  local cx=$((size / 2))
   local cy=$((size / 2))
   # Scale a unit at the SVG's 64px reference into final canvas px.
-  local r=$((box * 26 / 64))                 # outer circle radius
+  local r=$((box * 26 / 64))
   local stroke=$(awk -v b="$box" 'BEGIN{ s=b*4/64; if (s<2) s=2; printf "%.0f", s}')
-  local tick_outer=$((box * 26 / 64))        # tick mark outer offset (== r)
-  local tick_inner=$((box * 20 / 64))        # tick mark inner offset
-  local hour_len=$((box * 12 / 64))          # 12 → 32-20 in source
-  local min_dx=$((box * 12 / 64))            # 12 → 44-32
-  local min_dy=$((box *  4 / 64))            # 4  → 36-32
+  local tick_outer=$((box * 26 / 64))
+  local tick_inner=$((box * 20 / 64))
+  local hour_len=$((box * 12 / 64))
+  local min_dx=$((box * 12 / 64))
+  local min_dy=$((box *  4 / 64))
 
-  echo "  $out (${size}x${size}, ${pad_pct}% pad)"
+  local canvas_arg
+  if [ "$backdrop" = "transparent" ]; then
+    canvas_arg="canvas:none"
+  else
+    canvas_arg="canvas:$backdrop"
+  fi
 
-  magick -size "${size}x${size}" canvas:"$BG" \
+  echo "  $out (${size}x${size}, ${pad_pct}% pad, backdrop=$backdrop)"
+
+  magick -size "${size}x${size}" "$canvas_arg" \
     -fill none -stroke "$FG" -strokewidth "$stroke" \
     -draw "stroke-linecap round stroke-linejoin round
            circle $cx,$cy $cx,$((cy - r))
@@ -75,28 +83,28 @@ render_mark() {
     "$out"
 }
 
-# Standard inset for app icons (16% pad, mark fills ~68% of canvas).
+# Web icons: solid brand backdrop (favicons display directly).
 render_mark 32   16 "$OUT_TENANT/favicon-32.png"
 render_mark 180  16 "$OUT_TENANT/apple-touch-icon.png"
 render_mark 192  16 "$OUT_TENANT/icon-192.png"
 render_mark 512  16 "$OUT_TENANT/icon-512.png"
 render_mark 512  16 "$OUT_STORE/icon-512.png"
+
+# iOS app icon — solid backdrop (App Store + iOS render the bitmap directly,
+# no system-side mask).
 render_mark 1024 16 "$OUT_EXPO/icon.png"
 
-# Android adaptive icon foreground: extra padding so the OS mask doesn't crop.
-render_mark 1024 32 "$OUT_EXPO/adaptive-icon.png"
+# Android adaptive-icon foreground: TRANSPARENT, mark only. The OS composes
+# this over `android.adaptiveIcon.backgroundColor` from app.json (we pin
+# that to the brand teal). Extra padding so the OS shape mask doesn't crop.
+render_mark 1024 32 "$OUT_EXPO/adaptive-icon.png" transparent
 
-# Splash: 1284x2778 (iPhone 15 Pro Max bounds; smaller devices letterbox).
-# Mark centered, ~440px reference.
-echo "  $OUT_EXPO/splash.png (1284x2778)"
-# Render the centered mark on a 440x440 canvas, then composite onto the
-# splash backdrop. Reusing render_mark keeps the geometry consistent.
-TMP_SPLASH="$(mktemp -t splash-mark.XXXXXX).png"
-render_mark 440 0 "$TMP_SPLASH" >/dev/null
-magick -size 1284x2778 canvas:"$BG" \
-  "$TMP_SPLASH" -gravity center -composite \
-  "$OUT_EXPO/splash.png"
-rm -f "$TMP_SPLASH"
+# Splash: TRANSPARENT 1024x1024 mark only. We pair it with the
+# expo-splash-screen plugin in app.json, which fills the device viewport
+# with `backgroundColor` and centres the image at `imageWidth`. Avoids the
+# fixed-aspect bake-in problem (where a 1284x2778 PNG with the bg colour
+# baked in shows letterbox stripes on different device aspects).
+render_mark 1024 0 "$OUT_EXPO/splash.png" transparent
 
 # Multi-resolution favicon.ico (16+32+48 from the same source).
 echo "  favicon.ico"
@@ -110,7 +118,7 @@ magick \
 # left + wordmark text rendered with ImageMagick. Avoids the SVG renderer.
 echo "  og-image.png (1200x630)"
 TMP_OG_MARK="$(mktemp -t og-mark.XXXXXX).png"
-render_mark 360 0 "$TMP_OG_MARK" >/dev/null
+render_mark 360 0 "$TMP_OG_MARK" transparent >/dev/null
 magick -size 1200x630 canvas:"$BG" \
   -fill "$FG" -font "Helvetica-Bold" -pointsize 120 \
   -gravity center -annotate +130+0 "ma3ady" \

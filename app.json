@@ -7,11 +7,6 @@
     "scheme": "ma3ady",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FAFAF9"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ma3ady.app",
@@ -24,7 +19,7 @@
       "package": "com.ma3ady.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FAFAF9"
+        "backgroundColor": "#0F766E"
       },
       "intentFilters": [
         {
@@ -54,7 +49,16 @@
       "expo-router",
       "expo-secure-store",
       "expo-localization",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0F766E"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
