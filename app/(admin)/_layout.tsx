@@ -9,7 +9,7 @@ export default function AdminLayout() {
   const session = useAuthStore((s) => s.session);
   const role = useCurrentRole();
 
-  if (!session) return <Redirect href="/auth/sign-in" />;
+  if (!session) return <Redirect href="/sign-in" />;
   if (role && role !== 'owner' && role !== 'admin' && role !== 'staff') {
     return <Redirect href="/" />;
   }

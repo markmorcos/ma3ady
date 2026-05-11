@@ -26,7 +26,7 @@
 - [x] 1.10 `supabase/migrations/018_push_tokens.sql` — table + indexes + per-user RLS (select/insert/update/delete self).
 - [x] 1.11 `ExpoPushDispatcher` in `supabase/functions/_shared/dispatchers/push.ts` now POSTs to `https://exp.host/--/api/v2/push/send`, validates the ticket status, and returns the receipt id.
 - [ ] 1.12 Build dev clients: `make build-dev-ios`, `make build-dev-android` — manual, run by the operator.
-- [ ] 1.13 Update README + Makefile help to indicate dev-client is now the supported flow — README touch deferred to documentation pass.
+- [x] 1.13 Update README + Makefile help to indicate dev-client is now the supported flow — README now leads with the dev-client flow and `make expo-start` / `expo-start-dev-client` help strings call out which is daily-supported.
 - [x] 1.14 `eas.json` production profile already sets `EXPO_PUBLIC_*_DISPATCHER=real` and `EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=0.1`. The `prebuildCommand` aborts the build when any dispatcher var isn't `real`.
 - [ ] 1.15 Build preview, install on test devices, smoke-test real notifications — manual.
 - [x] 1.16 RLS pen-test fixture at `tests/security/rls.test.ts`. Drives Postgres directly via `pg`, forges two `authenticated` JWT identities, asserts cross-tenant isolation across `memberships`, `guest_contacts`, `appointments`, `pending_memberships`, `tenant_audit_events`, `client_errors`, and `notifications`. Suite no-ops gracefully when `LOCAL_DB_URL` isn't reachable.

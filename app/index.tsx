@@ -24,7 +24,7 @@ const DEV_LINKS: { href: string; label: string }[] = [
   { href: '/dev/sign-in', label: '/dev/sign-in (test users)' },
   { href: '/dev/i18n', label: '/dev/i18n' },
   { href: '/dev/design-system', label: '/dev/design-system' },
-  { href: '/auth/sign-in', label: '/auth/sign-in' },
+  { href: '/sign-in', label: '/sign-in' },
   { href: '/welcome', label: '/welcome (onboarding)' },
   { href: '/tenants/picker', label: '/tenants/picker' },
   { href: '/(public)/demo', label: '/demo (public booking)' },
@@ -76,7 +76,7 @@ export default function Home() {
             label={t('home.signIn')}
             variant="primary"
             fullWidth
-            onPress={() => router.push('/auth/sign-in')}
+            onPress={() => router.push('/sign-in')}
           />
           <Pressable onPress={() => router.push('/welcome')} accessibilityRole="button">
             <Text variant="caption" color="muted" style={styles.tenantCta}>

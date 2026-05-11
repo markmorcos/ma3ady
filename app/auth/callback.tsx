@@ -78,7 +78,7 @@ export default function AuthCallback() {
           <Button
             label={t('common.retry')}
             variant="primary"
-            onPress={() => router.replace('/(auth)/sign-in')}
+            onPress={() => router.replace('/sign-in')}
           />
         </>
       ) : (

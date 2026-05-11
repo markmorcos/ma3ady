@@ -30,7 +30,7 @@
 - [x] 1.13 Boot performance budget test:
   - `tests/perf/boot.test.ts` mocks all four boot phases with 100ms latency, asserts `bootPhase === 'ready'` within 1.5s on the test runner
   - `/dev/perf` visual stopwatch — deferred to setup-observability (the dev-tools surface is empty; this would be premature)
-- [ ] 1.14 Add `display_timezone_override` column to `profiles` — **deferred**: the `profiles` table doesn't exist until `define-tenancy-model` (Phase 2). Folding this column into the table's CREATE statement is cleaner than landing an additive migration that must wait two phases. Captured as a TODO in the `define-tenancy-model` change.
+- [x] 1.14 Add `display_timezone_override` column to `profiles` — **deferred**: the `profiles` table doesn't exist until `define-tenancy-model` (Phase 2). Folding this column into the table's CREATE statement is cleaner than landing an additive migration that must wait two phases. Captured as a TODO in the `define-tenancy-model` change. Fulfilled in `supabase/migrations/002_tenancy.sql` (column + shape constraint).
 - [x] 1.15 Write `app/(admin)/(tabs)/settings/timezone.tsx` — admin can pick from a list of IANA zones (sourced from `src/data/iana-zones.ts`); "I'm here right now" CTA reads `Intl.DateTimeFormat().resolvedOptions().timeZone` for one-tap. Persistence to `profiles.display_timezone_override` is wired in `implement-admin-mobile-dashboard`.
 - [x] 1.16 Write `<TimezoneToggle>` component for the public booking flow header — toggles between tenant TZ and device TZ; updates `sessionPrefsStore`
 - [x] 1.17 Tests:

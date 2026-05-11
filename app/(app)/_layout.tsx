@@ -7,7 +7,7 @@ export default function AppLayout() {
   const theme = useTheme();
   const session = useAuthStore((s) => s.session);
 
-  if (!session) return <Redirect href="/auth/sign-in" />;
+  if (!session) return <Redirect href="/sign-in" />;
 
   return (
     <RouteErrorBoundary>

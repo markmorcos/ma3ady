@@ -47,10 +47,10 @@ test-db: ## Run all SQL-based DB tests. Requires local Supabase to be up.
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/notifications.test.sql
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/observability.test.sql
 
-expo-start: ## Start Expo dev server (Expo Go)
+expo-start: ## Start Expo dev server (Expo Go — UI-only spot checks; lacks native modules)
 	pnpm exec expo start
 
-expo-start-dev-client: ## Start Expo dev server with dev client
+expo-start-dev-client: ## Start Expo dev server with dev client (supported daily flow)
 	pnpm exec expo start --dev-client
 
 build-dev-ios: ## EAS build, iOS development profile
@@ -111,6 +111,8 @@ PROJECT ?= preview
 SUPABASE_FUNCTIONS := \
 	claim-bookings \
 	claim-slug \
+	delete-account \
+	export-my-data \
 	invite-member \
 	manage-appointment \
 	update-appointment-status \

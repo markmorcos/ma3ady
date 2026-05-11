@@ -6,7 +6,7 @@ Multi-tenant appointment booking, mobile-first. Built with Expo + Supabase.
 
 ## Status
 
-Phase 0 in progress. Project shell (Expo SDK 55, pnpm, lint/typecheck/test gates, `/dev/*` debug surface) is on `main`.
+All v1 capabilities have landed. Daily development now runs on an **Expo dev client** (`expo-notifications` and other native modules require it; the legacy Expo Go path no longer boots the full feature set).
 
 ## First-time setup
 
@@ -22,9 +22,12 @@ pnpm install
 cp secrets/secrets.example.toml secrets/secrets.local.toml
 make secrets-validate
 
-# Run
-make expo-start
+# Build a dev client once per device (EAS), then iterate locally
+make build-dev-ios       # or: make build-dev-android
+make expo-start-dev-client
 ```
+
+`make expo-start` (plain Expo Go) is retained for quick UI-only spot checks but skips native-module surfaces (push, splash native config, etc.).
 
 See [`secrets/README.md`](secrets/README.md) for where each secret comes from and how rotation works. `secrets/secrets.local.toml` is gitignored — never commit it.
 
@@ -39,7 +42,7 @@ make secrets-audit            # read-only drift check
 ## Conventions
 
 - Spec-driven: every behavior is described in `openspec/specs/<capability>/spec.md` (or proposed in `openspec/changes/<slug>/specs/<capability>/spec.md`) before implementation.
-- Expo Go-first: daily dev runs in Expo Go. Native-module work is deferred behind dispatcher mocks until phase 9.
+- Dev-client-first: daily dev runs on an EAS-built dev client (`make expo-start-dev-client`). Native modules (`expo-notifications`, native splash) are linked in.
 - Locales: en + ar only.
 - Auth: Supabase Google OAuth only.
 
