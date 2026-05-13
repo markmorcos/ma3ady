@@ -1,0 +1,64 @@
+name: Build Android APK (local, no EAS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Env profile (mirrors eas.json)
+        required: true
+        default: preview
+        type: choice
+        options: [development, preview]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Expo prebuild (android)
+        env:
+          EXPO_PUBLIC_SHOW_DEV_TOOLS: ${{ inputs.profile == 'development' && '1' || '0' }}
+          EXPO_PUBLIC_EMAIL_DISPATCHER: mock
+          EXPO_PUBLIC_WHATSAPP_DISPATCHER: mock
+          EXPO_PUBLIC_PUSH_DISPATCHER: mock
+          EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE: '1.0'
+        run: npx expo prebuild --platform android --no-install --clean
+
+      - name: Gradle assembleRelease
+        working-directory: android
+        run: ./gradlew :app:assembleRelease --no-daemon
+
+      - name: Upload APK as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ma3ady-${{ inputs.profile }}-${{ github.sha }}
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Publish GitHub Release with APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="local-build-${{ inputs.profile }}-$(date -u +%Y%m%d-%H%M%S)"
+          gh release create "$tag" \
+            android/app/build/outputs/apk/release/app-release.apk \
+            --title "Local build ($tag)" \
+            --notes "Sideload APK built on GH Actions (debug-signed). Commit ${{ github.sha }}."
