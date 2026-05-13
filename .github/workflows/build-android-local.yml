@@ -33,12 +33,19 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Assert real dispatchers
+        env:
+          EXPO_PUBLIC_EMAIL_DISPATCHER: real
+          EXPO_PUBLIC_WHATSAPP_DISPATCHER: real
+          EXPO_PUBLIC_PUSH_DISPATCHER: real
+        run: node scripts/assert-real-dispatchers.js
+
       - name: Expo prebuild (android)
         env:
           EXPO_PUBLIC_SHOW_DEV_TOOLS: ${{ inputs.profile == 'development' && '1' || '0' }}
-          EXPO_PUBLIC_EMAIL_DISPATCHER: mock
-          EXPO_PUBLIC_WHATSAPP_DISPATCHER: mock
-          EXPO_PUBLIC_PUSH_DISPATCHER: mock
+          EXPO_PUBLIC_EMAIL_DISPATCHER: real
+          EXPO_PUBLIC_WHATSAPP_DISPATCHER: real
+          EXPO_PUBLIC_PUSH_DISPATCHER: real
           EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE: '1.0'
         run: npx expo prebuild --platform android --no-install --clean
 
@@ -61,4 +68,4 @@ jobs:
           gh release create "$tag" \
             android/app/build/outputs/apk/release/app-release.apk \
             --title "Local build ($tag)" \
-            --notes "Sideload APK built on GH Actions (debug-signed). Commit ${{ github.sha }}."
+            --notes "Sideload APK built on GH Actions (debug-signed, real dispatchers). Commit ${{ github.sha }}."
