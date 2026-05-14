@@ -5,7 +5,9 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
+import { supabase } from '@/services/api/supabase';
 import { exchangeCodeForSession } from '@/services/auth/googleSignIn';
+import { routeAfterSignIn } from '@/services/auth/postSignIn';
 import { useAuthStore } from '@/state/authStore';
 
 const EXCHANGE_TIMEOUT_MS = 10_000;
@@ -33,7 +35,7 @@ function timeout<T>(promise: Promise<T>, ms: number, signal: AbortSignal): Promi
 export default function AuthCallback() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const params = useLocalSearchParams<{ code?: string }>();
+  const params = useLocalSearchParams<{ code?: string; return_to?: string }>();
   const refresh = useAuthStore((s) => s.refresh);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,21 +44,43 @@ export default function AuthCallback() {
     let cancelled = false;
 
     (async () => {
+      // If the sign-in screen path already minted a session (it races against
+      // this deep-link route on Android once App Links is on), skip the
+      // exchange -- OAuth codes are single-use and a second exchange would
+      // throw invalid_grant.
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        if (cancelled) return;
+        routeAfterSignIn(params.return_to);
+        return;
+      }
+
       const code = params.code;
       if (!code) {
         setError(t('auth.callbackMissingCode'));
         return;
       }
+
       try {
         await timeout(exchangeCodeForSession(code), EXCHANGE_TIMEOUT_MS, controller.signal);
         if (cancelled) return;
         await refresh();
-        router.replace('/');
+        routeAfterSignIn(params.return_to);
       } catch (err) {
         if (cancelled) return;
+        // The other path may have minted a session while we were exchanging.
+        const { data: after } = await supabase.auth.getSession();
+        if (after.session) {
+          routeAfterSignIn(params.return_to);
+          return;
+        }
         const msg = err instanceof Error ? err.message : 'unknown';
         setError(
-          msg === 'exchange_timeout' ? t('auth.callbackTimeout') : t('errors.generic'),
+          msg === 'exchange_timeout'
+            ? t('auth.callbackTimeout')
+            : __DEV__
+              ? msg
+              : t('errors.generic'),
         );
       }
     })();
@@ -65,7 +89,7 @@ export default function AuthCallback() {
       cancelled = true;
       controller.abort();
     };
-  }, [params.code, refresh, t]);
+  }, [params.code, params.return_to, refresh, t]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.bg }]}>
