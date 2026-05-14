@@ -16,6 +16,16 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: write
+    env:
+      EXPO_PUBLIC_SHOW_DEV_TOOLS: ${{ inputs.profile == 'development' && '1' || '0' }}
+      EXPO_PUBLIC_EMAIL_DISPATCHER: real
+      EXPO_PUBLIC_WHATSAPP_DISPATCHER: real
+      EXPO_PUBLIC_PUSH_DISPATCHER: real
+      EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE: '1.0'
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_AUTH_REDIRECT_URI: ${{ vars.EXPO_PUBLIC_AUTH_REDIRECT_URI || 'ma3ady://auth/callback' }}
+      EXPO_PUBLIC_DEFAULT_LOCALE: ${{ vars.EXPO_PUBLIC_DEFAULT_LOCALE || 'en' }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -33,26 +43,25 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Assert required EXPO_PUBLIC_* secrets present
+        run: |
+          missing=""
+          [ -z "$EXPO_PUBLIC_SUPABASE_URL" ] && missing="$missing EXPO_PUBLIC_SUPABASE_URL"
+          [ -z "$EXPO_PUBLIC_SUPABASE_ANON_KEY" ] && missing="$missing EXPO_PUBLIC_SUPABASE_ANON_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repo secrets:$missing. Add them under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
       - name: Assert real dispatchers
-        env:
-          EXPO_PUBLIC_EMAIL_DISPATCHER: real
-          EXPO_PUBLIC_WHATSAPP_DISPATCHER: real
-          EXPO_PUBLIC_PUSH_DISPATCHER: real
         run: node scripts/assert-real-dispatchers.js
 
       - name: Expo prebuild (android)
-        env:
-          EXPO_PUBLIC_SHOW_DEV_TOOLS: ${{ inputs.profile == 'development' && '1' || '0' }}
-          EXPO_PUBLIC_EMAIL_DISPATCHER: real
-          EXPO_PUBLIC_WHATSAPP_DISPATCHER: real
-          EXPO_PUBLIC_PUSH_DISPATCHER: real
-          EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE: '1.0'
         run: npx expo prebuild --platform android --no-install --clean
 
       - name: Raise Gradle/worker JVM heap (avoid Metaspace OOM on CMake configure)
         run: |
           props=android/gradle.properties
-          # Drop any seeded org.gradle.jvmargs line and append our own.
           if [ -f "$props" ]; then
             sed -i '/^org\.gradle\.jvmargs=/d' "$props"
           fi
