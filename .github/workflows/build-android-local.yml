@@ -40,6 +40,7 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+      - uses: gradle/actions/setup-gradle@v4
 
       - run: pnpm install --frozen-lockfile
 
@@ -59,18 +60,20 @@ jobs:
       - name: Expo prebuild (android)
         run: npx expo prebuild --platform android --no-install --clean
 
-      - name: Raise Gradle/worker JVM heap (avoid Metaspace OOM on CMake configure)
+      - name: Raise Gradle/worker JVM heap and limit ABIs to arm64-v8a
         run: |
           props=android/gradle.properties
           if [ -f "$props" ]; then
             sed -i '/^org\.gradle\.jvmargs=/d' "$props"
+            sed -i '/^reactNativeArchitectures=/d' "$props"
           fi
           {
             echo ''
             echo '# Overridden by .github/workflows/build-android-local.yml'
             echo 'org.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=2g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8'
+            echo 'reactNativeArchitectures=arm64-v8a'
           } >> "$props"
-          tail -n 5 "$props"
+          tail -n 6 "$props"
 
       - name: Gradle assembleRelease
         working-directory: android
@@ -93,4 +96,4 @@ jobs:
           gh release create "$tag" \
             android/app/build/outputs/apk/release/app-release.apk \
             --title "Local build ($tag)" \
-            --notes "Sideload APK built on GH Actions (debug-signed, real dispatchers). Commit ${{ github.sha }}."
+            --notes "Sideload APK built on GH Actions (arm64-v8a only, debug-signed, real dispatchers). Commit ${{ github.sha }}."
