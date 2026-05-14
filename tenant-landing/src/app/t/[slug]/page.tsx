@@ -86,12 +86,6 @@ export default async function TenantLanding({
           <h1>{tenant.name}</h1>
           <p>{t(locale, 'tagline')}</p>
           <div style={{ marginTop: 20, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link
-              className="button primary"
-              href={{ pathname: `/t/${slug}/book`, query: sp }}
-            >
-              {locale === 'ar' ? 'احجز الآن' : 'Book now'}
-            </Link>
             <a className="button secondary" href={`ma3ady://${tenant.slug}`}>
               {t(locale, 'openInApp')}
             </a>
