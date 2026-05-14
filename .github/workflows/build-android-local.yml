@@ -112,7 +112,7 @@ jobs:
             }
           }
           GRADLE
-          echo "init_arg=--init-script ../signing.init.gradle" >> "$GITHUB_OUTPUT"
+          echo "init_arg=--init-script signing.init.gradle" >> "$GITHUB_OUTPUT"
           echo "signed=true" >> "$GITHUB_OUTPUT"
 
       - name: Gradle assembleRelease
