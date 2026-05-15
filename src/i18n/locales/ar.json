@@ -39,7 +39,6 @@
     "home": "الرئيسية",
     "bookings": "الحجوزات",
     "services": "الخدمات",
-    "team": "الفريق",
     "settings": "الإعدادات"
   },
   "auth": {
@@ -56,7 +55,6 @@
   },
   "onboarding": {
     "signUpBusiness": "سجّل نشاطك على ma3ady",
-    "joinByInviteHint": "إذا كانت هناك دعوة لك، سجّل الدخول بالبريد المدعوّ وسيظهر فريقك تلقائياً.",
     "claimSlugTitle": "اختر اسم المساحة",
     "claimSlugHeader": "اختر اسماً لمساحتك",
     "slugLabel": "المعرّف (النطاق الفرعي)",
@@ -76,7 +74,6 @@
     "joinedBody": "أصبحت مساحتك جاهزة. اختر الخطوة التالية.",
     "setUpServices": "إعداد الخدمات",
     "setAvailability": "ضبط التوفّر",
-    "inviteTeam": "دعوة الفريق",
     "pickerTitle": "اختر مساحة العمل",
     "addAnotherTenant": "إضافة مساحة أخرى",
     "roleLabel": {
@@ -123,7 +120,7 @@
     "manageTitle": "إدارة الحجز",
     "manageInvalid": "لم يعد هذا الرابط صالحاً.",
     "cancelConfirmTitle": "إلغاء هذا الحجز؟",
-    "cancelConfirmBody": "سيُحرَّر الموعد ويتوقف الرابط عن العمل.",
+    "cancelConfirmBody": "سيُحرّر الموعد ويتوقف الرابط عن العمل.",
     "cancelConfirm": "نعم، ألغِ",
     "keepIt": "احتفظ بالحجز",
     "cancelled": "ملغى",
@@ -137,7 +134,7 @@
   "appointments": {
     "status": {
       "pending": "قيد الانتظار",
-      "confirmed": "مؤكَّد",
+      "confirmed": "مؤكّد",
       "completed": "مكتمل",
       "cancelled": "ملغى",
       "no_show": "لم يحضر"
@@ -169,138 +166,11 @@
     "themeSystem": "النظام"
   },
   "admin": {
-    "today": "اليوم",
-    "services": "الخدمات",
-    "team": "الفريق",
-    "settings": "الإعدادات",
-    "addService": "إضافة خدمة",
-    "removeService": "حذف خدمة",
-    "displayTimezone": "المنطقة الزمنية للعرض",
-    "tzHereNow": "أنا هنا الآن",
-    "tzTenantDefault": "المنطقة الزمنية للجهة (الافتراضية)",
-    "tzUseTenantA11y": "استخدام المنطقة الزمنية للجهة (بدون تعديل)"
-  },
-  "audit": {
-    "title": "سجلّ التدقيق",
-    "empty": "لا يوجد نشاط بعد.",
-    "actorSystem": "النظام",
-    "actorGuestToken": "رابط إدارة الضيف",
-    "actorUnknown": "غير معروف",
-    "kind": {
-      "tenant.updated": "تم تحديث إعدادات الجهة",
-      "member.invited": "تم دعوة عضو",
-      "member.added": "تمت إضافة عضو",
-      "member.role_changed": "تم تغيير دور العضو",
-      "member.removed": "تمت إزالة عضو",
-      "service.created": "تم إنشاء خدمة",
-      "service.updated": "تم تحديث خدمة",
-      "service.deactivated": "تم تعطيل خدمة",
-      "service.activated": "تم تفعيل خدمة",
-      "service.removed": "تمت إزالة خدمة",
-      "availability_rule.created": "تمت إضافة قاعدة توفّر",
-      "availability_rule.updated": "تم تحديث قاعدة توفّر",
-      "availability_rule.deleted": "تمت إزالة قاعدة توفّر",
-      "availability_exception.created": "تمت إضافة استثناء توفّر",
-      "availability_exception.updated": "تم تحديث استثناء توفّر",
-      "availability_exception.deleted": "تمت إزالة استثناء توفّر"
-    }
-  },
-  "home": {
-    "signIn": "تسجيل الدخول",
-    "signedInAs": "مسجَّل الدخول باسم",
-    "openAdmin": "فتح لوحة الإدارة",
-    "openMyApp": "عرض حجوزاتي",
-    "tenantOnboard": "هل تدير عملاً؟ ابدأ هنا",
-    "tenantOnboardSignedIn": "إضافة نشاطي التجاري",
-    "devMenu": "قائمة المطورين",
-    "devTools": "أدوات المطورين"
-  },
-  "app": {
-    "tabs": {
-      "home": "الرئيسية",
-      "bookings": "حجوزاتي",
-      "settings": "الإعدادات"
-    },
-    "homeGreeting": "أهلاً {{name}}",
-    "nextAppointment": "موعدك القادم",
-    "noUpcoming": "لا توجد حجوزات قادمة",
-    "noUpcomingHint": "ليست لديك مواعيد محجوزة. زُر متجراً لتحجز.",
-    "tenantsHeading": "حيث حجزت",
-    "noTenants": "بمجرد أن تحجز في مكان، سيظهر هنا.",
-    "bookingsBucket": {
-      "upcoming": "القادمة",
-      "past": "السابقة"
-    },
-    "bookingsEmpty": {
-      "upcoming": "لا توجد حجوزات قادمة",
-      "past": "لا توجد حجوزات سابقة بعد"
-    },
-    "signedInAs": "مسجَّل الدخول باسم",
-    "settingsLanguage": "اللغة",
-    "settingsDataPrivacy": "البيانات والخصوصية",
-    "bookingTitle": "الحجز",
-    "bookingReschedule": "تغيير الموعد",
-    "rescheduleSuccess": "تم تغيير الموعد"
-  },
-  "dataPrivacy": {
-    "title": "البيانات والخصوصية",
-    "collectTitle": "ما الذي نجمعه",
-    "collectBody": "تفاصيل الحجز (الاسم، البريد، الهاتف، الخدمة، الوقت)، وبيانات الحساب (الاسم، البريد، اللغة)، وبيانات تشخيص الأخطاء. لا نستخدم أدوات تتبع خارجية.",
-    "readPolicy": "اقرأ سياسة الخصوصية كاملة",
-    "exportTitle": "تنزيل بياناتي",
-    "exportBody": "احصل على نسخة JSON من ملفك الشخصي وحجوزاتك وسجل الأحداث.",
-    "exportCta": "تنزيل بياناتي",
-    "exportingCta": "جاري التصدير…",
-    "deleteTitle": "حذف حسابي",
-    "deleteBody": "يُزيل ملفك الشخصي ويجعل حجوزاتك السابقة مجهولة الهوية. إن كنت المالك الوحيد لحساب تجاري، انقل الملكية أولاً.",
-    "deleteCta": "حذف حسابي",
-    "deletingCta": "جاري الحذف…",
-    "deleteConfirmTitle": "حذف حسابك؟",
-    "deleteConfirmBody": "سيؤدي هذا إلى حذف ملفك الشخصي بشكل نهائي وجعل حجوزاتك السابقة مجهولة. سيتم تسجيل خروجك.",
-    "deleteConfirmAction": "حذف",
-    "deleteTransferTitle": "انقل الملكية أولاً",
-    "deleteTransferBody": "أنت المالك الوحيد لـ: {{tenants}}. رقِّ عضواً آخر إلى مالك قبل حذف حسابك.",
-    "exportFailed": "فشل التصدير",
-    "deleteFailed": "فشل الحذف",
-    "exportSavedTitle": "تم حفظ التصدير",
-    "exportSavedBody": "تم الحفظ في {{path}}"
-  },
-  "errorViewer": {
-    "title": "الأخطاء",
-    "filterAll": "الكل",
-    "kind": {
-      "all": "الكل",
-      "boundary": "حدّ",
-      "unhandled_rejection": "غير ملتقَط",
-      "manual": "يدوي",
-      "network": "شبكة",
-      "rls_denied": "rls"
-    },
-    "range": {
-      "day": "٢٤ س",
-      "week": "٧ أيام",
-      "month": "٣٠ يوم"
-    },
-    "empty": "لا توجد أخطاء في هذه النافذة",
-    "notFound": "غير موجود.",
-    "fields": {
-      "when": "متى",
-      "kind": "النوع",
-      "platform": "المنصّة",
-      "appVersion": "إصدار التطبيق",
-      "locale": "اللغة",
-      "message": "الرسالة",
-      "stack": "التتبّع",
-      "payload": "الحمولة"
-    }
-  },
-  "admin": {
     "tabs": {
       "today": "اليوم",
       "upcoming": "القادم",
       "services": "الخدمات",
       "availability": "الساعات",
-      "team": "الفريق",
       "settings": "الإعدادات"
     },
     "noTenantSelected": "اختر متجراً لإدارته",
@@ -334,7 +204,7 @@
     "appointment": "الموعد",
     "appointmentNotFound": "لم يُعثر على الموعد",
     "auditLog": "سجل النشاط",
-    "auditEmpty": "لا شيء مسجَّل بعد",
+    "auditEmpty": "لا شيء مسجَل بعد",
     "tzHereNow": "استخدم منطقتي الزمنية الحاليّة",
     "tzTenantDefault": "افتراضي المتجر",
     "tzUseTenantA11y": "استخدام منطقة المتجر الافتراضية",
@@ -363,23 +233,6 @@
       "minNotice": "أدنى إشعار (د)",
       "maxAdvance": "أقصى تقدم (يوم)"
     },
-    "teamEmpty": "أنت فقط حالياً. ادعُ زملاءك ليساعدوك.",
-    "teamInvite": "دعوة زميل",
-    "teamInviteSend": "إرسال الدعوة",
-    "teamInviteSent": "تم إرسال الدعوة",
-    "teamPending": "قيد الانتظار — لم يسجّل الدخول بعد",
-    "teamRemoveMember": "إزالة العضو",
-    "teamRemoveMemberTitle": "إزالة من الفريق؟",
-    "teamRemoveMemberBody": "سيفقد {{name}} صلاحية الوصول إلى هذا المتجر.",
-    "teamRemoveMemberConfirm": "إزالة",
-    "teamMemberRemoved": "تم إزالة العضو",
-    "teamCancelInvite": "إلغاء الدعوة",
-    "teamCancelInviteTitle": "إلغاء هذه الدعوة؟",
-    "teamCancelInviteBody": "سنتوقّف عن انتظار {{email}}. يمكنك إعادة دعوتهم لاحقاً.",
-    "teamCancelInviteConfirm": "إلغاء الدعوة",
-    "teamInviteCancelled": "تم إلغاء الدعوة",
-    "teamRole": "الدور",
-    "teamForbiddenRole": "لا يمكنك منح هذا الدور",
     "role": {
       "owner": "مالك",
       "admin": "مدير",
@@ -439,6 +292,119 @@
     "exceptionKind": {
       "block": "محجوب",
       "extra": "ساعات إضافية"
+    }
+  },
+  "audit": {
+    "title": "سجلّ التدقيق",
+    "empty": "لا يوجد نشاط بعد.",
+    "actorSystem": "النظام",
+    "actorGuestToken": "رابط إدارة الضيف",
+    "actorUnknown": "غير معروف",
+    "kind": {
+      "tenant.updated": "تم تحديث إعدادات الجهة",
+      "member.added": "تمت إضافة عضو",
+      "member.role_changed": "تم تغيير دور العضو",
+      "member.removed": "تمت إزالة عضو",
+      "service.created": "تم إنشاء خدمة",
+      "service.updated": "تم تحديث خدمة",
+      "service.deactivated": "تم تعطيل خدمة",
+      "service.activated": "تم تفعيل خدمة",
+      "service.removed": "تمت إزالة خدمة",
+      "availability_rule.created": "تمت إضافة قاعدة توفّر",
+      "availability_rule.updated": "تم تحديث قاعدة توفّر",
+      "availability_rule.deleted": "تمت إزالة قاعدة توفّر",
+      "availability_exception.created": "تمت إضافة استثناء توفّر",
+      "availability_exception.updated": "تم تحديث استثناء توفّر",
+      "availability_exception.deleted": "تمت إزالة استثناء توفّر"
+    }
+  },
+  "home": {
+    "signIn": "تسجيل الدخول",
+    "signedInAs": "مسجَل الدخول باسم",
+    "openAdmin": "فتح لوحة الإدارة",
+    "openMyApp": "عرض حجوزاتي",
+    "tenantOnboard": "هل تدير عملاً؟ ابدأ هنا",
+    "tenantOnboardSignedIn": "إضافة نشاطي التجاري",
+    "devMenu": "قائمة المطورين",
+    "devTools": "أدوات المطورين"
+  },
+  "app": {
+    "tabs": {
+      "home": "الرئيسية",
+      "bookings": "حجوزاتي",
+      "settings": "الإعدادات"
+    },
+    "homeGreeting": "أهلاً {{name}}",
+    "nextAppointment": "موعدك القادم",
+    "noUpcoming": "لا توجد حجوزات قادمة",
+    "noUpcomingHint": "ليست لديك مواعيد محجوزة. زُر متجراً لتحجز.",
+    "tenantsHeading": "حيث حجزت",
+    "noTenants": "بمجرد أن تحجز في مكان، سيظهر هنا.",
+    "bookingsBucket": {
+      "upcoming": "القادمة",
+      "past": "السابقة"
+    },
+    "bookingsEmpty": {
+      "upcoming": "لا توجد حجوزات قادمة",
+      "past": "لا توجد حجوزات سابقة بعد"
+    },
+    "signedInAs": "مسجَل الدخول باسم",
+    "settingsLanguage": "اللغة",
+    "settingsDataPrivacy": "البيانات والخصوصية",
+    "bookingTitle": "الحجز",
+    "bookingReschedule": "تغيير الموعد",
+    "rescheduleSuccess": "تم تغيير الموعد"
+  },
+  "dataPrivacy": {
+    "title": "البيانات والخصوصية",
+    "collectTitle": "ما الذي نجمعه",
+    "collectBody": "تفاصيل الحجز (الاسم، البريد، الهاتف، الخدمة، الوقت)، وبيانات الحساب (الاسم، البريد، اللغة)، وبيانات تشخيص الأخطاء. لا نستخدم أدوات تتبع خارجية.",
+    "readPolicy": "اقرأ سياسة الخصوصية كاملة",
+    "exportTitle": "تنزيل بياناتي",
+    "exportBody": "احصل على نسخة JSON من ملفك الشخصي وحجوزاتك وسجل الأحداث.",
+    "exportCta": "تنزيل بياناتي",
+    "exportingCta": "جاري التصدير…",
+    "deleteTitle": "حذف حسابي",
+    "deleteBody": "يُزيل ملفك الشخصي ويجعل حجوزاتك السابقة مجهولة الهوية. إن كنت المالك الوحيد لحساب تجاري، انقل الملكية أولاً.",
+    "deleteCta": "حذف حسابي",
+    "deletingCta": "جاري الحذف…",
+    "deleteConfirmTitle": "حذف حسابك؟",
+    "deleteConfirmBody": "سيؤدي هذا إلى حذف ملفك الشخصي بشكل نهائي وجعل حجوزاتك السابقة مجهولة. سيتم تسجيل خروجك.",
+    "deleteConfirmAction": "حذف",
+    "deleteTransferTitle": "انقل الملكية أولاً",
+    "deleteTransferBody": "أنت المالك الوحيد لـ: {{tenants}}. رقّ عضواً آخر إلى مالك قبل حذف حسابك.",
+    "exportFailed": "فشل التصدير",
+    "deleteFailed": "فشل الحذف",
+    "exportSavedTitle": "تم حفظ التصدير",
+    "exportSavedBody": "تم الحفظ في {{path}}"
+  },
+  "errorViewer": {
+    "title": "الأخطاء",
+    "filterAll": "الكل",
+    "kind": {
+      "all": "الكل",
+      "boundary": "حدّ",
+      "unhandled_rejection": "غير ملتقَط",
+      "manual": "يدوي",
+      "network": "شبكة",
+      "rls_denied": "rls"
+    },
+    "range": {
+      "day": "٢٤ س",
+      "week": "٧ أيام",
+      "month": "٣٠ يوم"
+    },
+    "empty": "لا توجد أخطاء في هذه النافذة",
+    "notFound": "غير موجود.",
+    "fields": {
+      "when": "متى",
+      "kind": "النوع",
+      "platform": "المنصّة",
+      "appVersion": "إصدار التطبيق",
+      "locale": "اللغة",
+      "message": "الرسالة",
+      "stack": "التتبّع",
+      "payload": "الحمولة"
     }
   }
 }

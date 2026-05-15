@@ -14,12 +14,28 @@ export function sanitizeReturnTo(raw: unknown): string | undefined {
 }
 
 /**
- * Routes the user after sign-in finishes. Uses the return_to query param if
- * one was passed through the auth flow; otherwise falls back to home (or the
- * caller's preferred fallback). `replace` is intentional -- the sign-in screen
- * should never remain on the navigation stack once the user is authenticated.
+ * Routes the user after sign-in finishes.
+ *
+ * Policy:
+ *   - If the caller passed an explicit `return_to`, replace the current
+ *     (sign-in) screen with that path. This covers layout-redirect entries
+ *     like `<Redirect href={{ pathname: '/sign-in', params: { return_to } }}/>`.
+ *   - Otherwise, pop the sign-in screen off the stack rather than replacing
+ *     it with `/`. This avoids leaving a duplicate home frame on the stack
+ *     when the user came from `/ -> push /sign-in -> succeed` and then sees
+ *     two `/` entries behind them.
+ *   - If there's no stack to dismiss (e.g. user landed on /sign-in via
+ *     deep link with no prior history), replace with the fallback.
  */
 export function routeAfterSignIn(returnTo: unknown, fallback: string = '/'): void {
-  const target = sanitizeReturnTo(returnTo) ?? fallback;
-  router.replace(target);
+  const sanitized = sanitizeReturnTo(returnTo);
+  if (sanitized) {
+    router.replace(sanitized);
+    return;
+  }
+  if (router.canGoBack()) {
+    router.back();
+  } else {
+    router.replace(fallback);
+  }
 }

@@ -117,7 +117,12 @@ export default function ClaimSlugScreen() {
       } else if (err instanceof SlugReservedError) {
         setSubmitError(t('onboarding.slugReserved'));
       } else {
-        setSubmitError(t('errors.generic'));
+        // Surface the real error message in dev so we don't have to read
+        // server logs to debug claim-slug failures. Production users still
+        // see the friendly localized fallback.
+        setSubmitError(
+          __DEV__ && err instanceof Error ? err.message : t('errors.generic'),
+        );
       }
     } finally {
       setSubmitting(false);

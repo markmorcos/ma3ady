@@ -26,9 +26,6 @@ export default function OnboardingWelcome() {
           fullWidth
           onPress={() => router.push('/(onboarding)/claim-slug')}
         />
-        <Text variant="caption" color="muted" style={styles.note}>
-          {t('onboarding.joinByInviteHint')}
-        </Text>
       </View>
     </View>
   );
@@ -38,5 +35,4 @@ const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'space-between', padding: 24 },
   brand: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
   actions: { gap: 12, paddingBottom: 32 },
-  note: { textAlign: 'center' },
 });
