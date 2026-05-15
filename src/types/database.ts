@@ -600,7 +600,6 @@ export type Database = {
       tenant_audit_actor_kind: "user" | "system" | "guest_token"
       tenant_audit_event_kind:
         | "tenant.updated"
-        | "member.invited"
         | "member.added"
         | "member.role_changed"
         | "member.removed"
@@ -757,7 +756,6 @@ export const Constants = {
       tenant_audit_actor_kind: ["user", "system", "guest_token"],
       tenant_audit_event_kind: [
         "tenant.updated",
-        "member.invited",
         "member.added",
         "member.role_changed",
         "member.removed",

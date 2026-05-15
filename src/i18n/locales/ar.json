@@ -302,7 +302,6 @@
     "actorUnknown": "غير معروف",
     "kind": {
       "tenant.updated": "تم تحديث إعدادات الجهة",
-      "member.invited": "تمت دعوة عضو",
       "member.added": "تمت إضافة عضو",
       "member.role_changed": "تم تغيير دور العضو",
       "member.removed": "تمت إزالة عضو",

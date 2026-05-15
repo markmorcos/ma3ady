@@ -302,7 +302,6 @@
     "actorUnknown": "Unknown",
     "kind": {
       "tenant.updated": "Tenant settings updated",
-      "member.invited": "Member invited",
       "member.added": "Member added",
       "member.role_changed": "Member role changed",
       "member.removed": "Member removed",
