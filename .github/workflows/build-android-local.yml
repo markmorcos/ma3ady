@@ -1,5 +1,4 @@
 name: Build Android APK (local, no EAS)
-
 on:
   workflow_dispatch:
     inputs:
@@ -9,137 +8,27 @@ on:
         default: preview
         type: choice
         options: [development, preview]
-
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+    uses: markmorcos/build-tooling/.github/workflows/build-android.yml@main
     permissions:
       contents: write
-    env:
-      EXPO_PUBLIC_SHOW_DEV_TOOLS: ${{ inputs.profile == 'development' && '1' || '0' }}
-      EXPO_PUBLIC_EMAIL_DISPATCHER: real
-      EXPO_PUBLIC_WHATSAPP_DISPATCHER: real
-      EXPO_PUBLIC_PUSH_DISPATCHER: real
-      EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE: '1.0'
+    with:
+      profile: ${{ inputs.profile }}
+      app-slug: ma3ady
+      enable-dev-tools: ${{ inputs.profile == 'development' }}
+      auth-redirect-uri: ma3ady://auth/callback
+      default-locale: en
+      preflight-script: scripts/assert-real-dispatchers.js
+      extra-env: |
+        EXPO_PUBLIC_EMAIL_DISPATCHER=real
+        EXPO_PUBLIC_WHATSAPP_DISPATCHER=real
+        EXPO_PUBLIC_PUSH_DISPATCHER=real
+        EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=1.0
+    secrets:
       EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
-      EXPO_PUBLIC_AUTH_REDIRECT_URI: ${{ vars.EXPO_PUBLIC_AUTH_REDIRECT_URI || 'ma3ady://auth/callback' }}
-      EXPO_PUBLIC_DEFAULT_LOCALE: ${{ vars.EXPO_PUBLIC_DEFAULT_LOCALE || 'en' }}
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
-      - uses: gradle/actions/setup-gradle@v4
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Assert required EXPO_PUBLIC_* secrets present
-        run: |
-          missing=""
-          [ -z "$EXPO_PUBLIC_SUPABASE_URL" ] && missing="$missing EXPO_PUBLIC_SUPABASE_URL"
-          [ -z "$EXPO_PUBLIC_SUPABASE_ANON_KEY" ] && missing="$missing EXPO_PUBLIC_SUPABASE_ANON_KEY"
-          if [ -n "$missing" ]; then
-            echo "::error::Missing repo secrets:$missing. Add them under Settings > Secrets and variables > Actions."
-            exit 1
-          fi
-
-      - name: Assert real dispatchers
-        run: node scripts/assert-real-dispatchers.js
-
-      - name: Expo prebuild (android)
-        run: npx expo prebuild --platform android --no-install --clean
-
-      - name: Raise Gradle/worker JVM heap and limit ABIs to arm64-v8a
-        run: |
-          props=android/gradle.properties
-          if [ -f "$props" ]; then
-            sed -i '/^org\.gradle\.jvmargs=/d' "$props"
-            sed -i '/^reactNativeArchitectures=/d' "$props"
-          fi
-          {
-            echo ''
-            echo '# Overridden by .github/workflows/build-android-local.yml'
-            echo 'org.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=2g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8'
-            echo 'reactNativeArchitectures=arm64-v8a'
-          } >> "$props"
-          tail -n 6 "$props"
-
-      - name: Configure release signing (if ANDROID_KEYSTORE_BASE64 set)
-        id: signing
-        run: |
-          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "No keystore secret set -- falling back to default debug signing."
-            echo "init_arg=" >> "$GITHUB_OUTPUT"
-            echo "signed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
-          cat > android/signing.init.gradle <<'GRADLE'
-          gradle.allprojects { project ->
-            project.afterEvaluate {
-              if (project.plugins.hasPlugin('com.android.application')) {
-                project.android {
-                  signingConfigs {
-                    release {
-                      storeFile project.file('release.keystore')
-                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                      keyAlias System.getenv("ANDROID_KEY_ALIAS")
-                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")
-                    }
-                  }
-                  buildTypes {
-                    release {
-                      signingConfig signingConfigs.release
-                    }
-                  }
-                }
-              }
-            }
-          }
-          GRADLE
-          echo "init_arg=--init-script signing.init.gradle" >> "$GITHUB_OUTPUT"
-          echo "signed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Gradle assembleRelease
-        working-directory: android
-        env:
-          GRADLE_OPTS: -Xmx5g -XX:MaxMetaspaceSize=2g
-        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace ${{ steps.signing.outputs.init_arg }}
-
-      - name: Upload APK as workflow artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ma3ady-${{ inputs.profile }}-${{ github.sha }}
-          path: android/app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: error
-
-      - name: Publish GitHub Release with APK
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SIGNED: ${{ steps.signing.outputs.signed }}
-        run: |
-          tag="local-build-${{ inputs.profile }}-$(date -u +%Y%m%d-%H%M%S)"
-          if [ "$SIGNED" = "true" ]; then
-            sig_note="release-signed (App Links autoVerify enabled)"
-          else
-            sig_note="debug-signed (App Links will fall back to browser)"
-          fi
-          gh release create "$tag" \
-            android/app/build/outputs/apk/release/app-release.apk \
-            --title "Local build ($tag)" \
-            --notes "Sideload APK built on GH Actions (arm64-v8a only, $sig_note, real dispatchers). Commit ${{ github.sha }}."
