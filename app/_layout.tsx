@@ -6,6 +6,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { runBootSequence } from '@/boot/bootSequence';
 import { defaultRunners } from '@/boot/defaultRunners';
+import { MisconfiguredScreen } from '@/components/MisconfiguredScreen';
 import { RootErrorBoundary } from '@/components/RootErrorBoundary';
 import { ToastViewport } from '@/components/Toast';
 import { ThemeProvider, useTheme } from '@/design/ThemeProvider';
@@ -46,6 +47,7 @@ function ThemedStack() {
 
 export default function RootLayout() {
   const bootPhase = useAppStore((s) => s.bootPhase);
+  const bootError = useAppStore((s) => s.bootError);
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -64,10 +66,18 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (bootPhase === 'ready' || bootPhase === 'degraded') {
+    if (
+      bootPhase === 'ready' ||
+      bootPhase === 'degraded' ||
+      bootPhase === 'misconfigured'
+    ) {
       void SplashScreen.hideAsync().catch(() => undefined);
     }
   }, [bootPhase]);
+
+  if (bootPhase === 'misconfigured') {
+    return <MisconfiguredScreen error={bootError} />;
+  }
 
   return (
     <SafeAreaProvider>

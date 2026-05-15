@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 
-export type BootPhase = 'i18n' | 'theme' | 'auth' | 'tenant' | 'ready' | 'degraded';
+export type BootPhase =
+  | 'config'
+  | 'i18n'
+  | 'theme'
+  | 'auth'
+  | 'tenant'
+  | 'ready'
+  | 'degraded'
+  | 'misconfigured';
 
 type AppState = {
   bootPhase: BootPhase;
@@ -10,7 +18,7 @@ type AppState = {
 };
 
 export const useAppStore = create<AppState>((set) => ({
-  bootPhase: 'i18n',
+  bootPhase: 'config',
   bootError: null,
   setBootPhase: (bootPhase) => set({ bootPhase }),
   setBootError: (bootError) => set({ bootError }),
