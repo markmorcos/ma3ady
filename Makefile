@@ -113,7 +113,6 @@ SUPABASE_FUNCTIONS := \
 	claim-slug \
 	delete-account \
 	export-my-data \
-	invite-member \
 	manage-appointment \
 	update-appointment-status \
 	reschedule-appointment \
