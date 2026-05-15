@@ -13,6 +13,7 @@ describe('boot perf budget', () => {
   it('completes within a 1500ms synthetic budget when each phase takes 100ms', async () => {
     const start = Date.now();
     await runBootSequence({
+      config: () => wait(phaseLatencyMs),
       i18n: () => wait(phaseLatencyMs),
       theme: () => wait(phaseLatencyMs),
       auth: () => wait(phaseLatencyMs),
