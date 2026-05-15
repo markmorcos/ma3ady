@@ -1,11 +1,17 @@
 // Pure-RN diagnostic screen for the misconfigured boot state.
 //
-// Deliberately does NOT use i18n: this screen renders when the very first
-// boot phase (config validation) fails, which is *before* the i18n runner has
-// loaded any translations. So everything here is English-only and
-// self-contained. Users shouldn't see this in shipped builds -- it's a
-// developer-facing safety net for the case where someone publishes an APK
-// without the required EXPO_PUBLIC_* variables baked in.
+// Deliberately does NOT use i18n or the design-system theme: this screen
+// renders when the very first boot phase (config validation) fails, which is
+// *before* the i18n runner has loaded any translations and *before* the
+// ThemeProvider chain is mounted in `app/_layout.tsx`. So everything here is
+// English-only with hard-coded colors. Users shouldn't see this in shipped
+// builds -- it's a developer-facing safety net for the case where someone
+// publishes an APK without the required EXPO_PUBLIC_* variables baked in.
+//
+// The two ma3ady-rules below are correctly disabled for this file only:
+//   - no-inline-hex: useTheme() doesn't work here, theme isn't mounted yet.
+//   - no-literal-string: i18n hasn't bootstrapped, t() returns the key.
+/* eslint-disable ma3ady-rules/no-inline-hex, ma3ady-rules/no-literal-string */
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const palette = {
