@@ -11,6 +11,8 @@ on:
 jobs:
   build:
     uses: markmorcos/build-tooling/.github/workflows/build-android.yml@main
+    permissions:
+      contents: write
     with:
       profile: ${{ inputs.profile }}
       app-slug: ma3ady
