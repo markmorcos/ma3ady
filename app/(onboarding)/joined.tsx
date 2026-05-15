@@ -35,12 +35,6 @@ export default function JoinedScreen() {
             fullWidth
             onPress={() => router.replace('/')}
           />
-          <Button
-            label={t('onboarding.inviteTeam')}
-            variant="ghost"
-            fullWidth
-            onPress={() => router.replace('/')}
-          />
         </View>
       </View>
     </>

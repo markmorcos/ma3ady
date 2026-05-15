@@ -21,13 +21,19 @@ import { useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
 import { type AppointmentStatus } from '@/types/db';
 
-const NEXT_STATES: Record<AppointmentStatus, AppointmentStatus[]> = {
-  pending: ['confirmed', 'cancelled'],
-  confirmed: ['completed', 'no_show', 'cancelled'],
-  completed: [],
-  cancelled: [],
-  no_show: [],
-};
+const ALL_STATES: AppointmentStatus[] = [
+  'pending',
+  'confirmed',
+  'completed',
+  'cancelled',
+  'no_show',
+];
+
+// All terminal states are reversible (matches edge fn ALLOWED + migration 021).
+// Any non-self transition is offered; admins can correct mistakes.
+const NEXT_STATES: Record<AppointmentStatus, AppointmentStatus[]> = Object.fromEntries(
+  ALL_STATES.map((s) => [s, ALL_STATES.filter((other) => other !== s)]),
+) as Record<AppointmentStatus, AppointmentStatus[]>;
 
 export default function AppointmentDetailScreen() {
   const { t } = useTranslation();

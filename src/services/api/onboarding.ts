@@ -65,23 +65,3 @@ export async function claimSlug(input: ClaimSlugInput): Promise<Tenant> {
   if (!data?.tenant) throw new Error('claim-slug returned no tenant');
   return data.tenant;
 }
-
-export type InviteMemberInput = {
-  tenant_id: string;
-  email: string;
-  role: 'admin' | 'staff' | 'customer';
-};
-
-export type InviteMemberResult =
-  | { status: 'added'; user_id: string }
-  | { status: 'invited'; email: string };
-
-export async function inviteMember(input: InviteMemberInput): Promise<InviteMemberResult> {
-  const { data, error } = await supabase.functions.invoke<InviteMemberResult>(
-    'invite-member',
-    { body: input },
-  );
-  if (error) throw error;
-  if (!data) throw new Error('invite-member returned no data');
-  return data;
-}

@@ -52,13 +52,6 @@ export default function AdminTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="team"
-        options={{
-          title: t('admin.tabs.team'),
-          tabBarIcon: renderIcon('users'),
-        }}
-      />
-      <Tabs.Screen
         name="settings"
         options={{
           title: t('admin.tabs.settings'),

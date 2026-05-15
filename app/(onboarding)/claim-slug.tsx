@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Text } from '@/components/Text';
-import { brandSwatches } from '@/design/colors';
+import { BrandColorPicker } from '@/design/BrandColorPicker';
 import { useTheme } from '@/design/ThemeProvider';
 import { getDeviceTimezone } from '@/hooks/useDisplayTimezone';
 import {
@@ -74,7 +74,6 @@ export default function ClaimSlugScreen() {
   }, [debouncedSlug]);
 
   const slugError = (() => {
-    // Stay quiet while still typing or before the input is plausibly complete.
     if (!debouncedSlug) return null;
     if (!isPlausibleSlug(debouncedSlug)) return null;
     if (checking) return null;
@@ -201,23 +200,7 @@ export default function ClaimSlugScreen() {
           <Text variant="label" color="muted">
             {t('onboarding.brandColorLabel')}
           </Text>
-          <View style={styles.row}>
-            {brandSwatches.map((c) => (
-              <Pressable
-                key={c}
-                accessibilityRole="button"
-                onPress={() => setBrandColor(brandColor === c ? null : c)}
-                style={[
-                  styles.swatch,
-                  {
-                    backgroundColor: c,
-                    borderColor:
-                      brandColor === c ? theme.colors.text : 'transparent',
-                  },
-                ]}
-              />
-            ))}
-          </View>
+          <BrandColorPicker value={brandColor} onChange={setBrandColor} />
         </View>
 
         {submitError && (
@@ -244,5 +227,4 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   chip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1 },
-  swatch: { width: 32, height: 32, borderRadius: 16, borderWidth: 2 },
 });

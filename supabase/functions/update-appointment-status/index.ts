@@ -16,13 +16,15 @@ declare const Deno: {
 
 type Status = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
 
-const ALLOWED: Record<Status, Status[]> = {
-  pending: ['confirmed', 'cancelled'],
-  confirmed: ['completed', 'no_show', 'cancelled'],
-  completed: [],
-  cancelled: [],
-  no_show: [],
-};
+const ALL_STATES: Status[] = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'];
+
+// Any non-self transition is allowed -- terminal states (cancelled, completed,
+// no_show) are reversible by admins (see migration 021). Self-transitions are
+// a no-op and never reach this map; the trigger only fires when status
+// actually changes.
+const ALLOWED: Record<Status, Status[]> = Object.fromEntries(
+  ALL_STATES.map((s) => [s, ALL_STATES.filter((other) => other !== s)]),
+) as Record<Status, Status[]>;
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -114,6 +116,11 @@ Deno.serve(
   if (body.status === 'cancelled') {
     updates.cancelled_at = new Date().toISOString();
     updates.cancelled_by_user_id = user.id;
+  } else if (appt.status === 'cancelled') {
+    // Leaving the cancelled state -- clear stale cancellation metadata so
+    // the row no longer reads as currently cancelled.
+    updates.cancelled_at = null;
+    updates.cancelled_by_user_id = null;
   }
 
   const { data: updated, error: updErr } = await admin
@@ -123,6 +130,14 @@ Deno.serve(
     .select('*')
     .single();
   if (updErr) {
+    // appointments has an EXCLUDE constraint that blocks overlapping bookings
+    // for non-cancelled/no_show statuses (migration 005). Re-instating a
+    // cancelled appointment whose slot has since been rebooked surfaces here
+    // as SQLSTATE 23P01. Surface a clear error code so the admin sees a
+    // meaningful message instead of a 500.
+    if ((updErr as { code?: string }).code === '23P01') {
+      return jsonResponse({ error: 'slot_taken' }, 409);
+    }
     return jsonResponse({ error: 'update_failed', detail: updErr.message }, 500);
   }
 

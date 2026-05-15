@@ -8,6 +8,7 @@ import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { Input } from '@/components/Input';
 import { Text } from '@/components/Text';
+import { BrandColorPicker } from '@/design/BrandColorPicker';
 import { supabase } from '@/services/api/supabase';
 import { useAuthStore } from '@/state/authStore';
 import { useTenantStore } from '@/state/tenantStore';
@@ -28,11 +29,11 @@ export default function AdminSettingsScreen() {
   const effectiveTz = adminOverride ?? tenant?.timezone ?? '—';
 
   const [name, setName] = useState(tenant?.name ?? '');
-  const [brandColor, setBrandColor] = useState(tenant?.brand_color ?? '');
+  const [brandColor, setBrandColor] = useState<string | null>(tenant?.brand_color ?? null);
 
   useEffect(() => {
     setName(tenant?.name ?? '');
-    setBrandColor(tenant?.brand_color ?? '');
+    setBrandColor(tenant?.brand_color ?? null);
   }, [tenant?.id, tenant?.name, tenant?.brand_color]);
 
   const save = useMutation({
@@ -42,7 +43,7 @@ export default function AdminSettingsScreen() {
         .from('tenants')
         .update({
           name: name.trim(),
-          brand_color: brandColor.trim() || null,
+          brand_color: brandColor,
         })
         .eq('id', tenant.id);
       if (error) throw error;
@@ -76,14 +77,16 @@ export default function AdminSettingsScreen() {
           onChangeText={setName}
           editable={canEdit}
         />
-        <Input
-          label={t('admin.settingsBrandColor')}
-          value={brandColor}
-          onChangeText={setBrandColor}
-          placeholder={t('admin.settingsBrandColorHint')}
-          editable={canEdit}
-          autoCapitalize="none"
-        />
+        <View style={styles.brandColorBlock}>
+          <Text variant="label" color="muted">
+            {t('admin.settingsBrandColor')}
+          </Text>
+          <BrandColorPicker
+            value={brandColor}
+            onChange={setBrandColor}
+            disabled={!canEdit}
+          />
+        </View>
         <Text variant="caption" color="muted" style={styles.row}>
           {t('admin.settingsTenantTimezone')}: {tenant?.timezone ?? '—'}
         </Text>
@@ -151,6 +154,7 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
   flex: { flex: 1 },
   row: { marginTop: 4 },
+  brandColorBlock: { gap: 8 },
   linkRow: {
     flexDirection: 'row',
     alignItems: 'center',

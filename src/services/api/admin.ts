@@ -93,8 +93,6 @@ export async function getTenantStats(
   const today = await getTodayAppointments(tenantId, tenantTimezone);
 
   const now = new Date();
-  const weekAgo = new Date(now);
-  weekAgo.setDate(weekAgo.getDate() - 7);
   const weekStart = new Date(now);
   weekStart.setDate(weekStart.getDate() - 7);
   const weekEnd = new Date(now);
@@ -148,7 +146,24 @@ export async function updateAppointmentStatus(
   }>('update-appointment-status', {
     body: { appointment_id: appointmentId, status },
   });
-  if (error) throw error;
+  if (error) {
+    // Edge function returned non-2xx. supabase-js wraps that as a
+    // FunctionsHttpError with the raw response on `.context`; pull the body's
+    // `error` field so callers see e.g. 'slot_taken' instead of the SDK's
+    // generic "Edge Function returned a non-2xx status code: 409".
+    const ctx = (error as { context?: Response }).context;
+    let bodyError: string | undefined;
+    if (ctx && typeof ctx.json === 'function') {
+      try {
+        const body = (await ctx.json()) as { error?: string };
+        bodyError = body?.error;
+      } catch {
+        // Body wasn't JSON or already consumed; fall through.
+      }
+    }
+    if (bodyError) throw new Error(bodyError);
+    throw error;
+  }
   if (!data?.appointment)
     throw new Error('update-appointment-status returned no appointment');
   return data.appointment;

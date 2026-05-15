@@ -150,7 +150,6 @@ describe('RLS pen-test', () => {
           { table: 'memberships', tenantCol: 'tenant_id' },
           { table: 'guest_contacts', tenantCol: 'tenant_id' },
           { table: 'appointments', tenantCol: 'tenant_id' },
-          { table: 'pending_memberships', tenantCol: 'tenant_id' },
           { table: 'tenant_audit_events', tenantCol: 'tenant_id' },
         ];
         for (const { table, tenantCol } of tables) {

@@ -1,7 +1,8 @@
 -- Reschedule + cancel tests.
 -- Covers:
---   - validate_status_transition: full allowed/disallowed matrix
---   - trigger rejects disallowed transitions and leaves the row untouched
+--   - validate_status_transition: any non-self transition is allowed
+--     (terminal states became reversible in migration 021)
+--   - reversing a cancellation works at the trigger level
 --   - manual UPDATE of starts_at into another live appointment's window
 --     raises EXCLUDE violation (slot_taken at the DB level)
 --   - cancel populates cancelled_at + cancelled_by_user_id (set via the
@@ -86,7 +87,7 @@ insert into public.appointments (
 commit;
 
 -- ----------------------------------------------------------------------------
--- Test: validate_status_transition matrix
+-- Test: validate_status_transition is permissive for any non-self transition
 -- ----------------------------------------------------------------------------
 
 \echo '-- transition matrix --'
@@ -95,29 +96,13 @@ do $$
 declare
   src public.appointment_status;
   dst public.appointment_status;
-  expected boolean;
   actual boolean;
-  -- allowed pairs as 'src->dst' literals
-  allowed text[] := array[
-    'pending->pending',
-    'pending->confirmed',
-    'pending->cancelled',
-    'pending->no_show',
-    'confirmed->confirmed',
-    'confirmed->cancelled',
-    'confirmed->completed',
-    'confirmed->no_show',
-    'cancelled->cancelled',
-    'completed->completed',
-    'no_show->no_show'
-  ];
 begin
   for src in select unnest(enum_range(null::public.appointment_status)) loop
     for dst in select unnest(enum_range(null::public.appointment_status)) loop
-      expected := (src::text || '->' || dst::text) = any(allowed);
       actual := public.validate_status_transition(src, dst);
-      if expected <> actual then
-        raise exception 'transition % → %: expected %, got %', src, dst, expected, actual;
+      if not actual then
+        raise exception 'transition % → % unexpectedly rejected', src, dst;
       end if;
     end loop;
   end loop;
@@ -125,37 +110,38 @@ end;
 $$;
 
 -- ----------------------------------------------------------------------------
--- Test: disallowed transition triggers rejection and does not mutate the row
+-- Test: cancellations can be reversed (previously was rejected as terminal)
 -- ----------------------------------------------------------------------------
 
-\echo '-- disallowed transition rejected --'
+\echo '-- cancellation reversed --'
 
 do $$
 declare
-  before_status public.appointment_status;
-  after_status public.appointment_status;
+  v_status public.appointment_status;
 begin
-  -- First, mark appt 1 cancelled (allowed).
+  -- Mark cancelled.
   update public.appointments
      set status = 'cancelled', cancelled_at = now()
    where id = 'eeeeeeee-cccc-0000-0000-000000000001';
 
-  select status into before_status from public.appointments
+  -- Re-instate to confirmed (would have raised invalid_status_transition
+  -- pre-021).
+  update public.appointments
+     set status = 'confirmed', cancelled_at = null, cancelled_by_user_id = null
    where id = 'eeeeeeee-cccc-0000-0000-000000000001';
 
-  begin
-    update public.appointments
-       set status = 'confirmed'
-     where id = 'eeeeeeee-cccc-0000-0000-000000000001';
-    raise exception 'expected invalid_status_transition raise';
-  exception when sqlstate '22023' then null;
-  end;
-
-  select status into after_status from public.appointments
+  select status into v_status from public.appointments
    where id = 'eeeeeeee-cccc-0000-0000-000000000001';
-  if before_status <> after_status then
-    raise exception 'row mutated despite rejected transition (%, %)', before_status, after_status;
+
+  if v_status <> 'confirmed' then
+    raise exception 'expected re-instated to confirmed, got %', v_status;
   end if;
+
+  -- Re-cancel for the rest of the suite (the EXCLUDE test below depends on
+  -- appt 1 being cancelled).
+  update public.appointments
+     set status = 'cancelled', cancelled_at = now()
+   where id = 'eeeeeeee-cccc-0000-0000-000000000001';
 end;
 $$;
 
@@ -170,8 +156,7 @@ declare
   v_cancelled_at timestamptz;
   v_cancelled_by uuid;
 begin
-  -- The first appointment is already cancelled above (without cancelled_by);
-  -- emulate the Edge Function path: separate update setting both fields.
+  -- Emulate the Edge Function path: separate update setting cancelled_by.
   update public.appointments
      set cancelled_by_user_id = '00000000-0000-0000-0000-000000e70001'
    where id = 'eeeeeeee-cccc-0000-0000-000000000001';
