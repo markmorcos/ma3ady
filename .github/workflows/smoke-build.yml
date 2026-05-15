@@ -7,4 +7,4 @@ concurrency:
   cancel-in-progress: true
 jobs:
   smoke:
-    uses: markmorcos/build-tooling/.github/workflows/smoke-build.yml@main
+    uses: markmorcos/build-tooling/.github/workflows/smoke-build.yml@v1

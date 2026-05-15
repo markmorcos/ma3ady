@@ -10,7 +10,7 @@ on:
         options: [development, preview]
 jobs:
   build:
-    uses: markmorcos/build-tooling/.github/workflows/build-android.yml@main
+    uses: markmorcos/build-tooling/.github/workflows/build-android.yml@v1
     permissions:
       contents: write
     with:
