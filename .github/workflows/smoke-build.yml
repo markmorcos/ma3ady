@@ -1,70 +1,10 @@
 name: Smoke build
-
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
 concurrency:
   group: smoke-build-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   smoke:
-    name: typecheck + tests + assembleDebug
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
-      - uses: gradle/actions/setup-gradle@v4
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Unit tests
-        run: pnpm test --silent
-
-      - name: Expo prebuild (Android)
-        # No EXPO_PUBLIC_* secrets passed: the config boot phase will fail at
-        # runtime and show MisconfiguredScreen, but the build itself must
-        # succeed. That's the whole point of this workflow -- catch build
-        # breakage on every push, not just when we manually dispatch a release.
-        run: npx expo prebuild --platform android --no-install --clean
-
-      - name: Raise Gradle JVM heap and limit ABIs to arm64-v8a
-        run: |
-          props=android/gradle.properties
-          if [ -f "$props" ]; then
-            sed -i '/^org\.gradle\.jvmargs=/d' "$props"
-            sed -i '/^reactNativeArchitectures=/d' "$props"
-          fi
-          {
-            echo ''
-            echo '# Overridden by .github/workflows/smoke-build.yml'
-            echo 'org.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=2g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8'
-            echo 'reactNativeArchitectures=arm64-v8a'
-          } >> "$props"
-
-      - name: Gradle assembleDebug
-        working-directory: android
-        env:
-          GRADLE_OPTS: -Xmx5g -XX:MaxMetaspaceSize=2g
-        run: ./gradlew :app:assembleDebug --no-daemon
+    uses: markmorcos/build-tooling/.github/workflows/smoke-build.yml@main
