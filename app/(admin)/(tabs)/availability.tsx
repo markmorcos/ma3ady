@@ -77,6 +77,10 @@ export default function AvailabilityScreen() {
     ends_at: string;
     reason: string;
   } | null>(null);
+  // Locks the wrapping ScrollView while the heatmap is in long-press
+  // paint mode, so a vertical drag paints a band instead of scrolling
+  // the page out from under the user's finger.
+  const [heatmapPainting, setHeatmapPainting] = useState(false);
 
   const rules = useQuery({
     queryKey: ['admin-rules', tenant?.id],
@@ -281,6 +285,7 @@ export default function AvailabilityScreen() {
     <ScrollView
       contentContainerStyle={styles.content}
       style={{ backgroundColor: theme.colors.surface }}
+      scrollEnabled={!heatmapPainting}
     >
       <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
         {t('admin.availabilityTitle')}
@@ -325,6 +330,7 @@ export default function AvailabilityScreen() {
           exceptions={exceptions.data ?? []}
           onCommitBand={onHeatmapCommitBand}
           onToggleCell={onHeatmapToggleCell}
+          onPaintingChange={setHeatmapPainting}
         />
         <View style={styles.heatmapTip}>
           <Icon name="hand" size={16} color="onSurfaceVariant" />
