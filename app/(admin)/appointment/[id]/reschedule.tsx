@@ -131,7 +131,7 @@ export default function AdminRescheduleScreen() {
         <DayStrip
           days={days}
           selected={day}
-          hasSlotsByDay={Object.fromEntries(days.map((d) => [d, !!grouped[d]?.length]))}
+          slotCountByDay={Object.fromEntries(days.map((d) => [d, grouped[d]?.length ?? 0]))}
           onSelect={setSelectedDay}
           locale={i18n.language}
         />

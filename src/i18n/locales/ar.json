@@ -150,7 +150,28 @@
       "morning": "صباحاً",
       "afternoon": "ظهراً",
       "evening": "مساءً"
-    }
+    },
+    "bucketFull": "ممتلئ",
+    "scanHint": "اسحب شريط الأيام لرؤية أسبوعين دفعة واحدة.",
+    "tenantOpen": "مفتوح · يُغلق {{time}}",
+    "tenantClosed": "مغلق اليوم",
+    "pickServiceTitle": "اختر خدمة",
+    "poweredBy": "بواسطة ma3ady",
+    "confirmHero": "مؤكَّد",
+    "confirmHeadline": "حجزك مسجّل",
+    "confirmCountdown": "بعد {{value}}",
+    "confirmTimezone": "المواعيد بتوقيت {{timezone}}",
+    "addToCalendar": "أضف إلى التقويم",
+    "calendarGoogle": "جوجل",
+    "calendarApple": "أبل",
+    "calendarIcal": "iCal",
+    "shareTitle": "ادعُ صديقاً",
+    "shareBody": "شارك هذا الرابط ليحجزوا الموعد التالي.",
+    "policyTitle": "سياسة الإلغاء",
+    "policyDefault": "تحتاج لتغيير الموعد؟ تستطيع الإلغاء من رابط الإدارة في أي وقت.",
+    "saveToAccountCta": "احفظ في حسابي",
+    "summaryDate": "التاريخ",
+    "summaryTime": "الوقت"
   },
   "appointments": {
     "status": {

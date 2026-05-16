@@ -150,7 +150,28 @@
       "morning": "Morning",
       "afternoon": "Afternoon",
       "evening": "Evening"
-    }
+    },
+    "bucketFull": "Full",
+    "scanHint": "Drag the day strip to scan two weeks at once.",
+    "tenantOpen": "Open · closes {{time}}",
+    "tenantClosed": "Closed today",
+    "pickServiceTitle": "Pick a service",
+    "poweredBy": "Powered by ma3ady",
+    "confirmHero": "Confirmed",
+    "confirmHeadline": "You’re on the books",
+    "confirmCountdown": "in {{value}}",
+    "confirmTimezone": "Times shown in {{timezone}}",
+    "addToCalendar": "Add to calendar",
+    "calendarGoogle": "Google",
+    "calendarApple": "Apple",
+    "calendarIcal": "iCal",
+    "shareTitle": "Bring a friend",
+    "shareBody": "Share this booking link so they can grab the next slot.",
+    "policyTitle": "Cancellation policy",
+    "policyDefault": "Need to change plans? You can cancel from the manage link any time.",
+    "saveToAccountCta": "Save to my account",
+    "summaryDate": "Date",
+    "summaryTime": "Time"
   },
   "appointments": {
     "status": {

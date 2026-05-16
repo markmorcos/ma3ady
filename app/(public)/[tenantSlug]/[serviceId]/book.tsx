@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { BookingSummary } from '@/components/BookingSummary';
 import { Button } from '@/components/Button';
+import { Icon } from '@/components/Icon';
 import { Input } from '@/components/Input';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
@@ -87,11 +88,28 @@ export default function BookScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <Text variant="h2">{t('booking.confirmTitle')}</Text>
-      <BookingSummary service={service} startsAt={startsAt} tenantTimezone={tenant.timezone} />
+    <ScrollView
+      contentContainerStyle={styles.content}
+      style={{ backgroundColor: theme.colors.surface }}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
+        {t('booking.confirmTitle')}
+      </Text>
+      <BookingSummary
+        service={service}
+        startsAt={startsAt}
+        tenantTimezone={tenant.timezone}
+        tenant={tenant}
+      />
 
-      <Input label={t('booking.name')} value={name} onChangeText={setName} autoCapitalize="words" />
+      <Input
+        label={t('booking.name')}
+        value={name}
+        onChangeText={setName}
+        autoCapitalize="words"
+        leadingIcon={<Icon name="user" size={18} color="onSurfaceVariant" />}
+      />
       <Input
         label={t('booking.email')}
         value={email}
@@ -100,12 +118,14 @@ export default function BookScreen() {
         autoCapitalize="none"
         autoCorrect={false}
         error={email && !emailValid ? t('booking.invalidEmail') : undefined}
+        leadingIcon={<Icon name="mail" size={18} color="onSurfaceVariant" />}
       />
       <Input
         label={t('booking.phone')}
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
+        leadingIcon={<Icon name="phone" size={18} color="onSurfaceVariant" />}
       />
       <Input
         label={t('booking.notes')}
@@ -114,6 +134,7 @@ export default function BookScreen() {
         multiline
         numberOfLines={3}
         maxLength={500}
+        leadingIcon={<Icon name="edit" size={18} color="onSurfaceVariant" />}
       />
 
       <Pressable
@@ -126,26 +147,28 @@ export default function BookScreen() {
           style={[
             styles.box,
             {
-              borderColor: theme.colors.border,
-              backgroundColor: tos ? theme.colors.brand[500] : 'transparent',
+              borderColor: tos ? theme.colors.primary : theme.colors.onSurfaceVariant,
+              backgroundColor: tos ? theme.colors.primary : 'transparent',
+              borderWidth: tos ? 0 : 2,
             },
           ]}
         >
-          {tos && (
-            <Text variant="bodyStrong" style={{ color: theme.colors.white }}>
-              ✓
-            </Text>
-          )}
+          {tos && <Icon name="check" size={14} color="onPrimary" />}
         </View>
-        <Text variant="caption" style={styles.tosLabel}>
+        <Text
+          variant="bodyMd"
+          style={[styles.tosLabel, { color: theme.colors.onSurface }]}
+        >
           {t('booking.tos')}
         </Text>
       </Pressable>
 
       <Button
         label={t('booking.submit')}
-        variant="primary"
+        variant="filled"
+        size="lg"
         fullWidth
+        leadingIcon={<Icon name="check-check" size={20} color="onPrimary" />}
         loading={submitting}
         disabled={!canSubmit}
         onPress={onSubmit}
@@ -155,13 +178,12 @@ export default function BookScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16, gap: 12 },
+  content: { padding: 16, gap: 16, paddingBottom: 32 },
   tos: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 },
   box: {
-    width: 22,
-    height: 22,
-    borderWidth: 1,
-    borderRadius: 6,
+    width: 20,
+    height: 20,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
