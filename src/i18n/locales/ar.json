@@ -392,11 +392,16 @@
       "bookings": "حجوزاتي",
       "settings": "الإعدادات"
     },
-    "homeGreeting": "أهلاً {{name}}",
+    "homeGreeting": "أهلاً، {{name}}",
     "nextAppointment": "موعدك القادم",
     "noUpcoming": "لا توجد حجوزات قادمة",
     "noUpcomingHint": "ليست لديك مواعيد محجوزة. زُر متجراً لتحجز.",
-    "tenantsHeading": "حيث حجزت",
+    "tenantsHeading": "أماكنك المعتادة",
+    "seeAll": "عرض الكل",
+    "lastVisit": "آخر زيارة · {{date}}",
+    "discoverTitle": "اكتشف",
+    "discoverBody": "ألصق رابط ma3ady أو امسح QR لإضافة مكان جديد.",
+    "checkIn": "تسجيل الوصول",
     "noTenants": "بمجرد أن تحجز في مكان، سيظهر هنا.",
     "bookingsBucket": {
       "upcoming": "القادمة",
@@ -409,6 +414,8 @@
     "signedInAs": "مسجَل الدخول باسم",
     "settingsLanguage": "اللغة",
     "settingsDataPrivacy": "البيانات والخصوصية",
+    "settingsSectionAppearance": "المظهر",
+    "settingsSectionAccount": "الحساب",
     "bookingTitle": "الحجز",
     "bookingReschedule": "تغيير الموعد",
     "rescheduleSuccess": "تم تغيير الموعد"

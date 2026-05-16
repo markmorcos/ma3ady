@@ -1,15 +1,24 @@
 import { supabase } from './supabase';
 import { type Appointment } from '@/types/db';
 
-export async function getMyAppointments(): Promise<Appointment[]> {
+export type MyAppointment = Appointment & {
+  service: { id: string; name: string; duration_minutes: number } | null;
+  tenant: { id: string; slug: string; name: string; timezone: string } | null;
+};
+
+export async function getMyAppointments(): Promise<MyAppointment[]> {
   // RLS scopes to user_id = auth.uid() OR same-tenant staff. For a customer,
-  // that returns only their own appointments.
+  // that returns only their own appointments. Embed the service + tenant
+  // names so the customer home / bookings list can render without a second
+  // round-trip.
   const { data, error } = await supabase
     .from('appointments')
-    .select('*')
+    .select(
+      '*, service:services(id, name, duration_minutes), tenant:tenants(id, slug, name, timezone)',
+    )
     .order('starts_at', { ascending: true });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as MyAppointment[];
 }
 
 export async function getAppointment(id: string): Promise<Appointment | null> {

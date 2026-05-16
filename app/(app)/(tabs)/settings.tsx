@@ -1,57 +1,79 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
+import { ListItem } from '@/components/ListItem';
 import { Text } from '@/components/Text';
+import { useTheme } from '@/design/ThemeProvider';
 import { useAuthStore } from '@/state/authStore';
 
 export default function CustomerSettingsScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
   const profile = useAuthStore((s) => s.profile);
   const session = useAuthStore((s) => s.session);
   const signOut = useAuthStore((s) => s.signOut);
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <Text variant="h2">{t('app.tabs.settings')}</Text>
+    <ScrollView
+      contentContainerStyle={styles.content}
+      style={{ backgroundColor: theme.colors.surface }}
+    >
+      <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
+        {t('app.tabs.settings')}
+      </Text>
 
-      <Card>
-        <Text variant="label" color="muted">
-          {t('app.signedInAs')}
-        </Text>
-        <Text variant="bodyStrong">{profile?.full_name ?? '—'}</Text>
-        <Text variant="caption" color="muted">
-          {session?.user.email ?? ''}
-        </Text>
+      <Card kind="filled">
+        <View style={styles.profileRow}>
+          <View
+            style={[
+              styles.avatar,
+              {
+                backgroundColor: theme.colors.tertiaryContainer,
+                borderRadius: theme.shape.lg,
+              },
+            ]}
+          >
+            <Icon name="user" size={28} color="onTertiaryContainer" />
+          </View>
+          <View style={styles.profileText}>
+            <Text variant="titleLg" style={{ color: theme.colors.onSurface }}>
+              {profile?.full_name ?? '—'}
+            </Text>
+            <Text variant="bodyMd" style={{ color: theme.colors.onSurfaceVariant }}>
+              {session?.user.email ?? ''}
+            </Text>
+          </View>
+        </View>
       </Card>
 
-      <Card>
-        <Pressable
-          onPress={() => router.push('/dev/i18n')}
-          accessibilityRole="button"
-          style={styles.linkRow}
-        >
-          <Text variant="body">{t('app.settingsLanguage')}</Text>
-          <Icon name="chevron-right" size={18} color="muted" />
-        </Pressable>
-      </Card>
+      <Section title={t('app.settingsSectionAppearance')}>
+        <Card kind="filled" padded={false}>
+          <ListItem
+            leading={<Icon name="globe" size={20} color="onSurfaceVariant" />}
+            headline={t('app.settingsLanguage')}
+            trailing={<Icon name="chevron-right" size={20} color="onSurfaceVariant" />}
+            onPress={() => router.push('/dev/i18n')}
+          />
+        </Card>
+      </Section>
 
-      <Card>
-        <Pressable
-          onPress={() => router.push('/(app)/data-and-privacy' as never)}
-          accessibilityRole="button"
-          style={styles.linkRow}
-        >
-          <Text variant="body">{t('app.settingsDataPrivacy')}</Text>
-          <Icon name="chevron-right" size={18} color="muted" />
-        </Pressable>
-      </Card>
+      <Section title={t('app.settingsSectionAccount')}>
+        <Card kind="filled" padded={false}>
+          <ListItem
+            leading={<Icon name="users" size={20} color="onSurfaceVariant" />}
+            headline={t('app.settingsDataPrivacy')}
+            trailing={<Icon name="chevron-right" size={20} color="onSurfaceVariant" />}
+            onPress={() => router.push('/(app)/data-and-privacy' as never)}
+          />
+        </Card>
+      </Section>
 
       <Button
         label={t('admin.signOut')}
-        variant="ghost"
+        variant="text"
         fullWidth
         onPress={async () => {
           await signOut();
@@ -62,12 +84,35 @@ export default function CustomerSettingsScreen() {
   );
 }
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const theme = useTheme();
+  return (
+    <View style={styles.section}>
+      <Text
+        variant="labelLg"
+        style={{
+          color: theme.colors.primary,
+          textTransform: 'uppercase',
+          letterSpacing: 0.5,
+          marginBottom: 8,
+        }}
+      >
+        {title}
+      </Text>
+      {children}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  content: { padding: 16, gap: 16 },
-  linkRow: {
-    flexDirection: 'row',
+  content: { padding: 16, gap: 16, paddingBottom: 32 },
+  section: { gap: 8 },
+  profileRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  avatar: {
+    width: 64,
+    height: 64,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
+    justifyContent: 'center',
   },
+  profileText: { flex: 1, gap: 2 },
 });

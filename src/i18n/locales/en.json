@@ -392,11 +392,16 @@
       "bookings": "My bookings",
       "settings": "Settings"
     },
-    "homeGreeting": "Hi {{name}}",
+    "homeGreeting": "Hi, {{name}}",
     "nextAppointment": "Your next appointment",
     "noUpcoming": "No upcoming bookings",
     "noUpcomingHint": "You don't have any appointments scheduled. Visit a tenant to book.",
-    "tenantsHeading": "Where you've booked",
+    "tenantsHeading": "Places you visit",
+    "seeAll": "See all",
+    "lastVisit": "Last visit · {{date}}",
+    "discoverTitle": "Discover",
+    "discoverBody": "Paste a ma3ady link or scan a QR to add a new place.",
+    "checkIn": "Check in",
     "noTenants": "Once you book somewhere, it will show up here.",
     "bookingsBucket": {
       "upcoming": "Upcoming",
@@ -409,6 +414,8 @@
     "signedInAs": "Signed in as",
     "settingsLanguage": "Language",
     "settingsDataPrivacy": "Data & privacy",
+    "settingsSectionAppearance": "Appearance",
+    "settingsSectionAccount": "Account",
     "bookingTitle": "Booking",
     "bookingReschedule": "Reschedule",
     "rescheduleSuccess": "Rescheduled"
