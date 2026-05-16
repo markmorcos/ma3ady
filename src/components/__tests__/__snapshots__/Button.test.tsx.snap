@@ -36,17 +36,26 @@ exports[`<Button> renders the disabled state 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
+      },
+      {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
       },
       {
         "alignSelf": "auto",
         "backgroundColor": "#0059bf",
         "borderColor": "transparent",
-        "borderRadius": 12,
+        "borderRadius": 9999,
+        "borderWidth": 0,
         "minHeight": 48,
-        "opacity": 0.5,
-        "paddingHorizontal": 16,
+        "opacity": 0.4,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -70,15 +79,15 @@ exports[`<Button> renders the disabled state 1`] = `
           },
           {
             "fontSize": 14,
-            "fontWeight": "400",
-            "letterSpacing": 0.25,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
             "lineHeight": 20,
           },
           {
             "color": "#07090d",
           },
           {
-            "color": "#FFFFFF",
+            "color": "#ffffff",
           },
         ]
       }
@@ -125,17 +134,26 @@ exports[`<Button> renders the ghost variant 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
+      },
+      {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
       },
       {
         "alignSelf": "auto",
         "backgroundColor": "transparent",
         "borderColor": "transparent",
-        "borderRadius": 12,
+        "borderRadius": 9999,
+        "borderWidth": 0,
         "minHeight": 48,
         "opacity": 1,
-        "paddingHorizontal": 16,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -159,8 +177,8 @@ exports[`<Button> renders the ghost variant 1`] = `
           },
           {
             "fontSize": 14,
-            "fontWeight": "400",
-            "letterSpacing": 0.25,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
             "lineHeight": 20,
           },
           {
@@ -214,17 +232,26 @@ exports[`<Button> renders the loading state 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
+      },
+      {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
       },
       {
         "alignSelf": "auto",
         "backgroundColor": "#0059bf",
         "borderColor": "transparent",
-        "borderRadius": 12,
+        "borderRadius": 9999,
+        "borderWidth": 0,
         "minHeight": 48,
-        "opacity": 0.5,
-        "paddingHorizontal": 16,
+        "opacity": 0.4,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -232,7 +259,7 @@ exports[`<Button> renders the loading state 1`] = `
   }
 >
   <ActivityIndicator
-    color="#FFFFFF"
+    color="#ffffff"
   />
 </View>
 `;
@@ -273,17 +300,26 @@ exports[`<Button> renders the primary variant 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
+      },
+      {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
       },
       {
         "alignSelf": "auto",
         "backgroundColor": "#0059bf",
         "borderColor": "transparent",
-        "borderRadius": 12,
+        "borderRadius": 9999,
+        "borderWidth": 0,
         "minHeight": 48,
         "opacity": 1,
-        "paddingHorizontal": 16,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -307,15 +343,15 @@ exports[`<Button> renders the primary variant 1`] = `
           },
           {
             "fontSize": 14,
-            "fontWeight": "400",
-            "letterSpacing": 0.25,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
             "lineHeight": 20,
           },
           {
             "color": "#07090d",
           },
           {
-            "color": "#FFFFFF",
+            "color": "#ffffff",
           },
         ]
       }
@@ -362,17 +398,26 @@ exports[`<Button> renders the secondary variant 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
       },
       {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
+      },
+      {
         "alignSelf": "auto",
-        "backgroundColor": "#f6f9fd",
-        "borderColor": "#bec5ce",
-        "borderRadius": 12,
+        "backgroundColor": "transparent",
+        "borderColor": "#6c727a",
+        "borderRadius": 9999,
+        "borderWidth": 1,
         "minHeight": 48,
         "opacity": 1,
-        "paddingHorizontal": 16,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -396,15 +441,15 @@ exports[`<Button> renders the secondary variant 1`] = `
           },
           {
             "fontSize": 14,
-            "fontWeight": "400",
-            "letterSpacing": 0.25,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
             "lineHeight": 20,
           },
           {
             "color": "#07090d",
           },
           {
-            "color": "#07090d",
+            "color": "#0059bf",
           },
         ]
       }

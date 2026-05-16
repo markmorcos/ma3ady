@@ -196,51 +196,47 @@ export const motion = {
 // Elevation — M3 levels 0/1/3/5
 // ---------------------------------------------------------------------------
 
-export const elevation = {
-  level0: {
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 0,
-  },
-  level1: {
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
-  },
-  level3: {
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-  },
-  level5: {
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
-  },
+export type ElevationStyle = {
+  shadowOpacity: number;
+  shadowRadius: number;
+  shadowOffset: { width: number; height: number };
+  elevation: number;
+};
 
+const level0: ElevationStyle = {
+  shadowOpacity: 0,
+  shadowRadius: 0,
+  shadowOffset: { width: 0, height: 0 },
+  elevation: 0,
+};
+const level1: ElevationStyle = {
+  shadowOpacity: 0.3,
+  shadowRadius: 3,
+  shadowOffset: { width: 0, height: 1 },
+  elevation: 1,
+};
+const level3: ElevationStyle = {
+  shadowOpacity: 0.3,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 3,
+};
+const level5: ElevationStyle = {
+  shadowOpacity: 0.3,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 8 },
+  elevation: 5,
+};
+
+export const elevation = {
+  level0,
+  level1,
+  level3,
+  level5,
   // Back-compat aliases
-  sm: {
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
-  },
-  md: {
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-  },
-  lg: {
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
-  },
+  sm: level1,
+  md: level3,
+  lg: level5,
 } as const;
 
 export const hitSlop = { top: 8, right: 8, bottom: 8, left: 8 } as const;
