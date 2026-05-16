@@ -494,32 +494,41 @@ export type Database = {
       tenants: {
         Row: {
           brand_color: string | null
+          cancellation_policy: string | null
           created_at: string
           default_locale: string
           id: string
+          location: string | null
           name: string
           slug: string
           timezone: string
+          type: Database["public"]["Enums"]["tenant_type"]
           updated_at: string
         }
         Insert: {
           brand_color?: string | null
+          cancellation_policy?: string | null
           created_at?: string
           default_locale: string
           id?: string
+          location?: string | null
           name: string
           slug: string
           timezone: string
+          type?: Database["public"]["Enums"]["tenant_type"]
           updated_at?: string
         }
         Update: {
           brand_color?: string | null
+          cancellation_policy?: string | null
           created_at?: string
           default_locale?: string
           id?: string
+          location?: string | null
           name?: string
           slug?: string
           timezone?: string
+          type?: Database["public"]["Enums"]["tenant_type"]
           updated_at?: string
         }
         Relationships: []
@@ -615,6 +624,7 @@ export type Database = {
         | "availability_exception.updated"
         | "availability_exception.deleted"
       tenant_role: "owner" | "admin" | "staff" | "customer"
+      tenant_type: "generic" | "salon" | "clinic" | "auto"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -772,6 +782,7 @@ export const Constants = {
         "availability_exception.deleted",
       ],
       tenant_role: ["owner", "admin", "staff", "customer"],
+      tenant_type: ["generic", "salon", "clinic", "auto"],
     },
   },
 } as const

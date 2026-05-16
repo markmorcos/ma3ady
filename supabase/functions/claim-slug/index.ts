@@ -20,7 +20,11 @@ type ClaimInput = {
   timezone?: string;
   default_locale?: string;
   brand_color?: string | null;
+  type?: string | null;
+  location?: string | null;
 };
+
+type TenantType = 'generic' | 'salon' | 'clinic' | 'auto';
 
 type Tenant = {
   id: string;
@@ -29,7 +33,17 @@ type Tenant = {
   timezone: string;
   default_locale: string;
   brand_color: string | null;
+  type: TenantType;
+  location: string | null;
+  cancellation_policy: string | null;
 };
+
+const TENANT_TYPES: ReadonlySet<TenantType> = new Set([
+  'generic',
+  'salon',
+  'clinic',
+  'auto',
+]);
 
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])$/;
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
@@ -83,6 +97,12 @@ Deno.serve(
   const timezone = (body.timezone ?? '').trim();
   const defaultLocale = (body.default_locale ?? '').trim();
   const brandColor = body.brand_color ? body.brand_color.trim() : null;
+  const typeRaw = body.type ? body.type.trim() : 'generic';
+  const tenantType: TenantType | null = TENANT_TYPES.has(typeRaw as TenantType)
+    ? (typeRaw as TenantType)
+    : null;
+  const locationRaw = body.location ? body.location.trim() : null;
+  const location = locationRaw && locationRaw.length > 0 ? locationRaw.slice(0, 120) : null;
 
   if (!SLUG_RE.test(slug)) return jsonResponse({ error: 'invalid_slug' }, 400);
   if (!name) return jsonResponse({ error: 'invalid_name' }, 400);
@@ -93,6 +113,7 @@ Deno.serve(
   if (brandColor && !HEX_RE.test(brandColor)) {
     return jsonResponse({ error: 'invalid_brand_color' }, 400);
   }
+  if (!tenantType) return jsonResponse({ error: 'invalid_type' }, 400);
 
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -122,8 +143,12 @@ Deno.serve(
       timezone,
       default_locale: defaultLocale,
       brand_color: brandColor,
+      type: tenantType,
+      location,
     })
-    .select('id, slug, name, timezone, default_locale, brand_color')
+    .select(
+      'id, slug, name, timezone, default_locale, brand_color, type, location, cancellation_policy',
+    )
     .single();
   if (tenantErr || !tenantData) {
     if (tenantErr?.code === '23505') return jsonResponse({ error: 'slug_taken' }, 409);

@@ -63,6 +63,9 @@ export const useTenantStore = create<TenantState>((set, get) => ({
       timezone: tenant.timezone,
       default_locale: tenant.default_locale as 'en' | 'ar',
       brand_color: tenant.brand_color ?? null,
+      type: tenant.type,
+      location: tenant.location ?? null,
+      cancellation_policy: tenant.cancellation_policy ?? null,
       role: 'owner',
     };
     await get().selectTenant(tenant.id);
