@@ -224,7 +224,7 @@
     "pastEmpty": "لا مواعيد سابقة بعد",
     "now": "الآن",
     "heatmapEyebrow": "الأسبوع المعتاد",
-    "heatmapTip": "اضغط على خلية للتبديل. اضغط مطوّلاً ثم اسحب لرسم شريط.",
+    "heatmapTip": "اضغط على خلية لتبديل النصف ساعة. اضغط مطوّلاً على عمود لتحرير ساعات ذلك اليوم.",
     "heatmapLegendOpen": "مفتوح",
     "heatmapLegendClosed": "مغلق",
     "heatmapLegendBlock": "محظور",

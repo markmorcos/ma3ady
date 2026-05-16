@@ -31,6 +31,12 @@ import {
   type Band,
 } from '@/services/api/availability';
 import { AvailabilityHeatmap } from '@/features/admin/AvailabilityHeatmap';
+import {
+  isMinuteInsideBands,
+  mergeBands,
+  removeSlot,
+  toHHMMSS,
+} from '@/features/admin/bandOps';
 import { useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
 
@@ -77,10 +83,6 @@ export default function AvailabilityScreen() {
     ends_at: string;
     reason: string;
   } | null>(null);
-  // Locks the wrapping ScrollView while the heatmap is in long-press
-  // paint mode, so a vertical drag paints a band instead of scrolling
-  // the page out from under the user's finger.
-  const [heatmapPainting, setHeatmapPainting] = useState(false);
 
   const rules = useQuery({
     queryKey: ['admin-rules', tenant?.id],
@@ -201,77 +203,16 @@ export default function AvailabilityScreen() {
 
   const totalBands = (rules.data ?? []).length;
 
-  const toMinutes = (t: string): number => {
-    const [h, m] = t.split(':').map((p) => parseInt(p, 10));
-    return (h ?? 0) * 60 + (m ?? 0);
-  };
-  const toHHMMSS = (m: number): string =>
-    `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}:00`;
-
-  // Sort + merge overlapping or touching bands so a "paint over existing" or
-  // "fill the gap between two bands" gesture collapses into one band rather
-  // than producing N overlapping rows.
-  const mergeBands = (bands: Band[]): Band[] => {
-    if (bands.length === 0) return bands;
-    const sorted = [...bands].sort((a, b) => toMinutes(a.start_time) - toMinutes(b.start_time));
-    const out: Band[] = [{ ...sorted[0]! }];
-    for (let i = 1; i < sorted.length; i++) {
-      const prev = out[out.length - 1]!;
-      const curr = sorted[i]!;
-      if (toMinutes(curr.start_time) <= toMinutes(prev.end_time)) {
-        if (toMinutes(curr.end_time) > toMinutes(prev.end_time)) {
-          prev.end_time = curr.end_time;
-        }
-      } else {
-        out.push({ ...curr });
-      }
-    }
-    return out;
-  };
-
-  // Subtract a [startMin, endMin) slice from existing bands, splitting any
-  // overlapping band into the pieces that lie outside the slice.
-  const removeSlot = (bands: Band[], startMin: number, endMin: number): Band[] => {
-    const out: Band[] = [];
-    for (const b of bands) {
-      const s = toMinutes(b.start_time);
-      const e = toMinutes(b.end_time);
-      if (e <= startMin || s >= endMin) {
-        out.push(b);
-        continue;
-      }
-      if (s < startMin) out.push({ start_time: b.start_time, end_time: toHHMMSS(startMin) });
-      if (e > endMin) out.push({ start_time: toHHMMSS(endMin), end_time: b.end_time });
-    }
-    return out;
-  };
-
-  const onHeatmapCommitBand = (
-    uiDayIndex: number,
-    startMinutes: number,
-    endMinutes: number,
-  ) => {
-    if (!canEdit) return;
-    const dow = UI_TO_DOW[uiDayIndex]!;
-    const existing = bandsByDay.get(dow) ?? [];
-    const next = mergeBands([
-      ...existing,
-      { start_time: toHHMMSS(startMinutes), end_time: toHHMMSS(endMinutes) },
-    ]);
-    replace.mutate({ dow, bands: next });
-  };
-
-  // Single-tap toggle: if the cell falls inside an existing band, remove that
-  // 30-minute slice (which can split the band); otherwise add the slot and
-  // merge with neighbours.
-  const onHeatmapToggleCell = (uiDayIndex: number, startMinutes: number) => {
+  // Single-tap on a cell: if it falls inside an existing band, remove that
+  // 30-minute slice (splitting the band when the slice is mid-band);
+  // otherwise add a 30-minute band and merge with neighbours. Pure band
+  // math lives in `bandOps` and is unit-tested there.
+  const onHeatmapCellPress = (uiDayIndex: number, startMinutes: number) => {
     if (!canEdit) return;
     const dow = UI_TO_DOW[uiDayIndex]!;
     const existing = bandsByDay.get(dow) ?? [];
     const endMinutes = startMinutes + 30;
-    const isOpen = existing.some(
-      (b) => toMinutes(b.start_time) <= startMinutes && toMinutes(b.end_time) > startMinutes,
-    );
+    const isOpen = isMinuteInsideBands(existing, startMinutes);
     const next = isOpen
       ? removeSlot(existing, startMinutes, endMinutes)
       : mergeBands([
@@ -281,11 +222,18 @@ export default function AvailabilityScreen() {
     replace.mutate({ dow, bands: next });
   };
 
+  // Long-press on any cell in a column opens the per-day band editor so a
+  // multi-hour shift is editable in 3 taps instead of 16 cell taps.
+  const onHeatmapColumnLongPress = (uiDayIndex: number) => {
+    if (!canEdit) return;
+    const dow = UI_TO_DOW[uiDayIndex]!;
+    setEditing({ dayIndex: uiDayIndex, bands: bandsByDay.get(dow) ?? [] });
+  };
+
   return (
     <ScrollView
       contentContainerStyle={styles.content}
       style={{ backgroundColor: theme.colors.surface }}
-      scrollEnabled={!heatmapPainting}
     >
       <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
         {t('admin.availabilityTitle')}
@@ -328,9 +276,8 @@ export default function AvailabilityScreen() {
         <AvailabilityHeatmap
           rules={rules.data ?? []}
           exceptions={exceptions.data ?? []}
-          onCommitBand={onHeatmapCommitBand}
-          onToggleCell={onHeatmapToggleCell}
-          onPaintingChange={setHeatmapPainting}
+          onCellPress={onHeatmapCellPress}
+          onColumnLongPress={onHeatmapColumnLongPress}
         />
         <View style={styles.heatmapTip}>
           <Icon name="hand" size={16} color="onSurfaceVariant" />
