@@ -98,20 +98,30 @@ export default function UpcomingScreen() {
 
       {active.isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator color={theme.colors.brand[500]} />
-        </View>
-      ) : sections.length === 0 ? (
-        <View style={styles.center}>
-          <EmptyState
-            icon="calendar"
-            title={t(bucket === 'upcoming' ? 'admin.upcomingEmpty' : 'admin.pastEmpty')}
-          />
+          <ActivityIndicator color={theme.colors.primary} />
         </View>
       ) : (
         <SectionList
           sections={sections}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.content}
+          // Empty state renders inside the SectionList so it sits in the
+          // same area as data would, and inherits the pull-to-refresh
+          // affordance. Stretches the container so the centred state lands
+          // in the visual middle of the list area instead of glued to the
+          // top.
+          contentContainerStyle={
+            sections.length === 0 ? styles.contentEmpty : styles.content
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyWrap}>
+              <EmptyState
+                icon="calendar"
+                title={t(
+                  bucket === 'upcoming' ? 'admin.upcomingEmpty' : 'admin.pastEmpty',
+                )}
+              />
+            </View>
+          }
           refreshControl={
             <RefreshControl
               refreshing={active.isFetching}
@@ -163,6 +173,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   content: { padding: 16, gap: 8 },
+  contentEmpty: { flexGrow: 1, padding: 16 },
+  emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 48 },
   sectionHeader: { paddingTop: 16, paddingBottom: 8, gap: 8 },
   divider: { height: StyleSheet.hairlineWidth, flex: 1 },
   itemWrap: { marginBottom: 8 },

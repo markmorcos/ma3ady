@@ -40,7 +40,10 @@ export default function TenantLayout() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.bg }]}>
-      <TenantHeader tenant={tenant} subtitle={tenant.timezone} />
+      {/* The layout owns the tenant header so it persists across the
+          nested routes (/, /[serviceId]/slots, /book, /confirmation).
+          Nested screens MUST NOT render another TenantHeader. */}
+      <TenantHeader tenant={tenant} />
       <Stack
         screenOptions={{
           headerShown: false,
