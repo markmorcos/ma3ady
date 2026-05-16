@@ -53,16 +53,46 @@ export async function checkSlugAvailability(slug: string): Promise<SlugAvailabil
   return normalizeAvailability(data);
 }
 
+/**
+ * Read the body of a FunctionsHttpError so the caller can see the actual
+ * Edge Function failure code + Postgres detail instead of the generic
+ * "Edge Function returned a non-2xx status code" message that supabase-js
+ * surfaces by default.
+ */
+async function readEdgeError(
+  err: unknown,
+): Promise<{ code: string | null; detail: string | null }> {
+  // FunctionsHttpError.context is the underlying Response.
+  const ctx = (err as { context?: Response } | null)?.context;
+  if (!ctx || typeof ctx.json !== 'function') return { code: null, detail: null };
+  try {
+    const body = (await ctx.json()) as { error?: string; detail?: string };
+    return { code: body.error ?? null, detail: body.detail ?? null };
+  } catch {
+    return { code: null, detail: null };
+  }
+}
+
 export async function claimSlug(input: ClaimSlugInput): Promise<Tenant> {
   const { data, error } = await supabase.functions.invoke<{ tenant: Tenant; error?: string }>(
     'claim-slug',
     { body: input },
   );
   if (error) {
-    const msg = error.message ?? '';
+    const { code, detail } = await readEdgeError(error);
+    if (code === 'slug_taken') throw new SlugTakenError();
+    if (code === 'slug_reserved') throw new SlugReservedError();
+    // Fall back to the legacy substring check on the high-level message
+    // for older Edge Function versions that don't return a structured body.
+    const msg = (error as Error).message ?? '';
     if (msg.includes('slug_taken')) throw new SlugTakenError();
     if (msg.includes('slug_reserved')) throw new SlugReservedError();
-    throw error;
+    // Re-throw with the actual code + detail so the UI / logs surface the
+    // real failure (e.g. tenant_insert_failed: column "type" does not exist
+    // when migration 023 hasn't been applied).
+    const combined =
+      code && detail ? `${code}: ${detail}` : code ?? detail ?? msg ?? 'unknown';
+    throw new Error(combined);
   }
   if (!data?.tenant) throw new Error('claim-slug returned no tenant');
   return data.tenant;

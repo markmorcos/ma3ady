@@ -124,8 +124,14 @@ export default function ClaimSlugScreen() {
       } else if (err instanceof SlugReservedError) {
         setSubmitError(t('onboarding.slugReserved'));
       } else {
+        // Surface the Edge Function's `error: <code>` + `detail: <msg>` so
+        // setup issues (e.g. migration not applied, function not redeployed)
+        // are visible without needing to attach a debugger.
+        if (err instanceof Error) console.warn('[claim-slug]', err.message);
         setSubmitError(
-          __DEV__ && err instanceof Error ? err.message : t('errors.generic'),
+          err instanceof Error && err.message
+            ? `${t('errors.generic')} (${err.message})`
+            : t('errors.generic'),
         );
       }
     } finally {
