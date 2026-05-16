@@ -60,8 +60,8 @@ export default function CustomerBookingDetailScreen() {
 
   if (appt.isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color={theme.colors.brand[500]} />
+      <View style={[styles.center, { backgroundColor: theme.colors.surface }]}>
+        <ActivityIndicator color={theme.colors.primary} />
       </View>
     );
   }
@@ -69,7 +69,7 @@ export default function CustomerBookingDetailScreen() {
     return (
       <>
         <Stack.Screen options={headerOptions} />
-        <View style={styles.center}>
+        <View style={[styles.center, { backgroundColor: theme.colors.surface }]}>
           <EmptyState icon="alert-triangle" title={t('admin.appointmentNotFound')} />
         </View>
       </>
@@ -83,24 +83,34 @@ export default function CustomerBookingDetailScreen() {
   return (
     <>
       <Stack.Screen options={headerOptions} />
-      <ScrollView contentContainerStyle={styles.content}>
-        <Card>
-          <View style={styles.headerRow}>
-            <Text variant="h3">{tenant.data?.name ?? '—'}</Text>
-            <StatusBadge status={a.status} />
-          </View>
-          <Text variant="caption" color="muted">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        style={{ backgroundColor: theme.colors.surface }}
+      >
+        <View style={styles.headerBlock}>
+          <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
+            {tenant.data?.name ?? '—'}
+          </Text>
+          <Text variant="bodyMd" style={{ color: theme.colors.onSurfaceVariant }}>
             {service.data?.name ?? ''}
           </Text>
+          <View style={styles.badgeRow}>
+            <StatusBadge status={a.status} />
+          </View>
+        </View>
+
+        <Card kind="outlined">
           <Time
             value={a.starts_at}
             context="customer-bookings"
             tenantTimezone={tz}
             format="long"
-            secondary
-            style={styles.time}
+            style={{ color: theme.colors.onSurface, fontSize: 18, fontWeight: '500' }}
           />
-          <Text variant="caption" color="muted" style={styles.row}>
+          <Text
+            variant="bodyMd"
+            style={{ color: theme.colors.onSurfaceVariant, marginTop: 6 }}
+          >
             {t('booking.minutes', { count: service.data?.duration_minutes ?? 0 })}
           </Text>
         </Card>
@@ -109,7 +119,7 @@ export default function CustomerBookingDetailScreen() {
           <View style={styles.actions}>
             <Button
               label={t('app.bookingReschedule')}
-              variant="primary"
+              variant="tonal"
               fullWidth
               onPress={() =>
                 router.push({
@@ -120,7 +130,7 @@ export default function CustomerBookingDetailScreen() {
             />
             <Button
               label={t('booking.cancelBooking')}
-              variant="danger"
+              variant="text"
               fullWidth
               onPress={() => setConfirmingCancel(true)}
             />
@@ -128,15 +138,17 @@ export default function CustomerBookingDetailScreen() {
         )}
 
         {confirmingCancel && (
-          <Card>
-            <Text variant="bodyStrong">{t('booking.cancelConfirmTitle')}</Text>
-            <Text variant="caption" color="muted">
+          <Card kind="filled">
+            <Text variant="titleMd" style={{ color: theme.colors.onSurface }}>
+              {t('booking.cancelConfirmTitle')}
+            </Text>
+            <Text variant="bodySm" style={{ color: theme.colors.onSurfaceVariant }}>
               {t('booking.cancelConfirmBody')}
             </Text>
             <View style={styles.confirmRow}>
               <Button
                 label={t('booking.keepIt')}
-                variant="ghost"
+                variant="text"
                 onPress={() => setConfirmingCancel(false)}
               />
               <Button
@@ -148,8 +160,6 @@ export default function CustomerBookingDetailScreen() {
             </View>
           </Card>
         )}
-
-        <Button label={t('common.back')} variant="ghost" fullWidth onPress={() => router.back()} />
       </ScrollView>
     </>
   );
@@ -157,10 +167,9 @@ export default function CustomerBookingDetailScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  row: { marginTop: 4 },
-  time: { marginTop: 8 },
-  actions: { gap: 12 },
+  headerBlock: { gap: 4 },
+  badgeRow: { marginTop: 8 },
+  actions: { gap: 8 },
   confirmRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
