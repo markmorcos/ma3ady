@@ -1,8 +1,10 @@
 import { router, Stack } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
+import { Icon } from '@/components/Icon';
 import { Input } from '@/components/Input';
 import { Text } from '@/components/Text';
 import { BrandColorPicker } from '@/design/BrandColorPicker';
@@ -14,9 +16,10 @@ import {
   SlugTakenError,
 } from '@/services/api/onboarding';
 import { useTenantStore } from '@/state/tenantStore';
-import { type SlugAvailability } from '@/types/db';
+import { type SlugAvailability, type TenantType } from '@/types/db';
 
 const DEBOUNCE_MS = 400;
+const TENANT_TYPES: readonly TenantType[] = ['generic', 'salon', 'clinic', 'auto'];
 
 function useDebounced<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -35,6 +38,8 @@ export default function ClaimSlugScreen() {
   const [slug, setSlug] = useState('');
   const [name, setName] = useState('');
   const [locale, setLocale] = useState<'en' | 'ar'>('en');
+  const [tenantType, setTenantType] = useState<TenantType>('generic');
+  const [location, setLocation] = useState('');
   const [brandColor, setBrandColor] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -109,6 +114,8 @@ export default function ClaimSlugScreen() {
         timezone,
         default_locale: locale,
         brand_color: brandColor,
+        type: tenantType,
+        location: location.trim() || null,
       });
       router.replace('/(onboarding)/joined');
     } catch (err) {
@@ -117,9 +124,6 @@ export default function ClaimSlugScreen() {
       } else if (err instanceof SlugReservedError) {
         setSubmitError(t('onboarding.slugReserved'));
       } else {
-        // Surface the real error message in dev so we don't have to read
-        // server logs to debug claim-slug failures. Production users still
-        // see the friendly localized fallback.
         setSubmitError(
           __DEV__ && err instanceof Error ? err.message : t('errors.generic'),
         );
@@ -133,11 +137,18 @@ export default function ClaimSlugScreen() {
     <>
       <Stack.Screen options={{ title: t('onboarding.claimSlugTitle') }} />
       <ScrollView
-        style={[styles.container, { backgroundColor: theme.colors.bg }]}
+        style={[styles.container, { backgroundColor: theme.colors.surface }]}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text variant="h2">{t('onboarding.claimSlugHeader')}</Text>
+        <View style={styles.headerBlock}>
+          <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
+            {t('onboarding.claimSlugHeader')}
+          </Text>
+          <Text variant="bodyMd" style={{ color: theme.colors.onSurfaceVariant }}>
+            {t('onboarding.claimSlugBody')}
+          </Text>
+        </View>
 
         <Input
           label={t('onboarding.slugLabel')}
@@ -145,7 +156,8 @@ export default function ClaimSlugScreen() {
           onChangeText={setSlug}
           autoCapitalize="none"
           autoCorrect={false}
-          placeholder="acme-clinic"
+          prefix={t('onboarding.slugPrefix')}
+          placeholder="cleos-cut"
           helper={
             checking
               ? t('common.loading')
@@ -154,69 +166,91 @@ export default function ClaimSlugScreen() {
                 : t('onboarding.slugHint')
           }
           error={slugError ?? undefined}
+          trailingIcon={
+            availability?.available === true ? (
+              <Icon name="check" size={18} color="success" />
+            ) : null
+          }
         />
 
         <Input
           label={t('onboarding.nameLabel')}
           value={name}
           onChangeText={setName}
-          placeholder="Acme Clinic"
+          placeholder="Cleo’s Cut"
         />
 
-        <View>
-          <Text variant="label" color="muted">
-            {t('onboarding.localeLabel')}
+        <View style={styles.fieldBlock}>
+          <Text variant="labelLg" style={{ color: theme.colors.onSurfaceVariant }}>
+            {t('onboarding.typeLabel')}
           </Text>
-          <View style={styles.row}>
-            {(['en', 'ar'] as const).map((l) => (
-              <Pressable
-                key={l}
-                accessibilityRole="button"
-                onPress={() => setLocale(l)}
-                style={[
-                  styles.chip,
-                  {
-                    borderColor:
-                      locale === l ? theme.colors.brand[500] : theme.colors.border,
-                    backgroundColor:
-                      locale === l ? theme.colors.brandTint : 'transparent',
-                  },
-                ]}
-              >
-                <Text variant="caption">
-                  {l === 'en' ? t('common.english') : t('common.arabic')}
-                </Text>
-              </Pressable>
+          <View style={styles.chipRow}>
+            {TENANT_TYPES.map((tt) => (
+              <Chip
+                key={tt}
+                kind="filter"
+                label={t(`onboarding.type.${tt}`)}
+                selected={tenantType === tt}
+                onPress={() => setTenantType(tt)}
+              />
             ))}
           </View>
         </View>
 
-        <View>
-          <Text variant="label" color="muted">
+        <View style={styles.fieldBlock}>
+          <Text variant="labelLg" style={{ color: theme.colors.onSurfaceVariant }}>
+            {t('onboarding.localeLabel')}
+          </Text>
+          <View style={styles.chipRow}>
+            {(['en', 'ar'] as const).map((l) => (
+              <Chip
+                key={l}
+                kind="filter"
+                label={l === 'en' ? t('common.english') : t('common.arabic')}
+                selected={locale === l}
+                onPress={() => setLocale(l)}
+              />
+            ))}
+          </View>
+        </View>
+
+        <Input
+          label={t('onboarding.locationLabel')}
+          value={location}
+          onChangeText={setLocation}
+          placeholder={t('onboarding.locationPlaceholder')}
+          maxLength={120}
+        />
+
+        <View style={styles.fieldBlock}>
+          <Text variant="labelLg" style={{ color: theme.colors.onSurfaceVariant }}>
             {t('onboarding.timezoneLabel')}
           </Text>
-          <Text variant="body">{timezone}</Text>
-          <Text variant="caption" color="muted">
+          <Text variant="bodyLg" style={{ color: theme.colors.onSurface }}>
+            {timezone}
+          </Text>
+          <Text variant="bodySm" style={{ color: theme.colors.onSurfaceVariant }}>
             {t('onboarding.timezoneHint')}
           </Text>
         </View>
 
-        <View>
-          <Text variant="label" color="muted">
+        <View style={styles.fieldBlock}>
+          <Text variant="labelLg" style={{ color: theme.colors.onSurfaceVariant }}>
             {t('onboarding.brandColorLabel')}
           </Text>
           <BrandColorPicker value={brandColor} onChange={setBrandColor} />
         </View>
 
         {submitError && (
-          <Text variant="caption" style={{ color: theme.colors.danger }}>
+          <Text variant="bodySm" style={{ color: theme.colors.error }}>
             {submitError}
           </Text>
         )}
 
         <Button
           label={t('onboarding.claimCta')}
-          variant="primary"
+          variant="filled"
+          size="lg"
           fullWidth
           loading={submitting}
           disabled={!canSubmit}
@@ -229,7 +263,8 @@ export default function ClaimSlugScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: 16, gap: 16 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
-  chip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1 },
+  content: { padding: 16, gap: 20, paddingBottom: 48 },
+  headerBlock: { gap: 8, paddingTop: 8 },
+  fieldBlock: { gap: 6 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });
