@@ -6,6 +6,7 @@ import { SlotPicker } from '@/components/SlotPicker';
 import { TenantHeader } from '@/components/TenantHeader';
 import { env } from '@/lib/env';
 import { dirOf, resolveLocale, t, type Locale } from '@/lib/locale';
+import { paletteCss } from '@/lib/palette';
 import { getAnonClient } from '@/lib/supabase';
 import { resolveTenantBySlug } from '@/lib/tenant';
 
@@ -71,6 +72,7 @@ export default async function BookPage({
     chooseSlot: t(locale, 'book.chooseSlot'),
     tenantTimezone: t(locale, 'book.tenantTimezone'),
     yourTimezone: t(locale, 'book.yourTimezone'),
+    scanHint: t(locale, 'book.scanHint'),
   };
 
   const formLabels = {
@@ -83,15 +85,20 @@ export default async function BookPage({
     submitBusy: t(locale, 'book.submitBusy'),
   };
 
+  const css = paletteCss(tenant.brand_color ?? '#0B6BCB');
+
   return (
     <div dir={dir} lang={locale}>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
       <main className="container">
         <TenantHeader tenant={tenant} />
 
-        <h1 style={{ fontSize: 24, marginTop: 0 }}>
+        <h1 className="t-headline-sm" style={{ margin: '8px 0 4px' }}>
           {t(locale, 'book.pageTitle', { tenantName: tenant.name })}
         </h1>
-        <p className="muted">{t(locale, 'book.intro')}</p>
+        <p className="muted t-body-md" style={{ margin: '0 0 20px' }}>
+          {t(locale, 'book.intro')}
+        </p>
 
         {sp.err === 'slot_taken' || sp.err === 'slot_unavailable' ? (
           <div className="banner warning">{t(locale, 'book.slotTaken')}</div>
@@ -99,36 +106,43 @@ export default async function BookPage({
 
         {!service ? (
           <div className="card">
-            <p>{t(locale, 'book.needService')}</p>
+            <p className="t-body-md">{t(locale, 'book.needService')}</p>
             <Link
-              className="button primary"
+              className="btn btn-filled"
               href={{ pathname: `/t/${slug}`, query: sp }}
             >
-              ←
+              {t(locale, 'book.back')}
             </Link>
           </div>
         ) : !startsAt ? (
-          <section className="card">
-            <h2 className="section-title">
-              {t(locale, 'book.service')} · {service.name}
-            </h2>
-            <SlotPicker
-              tenantSlug={tenant.slug}
-              serviceId={service.id}
-              durationMinutes={service.duration_minutes}
-              tenantTimezone={tenant.timezone}
-              locale={locale}
-              supabaseUrl={env.SUPABASE_URL}
-              supabaseAnonKey={env.SUPABASE_ANON_KEY}
-              labels={slotLabels}
-            />
-          </section>
+          <SlotPicker
+            tenantSlug={tenant.slug}
+            serviceId={service.id}
+            durationMinutes={service.duration_minutes}
+            tenantTimezone={tenant.timezone}
+            locale={locale}
+            supabaseUrl={env.SUPABASE_URL}
+            supabaseAnonKey={env.SUPABASE_ANON_KEY}
+            labels={slotLabels}
+          />
         ) : (
           <>
-            <section className="card">
-              <h2 className="section-title">{t(locale, 'book.service')}</h2>
-              <p style={{ margin: 0, fontWeight: 600 }}>{service.name}</p>
-              <p className="muted" style={{ margin: 0 }}>
+            <div className="card-primary">
+              <p
+                className="t-label-md"
+                style={{
+                  margin: 0,
+                  opacity: 0.8,
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                }}
+              >
+                {tenant.name}
+              </p>
+              <p className="t-headline-sm" style={{ margin: '4px 0 8px' }}>
+                {service.name}
+              </p>
+              <p className="t-body-md" style={{ margin: 0, opacity: 0.9 }}>
                 {new Intl.DateTimeFormat(locale === 'ar' ? 'ar' : 'en-GB', {
                   timeZone: tenant.timezone,
                   weekday: 'long',
@@ -139,17 +153,19 @@ export default async function BookPage({
                   minute: '2-digit',
                 }).format(new Date(startsAt))}
               </p>
-            </section>
+            </div>
 
-            <section className="card">
-              <h2 className="section-title">{t(locale, 'book.yourDetails')}</h2>
+            <div className="card" style={{ marginBlockStart: 12 }}>
+              <h2 className="t-eyebrow" style={{ margin: '0 0 12px' }}>
+                {t(locale, 'book.yourDetails')}
+              </h2>
               <BookingForm
                 action={`/t/${slug}/book/submit`}
                 serviceId={service.id}
                 startsAt={startsAt}
                 labels={formLabels}
               />
-            </section>
+            </div>
           </>
         )}
 

@@ -95,7 +95,7 @@ export function BookingForm({ action, serviceId, startsAt, labels }: Props) {
 
       <label
         className="row"
-        style={{ marginTop: 16, gap: 10, cursor: 'pointer' }}
+        style={{ marginTop: 20, gap: 12, cursor: 'pointer' }}
       >
         <input
           type="checkbox"
@@ -103,15 +103,16 @@ export function BookingForm({ action, serviceId, startsAt, labels }: Props) {
           checked={tos}
           onChange={(e) => setTos(e.target.checked)}
           required
+          style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
         />
-        <span style={{ fontSize: 14 }}>{labels.tos}</span>
+        <span className="t-body-md">{labels.tos}</span>
       </label>
 
       <button
         type="submit"
-        className="button primary full"
+        className="btn btn-filled btn-full btn-lg"
         disabled={!valid || submitting}
-        style={{ marginTop: 20 }}
+        style={{ marginTop: 24 }}
       >
         {submitting ? labels.submitBusy : labels.submit}
       </button>

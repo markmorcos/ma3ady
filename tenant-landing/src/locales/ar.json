@@ -46,9 +46,10 @@
   "installApp": "حمّل تطبيق ma3ady",
   "installAppHint": "أَدِر كل حجوزاتك من مكان واحد.",
   "available": {
-    "title": "الخدمات المتاحة",
+    "title": "اختر خدمة",
     "subtitle": "اختر خدمة لمعرفة المواعيد المتاحة.",
-    "duration": "{{duration}} دقيقة"
+    "duration": "{{duration}} دقيقة",
+    "empty": "هذا النشاط لا يستقبل حجوزات بعد."
   },
   "book": {
     "pageTitle": "احجز في {{tenantName}}",
@@ -67,7 +68,9 @@
     "tryNextWeek": "جرّب الأسبوع التالي",
     "slotTaken": "الموعد للتو حُجز — اختر موعداً آخر.",
     "needService": "اختر خدمة لتبدأ.",
+    "back": "رجوع",
     "chooseSlot": "اختر موعداً يناسبك.",
+    "scanHint": "اسحب شريط الأيام لرؤية أسبوعين دفعة واحدة.",
     "morning": "صباحاً",
     "afternoon": "ظهراً",
     "evening": "مساءً",
@@ -76,17 +79,26 @@
     "yourTimezone": "بتوقيتك"
   },
   "confirm": {
-    "title": "تم حجز موعدك!",
+    "title": "حجزك مسجّل",
+    "hero": "مؤكَّد",
+    "countdown": "بعد {{value}}",
     "subtitle": "أرسلنا تأكيداً إلى {{email}}.",
     "service": "الخدمة",
     "when": "الموعد",
     "duration": "المدة",
+    "dateLabel": "التاريخ",
+    "timeLabel": "الوقت",
     "manageTitle": "هل تحتاج تغيير شيء؟",
     "manageBody": "استخدم الرابط أدناه لتغيير الموعد أو إلغائه — دون الحاجة إلى حساب.",
-    "manageCta": "إدارة الحجز",
+    "manageCta": "إدارة هذا الحجز",
     "addToCalendar": "أضف إلى التقويم",
-    "calendarGoogle": "تقويم جوجل",
-    "calendarApple": "Apple / Outlook (.ics)",
+    "calendarGoogle": "جوجل",
+    "calendarApple": "أبل",
+    "calendarIcal": "iCal",
+    "shareTitle": "ادعُ صديقاً",
+    "shareBody": "شارك هذا الرابط ليحجزوا الموعد التالي.",
+    "policyTitle": "سياسة الإلغاء",
+    "policyDefault": "تحتاج لتغيير الموعد؟ تستطيع الإلغاء من رابط الإدارة في أي وقت.",
     "openInApp": "افتح في تطبيق ma3ady"
   },
   "manage": {
