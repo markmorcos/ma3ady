@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/design/ThemeProvider';
 import { Text } from '@/components/Text';
 import { type AvailabilityException, type AvailabilityRule } from '@/types/db';
@@ -62,6 +62,13 @@ type Props = {
   onCellPress?: (uiDayIndex: number, startMinutes: number) => void;
   /** Long-press on any cell in a column — open the band editor for that day. */
   onColumnLongPress?: (uiDayIndex: number) => void;
+  /**
+   * True while a write to the server is in flight. Surfaces a small
+   * spinner in the heatmap header so a slow save doesn't look like the
+   * tap was ignored. Taps stay enabled — the server validates final
+   * state anyway, and queueing on the client would hide latency.
+   */
+  saving?: boolean;
 };
 
 function minutesAtRow(row: number): number {
@@ -88,6 +95,7 @@ export function AvailabilityHeatmap({
   exceptions,
   onCellPress,
   onColumnLongPress,
+  saving,
 }: Props) {
   const theme = useTheme();
 
@@ -125,7 +133,15 @@ export function AvailabilityHeatmap({
   return (
     <View>
       <View style={styles.headerRow}>
-        <View style={{ width: GUTTER }} />
+        <View style={[styles.gutterCol, { width: GUTTER }]}>
+          {saving ? (
+            <ActivityIndicator
+              size="small"
+              color={theme.colors.primary}
+              accessibilityLabel="Saving"
+            />
+          ) : null}
+        </View>
         {dayLabels.map((d) => (
           <View key={d} style={styles.dayHeader}>
             <Text variant="labelMd" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -221,7 +237,8 @@ function LegendSwatch({ color, label }: { color: string; label: string }) {
 }
 
 const styles = StyleSheet.create({
-  headerRow: { flexDirection: 'row', marginBottom: 8 },
+  headerRow: { flexDirection: 'row', marginBottom: 8, alignItems: 'center' },
+  gutterCol: { alignItems: 'center', justifyContent: 'center' },
   dayHeader: { flex: 1, alignItems: 'center', paddingVertical: 4 },
   grid: { gap: ROW_GAP },
   gridRow: {

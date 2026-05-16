@@ -278,6 +278,7 @@ export default function AvailabilityScreen() {
           exceptions={exceptions.data ?? []}
           onCellPress={onHeatmapCellPress}
           onColumnLongPress={onHeatmapColumnLongPress}
+          saving={replace.isPending}
         />
         <View style={styles.heatmapTip}>
           <Icon name="hand" size={16} color="onSurfaceVariant" />

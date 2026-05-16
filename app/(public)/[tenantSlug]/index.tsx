@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { EmptyState } from '@/components/EmptyState';
 import { ServiceCard } from '@/components/ServiceCard';
-import { TenantHeader } from '@/components/TenantHeader';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
 import { getActiveServices } from '@/services/api/services';
@@ -48,13 +47,12 @@ export default function ServicesIndex() {
       style={{ backgroundColor: theme.colors.surface }}
       contentContainerStyle={styles.list}
       ListHeaderComponent={
-        <View>
-          <TenantHeader tenant={tenant.data} />
-          <View style={styles.titleRow}>
-            <Text variant="titleMd" style={{ color: theme.colors.onSurface }}>
-              {t('booking.pickServiceTitle')}
-            </Text>
-          </View>
+        // The TenantHeader is rendered by the parent (public)/[tenantSlug]
+        // /_layout.tsx — don't duplicate it here. Just the section title.
+        <View style={styles.titleRow}>
+          <Text variant="titleMd" style={{ color: theme.colors.onSurface }}>
+            {t('booking.pickServiceTitle')}
+          </Text>
         </View>
       }
       data={services}

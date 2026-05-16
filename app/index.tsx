@@ -2,6 +2,7 @@ import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ActivityIndicator,
   Modal,
   Pressable,
   ScrollView,
@@ -14,6 +15,7 @@ import { Icon } from '@/components/Icon';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
 import { overlay } from '@/design/tokens';
+import { useAppStore } from '@/state/appStore';
 import { useAuthStore } from '@/state/authStore';
 import { useCurrentRole, useTenantStore } from '@/state/tenantStore';
 
@@ -38,6 +40,8 @@ export default function Home() {
   const profile = useAuthStore((s) => s.profile);
   const role = useCurrentRole();
   const refreshTenants = useTenantStore((s) => s.refresh);
+  const tenantsLoading = useTenantStore((s) => s.loading);
+  const bootPhase = useAppStore((s) => s.bootPhase);
   const [devOpen, setDevOpen] = useState(false);
 
   const userId = session?.user.id;
@@ -46,6 +50,25 @@ export default function Home() {
   }, [userId, refreshTenants]);
 
   const isStaff = role === 'owner' || role === 'admin' || role === 'staff';
+
+  // Gate the UI on boot completion so admins don't flash the customer
+  // landing for a frame while their tenants + role resolve. The boot
+  // sequence awaits useTenantStore.refresh() during the `tenant` phase,
+  // so by the time bootPhase moves past it we know the role too.
+  const bootReady =
+    bootPhase === 'ready' || bootPhase === 'degraded' || bootPhase === 'misconfigured';
+  // If we have a session but the tenant fetch is mid-flight (e.g. a
+  // post-sign-in refetch triggered by the userId effect above), keep the
+  // splash up until role resolves. Anonymous users have no role to wait
+  // for, so they bypass.
+  const awaitingRole = !!session && tenantsLoading;
+  if (!bootReady || awaitingRole) {
+    return (
+      <View style={[styles.bootGate, { backgroundColor: theme.colors.bg }]}>
+        <ActivityIndicator color={theme.colors.brand[500]} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -160,6 +183,11 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
+  bootGate: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   content: { flexGrow: 1, padding: 24 },
   headerBar: { flexDirection: 'row', justifyContent: 'space-between' },
   hero: {
