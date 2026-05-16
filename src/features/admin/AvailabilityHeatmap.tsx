@@ -12,16 +12,19 @@ import { type AvailabilityException, type AvailabilityRule } from '@/types/db';
  *
  * Interaction
  * -----------
- * The grid wrapper installs a `PanResponder`. The responder converts the
- * gesture's `(locationX, locationY)` into `(uiDayIndex, row)` using the
- * grid's measured width plus the constant row pitch. Pressable per-cell
- * doesn't work for drag-paint — RN only fires `onPressIn` on the cell
- * initially pressed, not on cells you drag into.
+ * Tap-to-toggle, long-press-then-drag to paint a band.
  *
- * Release decides between the two callbacks:
- *  - `lo === hi` (no movement) → `onToggleCell` (caller adds or removes
- *    the single 30-minute slot depending on its current state).
- *  - `lo !== hi` (multi-row drag) → `onCommitBand` with the band.
+ *  - **Tap** (quick touch, no drag) → `onToggleCell` for that one 30-minute
+ *    slot. Caller decides add vs. remove based on the cell's current state.
+ *  - **Long-press + drag** (hold ~350ms, then drag in a single column) →
+ *    `onCommitBand` with the painted band on release. Always additive.
+ *  - **Long-press without drag** (hold, release without moving) → no-op,
+ *    so users can safely back out of an accidental long-press.
+ *  - **Quick swipe** (touch + move before the long-press timer fires) →
+ *    the responder releases so the parent ScrollView scrolls the page.
+ *    This is what made the previous "any drag paints" model feel wiggly —
+ *    a stray scroll attempt was indistinguishable from a tap-to-remove,
+ *    and the heatmap would commit a band instead of toggling.
  *
  * Cell states
  * -----------
@@ -44,6 +47,11 @@ const ROW_HEIGHT = 22;
 const ROW_GAP = 3;
 const COL_GAP = 3;
 const ROW_PITCH = ROW_HEIGHT + ROW_GAP;
+
+const LONG_PRESS_MS = 350;
+// Pre-long-press finger jitter tolerance. Beyond this, we treat the gesture
+// as a scroll attempt and cancel the long-press timer.
+const SCROLL_INTENT_PX = 6;
 
 // UI Mon-first index → Postgres DOW (0=Sun..6=Sat)
 const UI_TO_DOW = [1, 2, 3, 4, 5, 6, 0];
@@ -95,9 +103,13 @@ export function AvailabilityHeatmap({
   callbacksRef.current = { onCommitBand, onToggleCell };
 
   const paintRef = useRef<{ start: Cell; end: Cell } | null>(null);
-  // `paintTick` drives a re-render whenever the pan responder mutates the
-  // paint ref. Reading the ref directly during render is intentional —
-  // we just need to make sure we re-render on each pan move.
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startCellRef = useRef<Cell | null>(null);
+  const startXYRef = useRef<{ x: number; y: number } | null>(null);
+  const paintModeRef = useRef(false);
+  // Drives a re-render whenever the responder mutates `paintRef`. Reading
+  // the ref directly during render is intentional — we just need to make
+  // sure we re-render on each pan move.
   const [, setPaintTick] = useState(0);
   const paint = paintRef.current;
 
@@ -153,53 +165,113 @@ export function AvailabilityHeatmap({
 
   const repaint = () => setPaintTick((t) => t + 1);
 
+  const clearLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const resetGesture = () => {
+    clearLongPress();
+    paintRef.current = null;
+    paintModeRef.current = false;
+    startCellRef.current = null;
+    startXYRef.current = null;
+  };
+
   const panResponder = useMemo(
     () =>
       PanResponder.create({
+        // Claim the start event so we can run the long-press timer, but
+        // hand the gesture back to the parent ScrollView if the user
+        // starts scrolling before the timer fires.
         onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => false,
+        onPanResponderTerminationRequest: () => !paintModeRef.current,
+
         onPanResponderGrant: (evt) => {
-          const c = cellFromXY(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
-          if (!c) return;
-          paintRef.current = { start: c, end: c };
-          repaint();
-        },
-        onPanResponderMove: (evt) => {
-          const c = cellFromXY(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
-          if (!c) return;
-          const cur = paintRef.current;
-          if (!cur) {
-            paintRef.current = { start: c, end: c };
+          const x = evt.nativeEvent.locationX;
+          const y = evt.nativeEvent.locationY;
+          const c = cellFromXY(x, y);
+          clearLongPress();
+          startCellRef.current = c;
+          startXYRef.current = { x, y };
+          paintModeRef.current = false;
+          longPressTimerRef.current = setTimeout(() => {
+            // Enter paint mode. Showing the painted overlay on the cell
+            // the user is holding is the visual cue that the long-press
+            // landed.
+            const start = startCellRef.current;
+            if (!start) return;
+            paintModeRef.current = true;
+            paintRef.current = { start, end: start };
             repaint();
+          }, LONG_PRESS_MS);
+        },
+
+        onPanResponderMove: (evt) => {
+          const x = evt.nativeEvent.locationX;
+          const y = evt.nativeEvent.locationY;
+          if (!paintModeRef.current) {
+            // Pre-long-press: if the finger has moved past the jitter
+            // threshold the user is trying to scroll, not tap. Cancel
+            // the long-press timer; the parent ScrollView will take
+            // over via onPanResponderTerminationRequest.
+            const s = startXYRef.current;
+            if (!s) return;
+            const dx = x - s.x;
+            const dy = y - s.y;
+            if (dx * dx + dy * dy > SCROLL_INTENT_PX * SCROLL_INTENT_PX) {
+              clearLongPress();
+              startCellRef.current = null;
+            }
             return;
           }
-          // Clamp to the column we started in — drag-paint doesn't cross days.
+          // Paint mode: track the band, clamped to the starting column.
+          const c = cellFromXY(x, y);
+          const cur = paintRef.current;
+          if (!c || !cur) return;
           if (c.ui !== cur.start.ui) return;
           if (c.row === cur.end.row) return;
           paintRef.current = { start: cur.start, end: c };
           repaint();
         },
+
         onPanResponderRelease: () => {
-          const s = paintRef.current;
-          if (s) {
+          const { onCommitBand: ocb, onToggleCell: otc } = callbacksRef.current;
+          if (paintModeRef.current && paintRef.current) {
+            const s = paintRef.current;
             const lo = Math.min(s.start.row, s.end.row);
             const hi = Math.max(s.start.row, s.end.row);
-            const { onCommitBand: ocb, onToggleCell: otc } = callbacksRef.current;
-            if (lo === hi) {
-              otc?.(s.start.ui, minutesAtRow(lo));
-            } else {
+            // Long-press + no drag = no-op. The user explicitly opted in
+            // to paint mode; ignoring the release here avoids the very
+            // surprise we're trying to fix (long-press accidentally
+            // toggling the held cell).
+            if (hi > lo) {
               ocb?.(s.start.ui, minutesAtRow(lo), minutesAtRow(hi + 1));
             }
+          } else if (startCellRef.current) {
+            // Quick tap (or hold-still that was released before the
+            // long-press timer fired): toggle that one cell.
+            const sc = startCellRef.current;
+            otc?.(sc.ui, minutesAtRow(sc.row));
           }
-          paintRef.current = null;
+          resetGesture();
           repaint();
         },
+
         onPanResponderTerminate: () => {
-          paintRef.current = null;
+          // ScrollView (or anything else) took over the gesture. Drop any
+          // pending paint state without committing.
+          resetGesture();
           repaint();
         },
       }),
-    // Static — PanResponder reads everything through refs.
+    // Static — PanResponder reads everything (callbacks, grid width,
+    // gesture state) through refs, so the responder doesn't need to
+    // rebuild across renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
