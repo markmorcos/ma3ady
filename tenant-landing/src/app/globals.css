@@ -1016,9 +1016,9 @@ footer.site-footer {
 .marketing .screenshot-row .placeholder {
   width: 100%;
   max-width: 280px;
-  aspect-ratio: 9/19;
+  height: auto;
   border-radius: 24px;
-  background: linear-gradient(180deg, var(--surface-container-high), var(--surface-container));
+  background: var(--surface-container-high);
   display: block;
   margin: 0 auto;
   border: 1px solid var(--outline-variant);

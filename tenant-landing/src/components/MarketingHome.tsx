@@ -117,7 +117,14 @@ export function MarketingHome({ locale }: Props) {
           <div className="screenshot-row">
             {(['today', 'booking', 'reminders'] as const).map((key) => (
               <figure key={key}>
-                <div className="placeholder" aria-hidden="true" />
+                <img
+                  className="placeholder"
+                  src={`/marketing-shots/${key}.png`}
+                  alt={t(locale, `marketing.screens.${key}`)}
+                  width={412}
+                  height={870}
+                  loading="lazy"
+                />
                 <figcaption>{t(locale, `marketing.screens.${key}`)}</figcaption>
               </figure>
             ))}
