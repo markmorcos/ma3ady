@@ -1,110 +1,151 @@
-import { palette, radii, spacing, typography, elevation, motion } from './tokens';
+import {
+  elevation,
+  motion,
+  radii,
+  shape,
+  spacing,
+  spacingScale,
+  typography,
+} from './tokens';
+import { buildPalette, DEFAULT_SOURCE_HEX, type M3Roles, type ThemeMode } from './palette';
 
 export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
 
-type ThemeColors = {
+/**
+ * Theme color surface.
+ *
+ * Carries the full M3 role table plus a back-compat block of "legacy" short
+ * keys (`brand`, `bg`, `text`, `muted`, etc.) that resolve to the closest M3
+ * role. The legacy keys exist so screens not yet migrated to M3 role names
+ * keep compiling; the cleanup commit at the end of the revamp deletes them.
+ *
+ * Note: `surface`, `successContainer`, `warningContainer`, and `errorContainer`
+ * are M3 role names; the legacy block reuses them by aliasing the M3 value.
+ */
+export type ThemeColors = Omit<M3Roles, never> & {
   brand: { 500: string; 600: string };
   accent: { 500: string };
   bg: string;
-  surface: string;
   border: string;
   text: string;
   muted: string;
-  success: string;
-  warning: string;
   danger: string;
   white: string;
   brandTint: string;
 };
 
 export type Theme = {
-  name: 'light' | 'dark';
+  name: ThemeMode;
+  /** Source hex used to build the palette. */
+  sourceHex: string;
+  /** Whether expressive shape language is on (default true). */
+  expressive: boolean;
   colors: ThemeColors;
   spacing: typeof spacing;
+  spacingScale: typeof spacingScale;
   radii: typeof radii;
+  shape: typeof shape;
   typography: typeof typography;
   elevation: typeof elevation;
   motion: typeof motion;
 };
 
-export const lightTheme: Theme = {
-  name: 'light',
-  colors: {
-    brand: palette.brand.light,
-    accent: palette.accent.light,
-    bg: palette.neutral.light.bg,
-    surface: palette.neutral.light.surface,
-    border: palette.neutral.light.border,
-    text: palette.neutral.light.text,
-    muted: palette.neutral.light.muted,
-    success: palette.semantic.light.success,
-    warning: palette.semantic.light.warning,
-    danger: palette.semantic.light.danger,
-    white: '#FFFFFF',
-    brandTint: '#0F766E10',
-  },
-  spacing,
-  radii,
-  typography,
-  elevation,
-  motion,
-};
+function hexWithAlpha(hex: string, alpha: number): string {
+  const a = Math.round(Math.max(0, Math.min(1, alpha)) * 255)
+    .toString(16)
+    .padStart(2, '0');
+  return `${hex}${a}`;
+}
 
-export const darkTheme: Theme = {
-  name: 'dark',
-  colors: {
-    brand: palette.brand.dark,
-    accent: palette.accent.dark,
-    bg: palette.neutral.dark.bg,
-    surface: palette.neutral.dark.surface,
-    border: palette.neutral.dark.border,
-    text: palette.neutral.dark.text,
-    muted: palette.neutral.dark.muted,
-    success: palette.semantic.dark.success,
-    warning: palette.semantic.dark.warning,
-    danger: palette.semantic.dark.danger,
+function withLegacy(roles: M3Roles): ThemeColors {
+  return {
+    ...roles,
+    brand: { 500: roles.primary, 600: roles.onPrimaryContainer },
+    accent: { 500: roles.tertiary },
+    bg: roles.surface,
+    border: roles.outlineVariant,
+    text: roles.onSurface,
+    muted: roles.onSurfaceVariant,
+    danger: roles.error,
     white: '#FFFFFF',
-    brandTint: '#2DD4BF10',
-  },
-  spacing,
-  radii,
-  typography,
-  elevation,
-  motion,
+    brandTint: hexWithAlpha(roles.primary, 0.06),
+  };
+}
+
+export function buildTheme({
+  mode,
+  sourceHex = DEFAULT_SOURCE_HEX,
+  expressive = true,
+}: {
+  mode: ThemeMode;
+  sourceHex?: string;
+  expressive?: boolean;
+}): Theme {
+  const roles = buildPalette(sourceHex, mode);
+  return {
+    name: mode,
+    sourceHex,
+    expressive,
+    colors: withLegacy(roles),
+    spacing,
+    spacingScale,
+    radii,
+    shape,
+    typography,
+    elevation,
+    motion,
+  };
+}
+
+/** Default light theme (Ma3ady source). Useful as a fallback / test seed. */
+export const lightTheme: Theme = buildTheme({ mode: 'light' });
+
+/** Default dark theme (Ma3ady source). */
+export const darkTheme: Theme = buildTheme({ mode: 'dark' });
+
+/**
+ * Status → role-token mapping per the design handoff §Status badges. Each
+ * status maps to a background container role + a foreground role. Color is
+ * never the only differentiator: every badge also carries an icon + label.
+ */
+export const statusColorMap: Record<
+  AppointmentStatus,
+  { bg: keyof ThemeColors; fg: keyof ThemeColors }
+> = {
+  pending: { bg: 'warningContainer', fg: 'onWarningContainer' },
+  confirmed: { bg: 'successContainer', fg: 'onSuccessContainer' },
+  completed: { bg: 'secondaryContainer', fg: 'onSecondaryContainer' },
+  cancelled: { bg: 'errorContainer', fg: 'onErrorContainer' },
+  no_show: { bg: 'surfaceContainerHighest', fg: 'onSurfaceVariant' },
 };
 
 /**
- * Status → semantic-color mapping per `project.md` §1b.
- * Color is never the only differentiator: every Badge also carries an icon + label.
+ * Tokens accepted by `<Text color={...}>`, `<Icon color={...}>`, etc.
+ * Includes M3 role keys plus the legacy short-key set.
  */
-export const statusColorMap: Record<AppointmentStatus, keyof ThemeColors> = {
-  pending: 'warning',
-  confirmed: 'brand',
-  completed: 'success',
-  cancelled: 'muted',
-  no_show: 'danger',
-};
-
 export type ColorToken =
+  | keyof M3Roles
   | `brand.${500 | 600}`
   | `accent.${500}`
   | 'bg'
-  | 'surface'
   | 'border'
   | 'text'
   | 'muted'
-  | 'success'
-  | 'warning'
   | 'danger'
   | 'white'
   | 'brandTint';
 
 export function resolveColor(theme: Theme, token: ColorToken): string {
-  if (token.includes('.')) {
-    const [group, shade] = token.split('.') as [keyof ThemeColors, string];
+  const t = String(token);
+  if (t.includes('.')) {
+    const [group, shadeStr] = t.split('.') as [keyof ThemeColors, string];
     const value = theme.colors[group];
-    if (typeof value === 'object') return (value as Record<string, string>)[shade];
-    return value as string;
+    if (value && typeof value === 'object') {
+      return (value as Record<string, string>)[shadeStr] ?? theme.colors.onSurface;
+    }
+    return (value as string) ?? theme.colors.onSurface;
   }
-  return theme.colors[token as keyof ThemeColors] as string;
+  const value = theme.colors[t as keyof ThemeColors];
+  if (typeof value === 'string') return value;
+  return theme.colors.onSurface;
 }

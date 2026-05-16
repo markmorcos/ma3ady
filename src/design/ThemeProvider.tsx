@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
-import { darkTheme, lightTheme, type Theme } from './theme';
+import { buildTheme, type Theme } from './theme';
+import { DEFAULT_SOURCE_HEX } from './palette';
+import { useTenantStore } from '@/state/tenantStore';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 
@@ -18,6 +20,14 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemScheme = useColorScheme();
   const [preference, setPreferenceState] = useState<ThemePreference>('system');
+
+  // The active tenant drives the palette source color. When no tenant is
+  // active (anonymous public booking, pre-sign-in, mid-onboarding) we fall
+  // back to the Ma3ady default source.
+  const activeTenant = useTenantStore((s) =>
+    s.tenants.find((t) => t.id === s.currentTenantId),
+  );
+  const sourceHex = activeTenant?.brand_color ?? DEFAULT_SOURCE_HEX;
 
   useEffect(() => {
     let mounted = true;
@@ -38,11 +48,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.setItem(STORAGE_KEY_THEME, next);
   };
 
-  const theme = useMemo<Theme>(() => {
-    if (preference === 'light') return lightTheme;
-    if (preference === 'dark') return darkTheme;
-    return systemScheme === 'dark' ? darkTheme : lightTheme;
+  const mode = useMemo<'light' | 'dark'>(() => {
+    if (preference === 'light') return 'light';
+    if (preference === 'dark') return 'dark';
+    return systemScheme === 'dark' ? 'dark' : 'light';
   }, [preference, systemScheme]);
+
+  const theme = useMemo<Theme>(
+    () => buildTheme({ mode, sourceHex }),
+    [mode, sourceHex],
+  );
 
   const value = useMemo<ThemeContextValue>(
     () => ({ theme, preference, setPreference }),

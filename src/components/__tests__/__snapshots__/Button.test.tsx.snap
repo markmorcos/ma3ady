@@ -41,7 +41,7 @@ exports[`<Button> renders the disabled state 1`] = `
       },
       {
         "alignSelf": "auto",
-        "backgroundColor": "#0F766E",
+        "backgroundColor": "#0059bf",
         "borderColor": "transparent",
         "borderRadius": 12,
         "minHeight": 48,
@@ -69,12 +69,13 @@ exports[`<Button> renders the disabled state 1`] = `
             "includeFontPadding": false,
           },
           {
-            "fontSize": 16,
+            "fontSize": 14,
             "fontWeight": "400",
-            "lineHeight": 24,
+            "letterSpacing": 0.25,
+            "lineHeight": 20,
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
           {
             "color": "#FFFFFF",
@@ -157,15 +158,16 @@ exports[`<Button> renders the ghost variant 1`] = `
             "includeFontPadding": false,
           },
           {
-            "fontSize": 16,
+            "fontSize": 14,
             "fontWeight": "400",
-            "lineHeight": 24,
+            "letterSpacing": 0.25,
+            "lineHeight": 20,
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
           {
-            "color": "#0F766E",
+            "color": "#0059bf",
           },
         ]
       }
@@ -217,7 +219,7 @@ exports[`<Button> renders the loading state 1`] = `
       },
       {
         "alignSelf": "auto",
-        "backgroundColor": "#0F766E",
+        "backgroundColor": "#0059bf",
         "borderColor": "transparent",
         "borderRadius": 12,
         "minHeight": 48,
@@ -276,7 +278,7 @@ exports[`<Button> renders the primary variant 1`] = `
       },
       {
         "alignSelf": "auto",
-        "backgroundColor": "#0F766E",
+        "backgroundColor": "#0059bf",
         "borderColor": "transparent",
         "borderRadius": 12,
         "minHeight": 48,
@@ -304,12 +306,13 @@ exports[`<Button> renders the primary variant 1`] = `
             "includeFontPadding": false,
           },
           {
-            "fontSize": 16,
+            "fontSize": 14,
             "fontWeight": "400",
-            "lineHeight": 24,
+            "letterSpacing": 0.25,
+            "lineHeight": 20,
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
           {
             "color": "#FFFFFF",
@@ -364,8 +367,8 @@ exports[`<Button> renders the secondary variant 1`] = `
       },
       {
         "alignSelf": "auto",
-        "backgroundColor": "#FFFFFF",
-        "borderColor": "#E7E5E4",
+        "backgroundColor": "#f6f9fd",
+        "borderColor": "#bec5ce",
         "borderRadius": 12,
         "minHeight": 48,
         "opacity": 1,
@@ -392,15 +395,16 @@ exports[`<Button> renders the secondary variant 1`] = `
             "includeFontPadding": false,
           },
           {
-            "fontSize": 16,
+            "fontSize": 14,
             "fontWeight": "400",
-            "lineHeight": 24,
+            "letterSpacing": 0.25,
+            "lineHeight": 20,
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
         ]
       }

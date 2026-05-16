@@ -19,18 +19,18 @@ const STATUS_ICON: Record<AppointmentStatus, IconName> = {
 
 export function Badge({ status, label }: Props) {
   const theme = useTheme();
-  const colorKey = statusColorMap[status];
-  const baseColor =
-    colorKey === 'brand' ? theme.colors.brand[500] : (theme.colors[colorKey] as string);
+  const { bg, fg } = statusColorMap[status];
+  const bgColor = theme.colors[bg] as string;
+  const fgColor = theme.colors[fg] as string;
   return (
     <View
       style={[
         styles.container,
-        { backgroundColor: baseColor + '20', borderColor: baseColor, borderRadius: theme.radii.pill },
+        { backgroundColor: bgColor, borderRadius: theme.radii.pill },
       ]}
     >
-      <Icon name={STATUS_ICON[status]} size={12} color="text" />
-      <Text variant="label" style={{ color: theme.colors.text }}>
+      <Icon name={STATUS_ICON[status]} size={12} colorHex={fgColor} />
+      <Text variant="label" style={{ color: fgColor }}>
         {label}
       </Text>
     </View>
@@ -44,7 +44,6 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 4,
     paddingHorizontal: 8,
-    borderWidth: 1,
     alignSelf: 'flex-start',
   },
 });
