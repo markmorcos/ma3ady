@@ -4,6 +4,7 @@
 import type { Database } from './database';
 
 export type TenantRole = Database['public']['Enums']['tenant_role'];
+export type TenantType = Database['public']['Enums']['tenant_type'];
 
 export type Tenant = Database['public']['Tables']['tenants']['Row'];
 export type TenantInsert = Database['public']['Tables']['tenants']['Insert'];
@@ -18,7 +19,15 @@ export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 // Subset of tenant columns readable by anonymous clients (per RLS policy).
 export type TenantPublic = Pick<
   Tenant,
-  'id' | 'slug' | 'name' | 'timezone' | 'default_locale' | 'brand_color'
+  | 'id'
+  | 'slug'
+  | 'name'
+  | 'timezone'
+  | 'default_locale'
+  | 'brand_color'
+  | 'type'
+  | 'location'
+  | 'cancellation_policy'
 >;
 
 export type AvailabilityRule = Database['public']['Tables']['availability_rules']['Row'];

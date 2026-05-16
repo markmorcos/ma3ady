@@ -1,5 +1,7 @@
 import { getAnonClient } from './supabase';
 
+export type TenantType = 'generic' | 'salon' | 'clinic' | 'auto';
+
 export type Tenant = {
   id: string;
   slug: string;
@@ -7,6 +9,9 @@ export type Tenant = {
   timezone: string;
   default_locale: 'en' | 'ar';
   brand_color: string | null;
+  type: TenantType;
+  location: string | null;
+  cancellation_policy: string | null;
 };
 
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/;
@@ -48,7 +53,7 @@ export async function resolveTenantBySlug(slug: string): Promise<Tenant | null> 
   const sb = getAnonClient();
   const { data, error } = await sb
     .from('tenants')
-    .select('id, slug, name, timezone, default_locale, brand_color')
+    .select('id, slug, name, timezone, default_locale, brand_color, type, location, cancellation_policy')
     .eq('slug', slug)
     .maybeSingle();
   const tenant = error || !data ? null : (data as Tenant);

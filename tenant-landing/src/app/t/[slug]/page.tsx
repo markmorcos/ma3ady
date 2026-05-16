@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { TenantHeader } from '@/components/TenantHeader';
 import { dirOf, resolveLocale, t, type Locale } from '@/lib/locale';
+import { paletteCss } from '@/lib/palette';
 import { getAnonClient } from '@/lib/supabase';
 import { resolveTenantBySlug } from '@/lib/tenant';
 
@@ -69,55 +70,55 @@ export default async function TenantLanding({
     timezone: tenant.timezone,
   };
 
+  const css = paletteCss(tenant.brand_color ?? '#0B6BCB');
+
   return (
     <div dir={dirOf(locale)} lang={locale}>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
       <main className="container">
         <TenantHeader tenant={tenant} />
 
         {sp.cancelled === '1' ? (
-          <div className="banner">{t(locale, 'manage.cancelled')}</div>
+          <div className="banner success">{t(locale, 'manage.cancelled')}</div>
         ) : null}
 
-        <section className="hero">
-          <div
-            className="brand-bar"
-            style={{ background: tenant.brand_color ?? undefined }}
-          />
-          <h1>{tenant.name}</h1>
-          <p>{t(locale, 'tagline')}</p>
-          <div style={{ marginTop: 20, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <a className="button secondary" href={`ma3ady://${tenant.slug}`}>
-              {t(locale, 'openInApp')}
-            </a>
-          </div>
-        </section>
+        <h2 className="t-title-md" style={{ margin: '8px 0 16px' }}>
+          {t(locale, 'available.title')}
+        </h2>
 
         {services.length > 0 ? (
-          <section className="card">
-            <h2 className="section-title">{t(locale, 'available.title')}</h2>
-            <p className="muted" style={{ margin: '0 0 12px' }}>
-              {t(locale, 'available.subtitle')}
-            </p>
-            <div style={{ display: 'grid', gap: 8 }}>
-              {services.map((s) => (
-                <Link
-                  key={s.id}
-                  className="service-card"
-                  href={{
-                    pathname: `/t/${slug}/book`,
-                    query: { ...sp, service: s.id },
-                  }}
-                >
+          <div>
+            {services.map((s) => (
+              <Link
+                key={s.id}
+                className="service-card"
+                href={{
+                  pathname: `/t/${slug}/book`,
+                  query: { ...sp, service: s.id },
+                }}
+              >
+                <div className="body">
                   <p className="name">{s.name}</p>
-                  <p className="duration">
+                  <p className="meta">
                     {t(locale, 'available.duration', { duration: s.duration_minutes })}
                     {s.description ? ` · ${s.description}` : ''}
                   </p>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
+                </div>
+                <span className="chev" aria-hidden>
+                  ›
+                </span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">{t(locale, 'available.empty')}</div>
+        )}
+
+        <div style={{ marginTop: 24 }}>
+          <a className="btn btn-tonal btn-full" href={`ma3ady://${tenant.slug}`}>
+            {t(locale, 'openInApp')}
+          </a>
+        </div>
 
         <footer className="site-footer">
           <Link href="/">ma3ady.com</Link>

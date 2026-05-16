@@ -6,6 +6,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { DayStrip, groupSlotsByDay } from '@/components/DayStrip';
 import { EmptyState } from '@/components/EmptyState';
+import { Icon } from '@/components/Icon';
 import { SlotGrid } from '@/components/SlotGrid';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
@@ -97,10 +98,15 @@ export default function SlotsScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      style={{ backgroundColor: theme.colors.surface }}
+    >
       <View style={styles.titleBlock}>
-        <Text variant="h2">{service.name}</Text>
-        <Text variant="caption" color="muted">
+        <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
+          {service.name}
+        </Text>
+        <Text variant="bodyMd" style={{ color: theme.colors.onSurfaceVariant }}>
           {t('booking.minutes', { count: service.duration_minutes })}
         </Text>
       </View>
@@ -108,7 +114,7 @@ export default function SlotsScreen() {
       <DayStrip
         days={days}
         selected={day}
-        hasSlotsByDay={Object.fromEntries(days.map((d) => [d, !!grouped[d]?.length]))}
+        slotCountByDay={Object.fromEntries(days.map((d) => [d, grouped[d]?.length ?? 0]))}
         onSelect={(d) => setSelectedDay(d)}
         locale={i18n.language}
       />
@@ -141,7 +147,7 @@ export default function SlotsScreen() {
       <View style={styles.footer}>
         <Button
           label={t('booking.tryPreviousWeek')}
-          variant="ghost"
+          variant="text"
           onPress={() => {
             const prev = new Date(windowStart);
             prev.setDate(prev.getDate() - WINDOW_DAYS);
@@ -151,7 +157,7 @@ export default function SlotsScreen() {
         />
         <Button
           label={t('booking.tryNextWeek')}
-          variant="ghost"
+          variant="text"
           onPress={() => {
             const next = new Date(windowStart);
             next.setDate(next.getDate() + WINDOW_DAYS);
@@ -160,18 +166,41 @@ export default function SlotsScreen() {
           }}
         />
       </View>
+
+      <View
+        style={[
+          styles.tipCard,
+          {
+            backgroundColor: theme.colors.surfaceContainerLow,
+            borderRadius: theme.shape.lg,
+          },
+        ]}
+      >
+        <Icon name="hand" size={18} color="onSurfaceVariant" />
+        <Text variant="bodySm" style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}>
+          {t('booking.scanHint')}
+        </Text>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { paddingBottom: 32 },
-  titleBlock: { paddingHorizontal: 16, paddingTop: 12, gap: 4 },
+  titleBlock: { paddingHorizontal: 16, paddingTop: 16, gap: 4 },
   center: { padding: 32, alignItems: 'center' },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
+    marginTop: 16,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    marginHorizontal: 16,
     marginTop: 16,
   },
 });

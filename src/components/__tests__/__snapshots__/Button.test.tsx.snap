@@ -36,17 +36,26 @@ exports[`<Button> renders the disabled state 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
       },
       {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
+      },
+      {
         "alignSelf": "auto",
-        "backgroundColor": "#0F766E",
+        "backgroundColor": "#0059bf",
         "borderColor": "transparent",
-        "borderRadius": 12,
+        "borderRadius": 9999,
+        "borderWidth": 0,
         "minHeight": 48,
-        "opacity": 0.5,
-        "paddingHorizontal": 16,
+        "opacity": 0.4,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -69,15 +78,16 @@ exports[`<Button> renders the disabled state 1`] = `
             "includeFontPadding": false,
           },
           {
-            "fontSize": 16,
-            "fontWeight": "400",
-            "lineHeight": 24,
+            "fontSize": 14,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
+            "lineHeight": 20,
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
           {
-            "color": "#FFFFFF",
+            "color": "#ffffff",
           },
         ]
       }
@@ -124,17 +134,26 @@ exports[`<Button> renders the ghost variant 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
+      },
+      {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
       },
       {
         "alignSelf": "auto",
         "backgroundColor": "transparent",
         "borderColor": "transparent",
-        "borderRadius": 12,
+        "borderRadius": 9999,
+        "borderWidth": 0,
         "minHeight": 48,
         "opacity": 1,
-        "paddingHorizontal": 16,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -157,15 +176,16 @@ exports[`<Button> renders the ghost variant 1`] = `
             "includeFontPadding": false,
           },
           {
-            "fontSize": 16,
-            "fontWeight": "400",
-            "lineHeight": 24,
+            "fontSize": 14,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
+            "lineHeight": 20,
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
           {
-            "color": "#0F766E",
+            "color": "#0059bf",
           },
         ]
       }
@@ -212,17 +232,26 @@ exports[`<Button> renders the loading state 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
       },
       {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
+      },
+      {
         "alignSelf": "auto",
-        "backgroundColor": "#0F766E",
+        "backgroundColor": "#0059bf",
         "borderColor": "transparent",
-        "borderRadius": 12,
+        "borderRadius": 9999,
+        "borderWidth": 0,
         "minHeight": 48,
-        "opacity": 0.5,
-        "paddingHorizontal": 16,
+        "opacity": 0.4,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -230,7 +259,7 @@ exports[`<Button> renders the loading state 1`] = `
   }
 >
   <ActivityIndicator
-    color="#FFFFFF"
+    color="#ffffff"
   />
 </View>
 `;
@@ -271,17 +300,26 @@ exports[`<Button> renders the primary variant 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
       },
       {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
+      },
+      {
         "alignSelf": "auto",
-        "backgroundColor": "#0F766E",
+        "backgroundColor": "#0059bf",
         "borderColor": "transparent",
-        "borderRadius": 12,
+        "borderRadius": 9999,
+        "borderWidth": 0,
         "minHeight": 48,
         "opacity": 1,
-        "paddingHorizontal": 16,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -304,15 +342,16 @@ exports[`<Button> renders the primary variant 1`] = `
             "includeFontPadding": false,
           },
           {
-            "fontSize": 16,
-            "fontWeight": "400",
-            "lineHeight": 24,
+            "fontSize": 14,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
+            "lineHeight": 20,
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
           {
-            "color": "#FFFFFF",
+            "color": "#ffffff",
           },
         ]
       }
@@ -359,17 +398,26 @@ exports[`<Button> renders the secondary variant 1`] = `
     [
       {
         "alignItems": "center",
-        "borderWidth": 1,
         "justifyContent": "center",
       },
       {
+        "elevation": 0,
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
+      },
+      {
         "alignSelf": "auto",
-        "backgroundColor": "#FFFFFF",
-        "borderColor": "#E7E5E4",
-        "borderRadius": 12,
+        "backgroundColor": "transparent",
+        "borderColor": "#6c727a",
+        "borderRadius": 9999,
+        "borderWidth": 1,
         "minHeight": 48,
         "opacity": 1,
-        "paddingHorizontal": 16,
+        "paddingHorizontal": 24,
         "paddingVertical": 12,
       },
       undefined,
@@ -392,15 +440,16 @@ exports[`<Button> renders the secondary variant 1`] = `
             "includeFontPadding": false,
           },
           {
-            "fontSize": 16,
-            "fontWeight": "400",
-            "lineHeight": 24,
+            "fontSize": 14,
+            "fontWeight": "500",
+            "letterSpacing": 0.1,
+            "lineHeight": 20,
           },
           {
-            "color": "#0C0A09",
+            "color": "#07090d",
           },
           {
-            "color": "#0C0A09",
+            "color": "#0059bf",
           },
         ]
       }

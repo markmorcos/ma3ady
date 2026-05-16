@@ -82,9 +82,10 @@
   "installApp": "Get the ma3ady app",
   "installAppHint": "Manage all your bookings in one place.",
   "available": {
-    "title": "Available services",
+    "title": "Pick a service",
     "subtitle": "Pick a service to see times.",
-    "duration": "{{duration}} min"
+    "duration": "{{duration}} min",
+    "empty": "This business isn’t taking bookings yet."
   },
   "book": {
     "pageTitle": "Book {{tenantName}}",
@@ -103,7 +104,9 @@
     "tryNextWeek": "Try the next week",
     "slotTaken": "That slot just got taken — please pick another.",
     "needService": "Pick a service to start.",
+    "back": "Back",
     "chooseSlot": "Pick a time that works for you.",
+    "scanHint": "Drag the day strip to scan two weeks at once.",
     "morning": "Morning",
     "afternoon": "Afternoon",
     "evening": "Evening",
@@ -112,17 +115,26 @@
     "yourTimezone": "your time"
   },
   "confirm": {
-    "title": "You're booked!",
+    "title": "You’re on the books",
+    "hero": "Confirmed",
+    "countdown": "in {{value}}",
     "subtitle": "We've sent a confirmation to {{email}}.",
     "service": "Service",
     "when": "When",
     "duration": "Duration",
+    "dateLabel": "Date",
+    "timeLabel": "Time",
     "manageTitle": "Need to make changes?",
     "manageBody": "Use the link below to reschedule or cancel — no account required.",
-    "manageCta": "Manage booking",
+    "manageCta": "Manage this booking",
     "addToCalendar": "Add to calendar",
-    "calendarGoogle": "Google Calendar",
-    "calendarApple": "Apple / Outlook (.ics)",
+    "calendarGoogle": "Google",
+    "calendarApple": "Apple",
+    "calendarIcal": "iCal",
+    "shareTitle": "Bring a friend",
+    "shareBody": "Share this booking link so they can grab the next slot.",
+    "policyTitle": "Cancellation policy",
+    "policyDefault": "Need to change plans? You can cancel from the manage link any time.",
     "openInApp": "Open in the ma3ady app"
   },
   "manage": {

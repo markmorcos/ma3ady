@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { type SlugAvailability, type Tenant } from '@/types/db';
+import { type SlugAvailability, type Tenant, type TenantType } from '@/types/db';
 
 export type ClaimSlugInput = {
   slug: string;
@@ -7,6 +7,8 @@ export type ClaimSlugInput = {
   timezone: string;
   default_locale: 'en' | 'ar';
   brand_color?: string | null;
+  type?: TenantType;
+  location?: string | null;
 };
 
 export class SlugTakenError extends Error {

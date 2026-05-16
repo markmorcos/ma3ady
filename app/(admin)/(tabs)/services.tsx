@@ -1,17 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Switch,
-  View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
+import { FAB } from '@/components/FAB';
 import { Icon } from '@/components/Icon';
+import { Switch } from '@/components/Switch';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
 import { getAllServices, setServiceActive } from '@/services/api/services';
@@ -44,38 +39,25 @@ export default function ServicesScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color={theme.colors.brand[500]} />
+      <View style={[styles.center, { backgroundColor: theme.colors.surface }]}>
+        <ActivityIndicator color={theme.colors.primary} />
       </View>
     );
   }
 
-  if ((data ?? []).length === 0) {
-    return (
-      <View style={styles.center}>
-        <EmptyState icon="scissors" title={t('admin.servicesEmpty')} />
-        {canEdit && (
-          <Pressable
-            onPress={() => router.push('/(admin)/service/new')}
-            accessibilityRole="button"
-            style={[styles.fabInline, { backgroundColor: theme.colors.brand[500] }]}
-          >
-            <Icon name="plus" size={18} colorHex={theme.colors.white} />
-            <Text variant="bodyStrong" style={{ color: theme.colors.white }}>
-              {t('admin.serviceCreate')}
-            </Text>
-          </Pressable>
-        )}
-      </View>
-    );
-  }
+  const services = data ?? [];
 
   return (
-    <View style={styles.flex}>
+    <View style={[styles.flex, { backgroundColor: theme.colors.surface }]}>
       <FlatList
-        data={data ?? []}
+        data={services}
         keyExtractor={(s: Service) => s.id}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <EmptyState icon="scissors" title={t('admin.servicesEmpty')} />
+          </View>
+        }
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>
@@ -86,24 +68,31 @@ export default function ServicesScreen() {
             }
             accessibilityRole="button"
           >
-            <Card>
+            <Card kind="outlined">
               <View style={styles.row}>
-                <View style={styles.flex}>
-                  <Text variant="bodyStrong">{item.name}</Text>
-                  <Text variant="caption" color="muted">
+                <View
+                  style={[
+                    styles.iconTile,
+                    {
+                      backgroundColor: theme.colors.secondaryContainer,
+                      borderRadius: theme.shape.lg,
+                    },
+                  ]}
+                >
+                  <Icon name="scissors" size={22} color="onSecondaryContainer" />
+                </View>
+                <View style={styles.body}>
+                  <Text variant="titleMd" style={{ color: theme.colors.onSurface }}>
+                    {item.name}
+                  </Text>
+                  <Text variant="bodyMd" style={{ color: theme.colors.onSurfaceVariant }}>
                     {t('booking.minutes', { count: item.duration_minutes })}
                   </Text>
                 </View>
                 <Switch
                   value={item.active}
                   disabled={!canEdit || toggleActive.isPending}
-                  onValueChange={(v) =>
-                    toggleActive.mutate({ id: item.id, active: v })
-                  }
-                  trackColor={{
-                    false: theme.colors.border,
-                    true: theme.colors.brand[500],
-                  }}
+                  onValueChange={(v) => toggleActive.mutate({ id: item.id, active: v })}
                 />
               </View>
             </Card>
@@ -112,14 +101,15 @@ export default function ServicesScreen() {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
       {canEdit && (
-        <Pressable
-          onPress={() => router.push('/(admin)/service/new')}
-          accessibilityRole="button"
-          accessibilityLabel={t('admin.serviceCreate')}
-          style={[styles.fab, { backgroundColor: theme.colors.brand[500] }]}
-        >
-          <Icon name="plus" size={24} colorHex={theme.colors.white} />
-        </Pressable>
+        <View style={styles.fabWrap}>
+          <FAB
+            extended
+            icon={<Icon name="plus" size={20} color="onPrimaryContainer" />}
+            label={t('admin.newService')}
+            accessibilityLabel={t('admin.newService')}
+            onPress={() => router.push('/(admin)/service/new')}
+          />
+        </View>
       )}
     </View>
   );
@@ -127,36 +117,21 @@ export default function ServicesScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  list: { padding: 16 },
+  list: { padding: 16, paddingBottom: 96 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  separator: { height: 8 },
-  center: {
-    flex: 1,
+  iconTile: {
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
-    gap: 16,
   },
-  fab: {
+  body: { flex: 1, gap: 2 },
+  separator: { height: 8 },
+  empty: { padding: 32, alignItems: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
+  fabWrap: {
     position: 'absolute',
     end: 24,
     bottom: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4,
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  fabInline: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    gap: 8,
   },
 });

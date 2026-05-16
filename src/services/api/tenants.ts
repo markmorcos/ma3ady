@@ -6,7 +6,7 @@ export type TenantWithRole = TenantPublic & { role: Membership['role'] };
 export async function getTenantBySlug(slug: string): Promise<TenantPublic | null> {
   const { data, error } = await supabase
     .from('tenants')
-    .select('id, slug, name, timezone, default_locale, brand_color')
+    .select('id, slug, name, timezone, default_locale, brand_color, type, location, cancellation_policy')
     .eq('slug', slug)
     .maybeSingle();
   if (error) throw error;
@@ -16,7 +16,7 @@ export async function getTenantBySlug(slug: string): Promise<TenantPublic | null
 export async function getTenantById(id: string): Promise<TenantPublic | null> {
   const { data, error } = await supabase
     .from('tenants')
-    .select('id, slug, name, timezone, default_locale, brand_color')
+    .select('id, slug, name, timezone, default_locale, brand_color, type, location, cancellation_policy')
     .eq('id', id)
     .maybeSingle();
   if (error) throw error;
@@ -42,7 +42,7 @@ export async function getMyMemberships(): Promise<TenantWithRole[]> {
   const tenantIds = memberships.map((m) => m.tenant_id);
   const { data: tenants, error: tenantError } = await supabase
     .from('tenants')
-    .select('id, slug, name, timezone, default_locale, brand_color')
+    .select('id, slug, name, timezone, default_locale, brand_color, type, location, cancellation_policy')
     .in('id', tenantIds);
   if (tenantError) throw tenantError;
 

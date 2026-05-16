@@ -14,7 +14,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
-import { AppointmentRow } from '@/features/admin/AppointmentRow';
+import { AppointmentTimeline } from '@/features/admin/AppointmentTimeline';
 import { StatsCard } from '@/features/admin/StatsCard';
 import {
   getTenantStats,
@@ -74,11 +74,12 @@ export default function AdminTodayScreen() {
   return (
     <ScrollView
       contentContainerStyle={styles.content}
+      style={{ backgroundColor: theme.colors.surface }}
       refreshControl={
         <RefreshControl
           refreshing={today.isFetching || stats.isFetching}
           onRefresh={onRefresh}
-          tintColor={theme.colors.brand[500]}
+          tintColor={theme.colors.primary}
         />
       }
     >
@@ -90,13 +91,17 @@ export default function AdminTodayScreen() {
               onPress={() => router.push('/(app)/tenants/picker')}
               style={styles.tenantNameRow}
             >
-              <Text variant="h2">{tenant?.name}</Text>
-              <Icon name="chevron-right" size={20} color="muted" />
+              <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
+                {tenant?.name}
+              </Text>
+              <Icon name="chevron-right" size={20} color="onSurfaceVariant" />
             </Pressable>
           ) : (
-            <Text variant="h2">{tenant?.name}</Text>
+            <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
+              {tenant?.name}
+            </Text>
           )}
-          <Text variant="caption" color="muted">
+          <Text variant="bodyMd" style={{ color: theme.colors.onSurfaceVariant }}>
             {t('admin.todaySubtitle')}
           </Text>
         </View>
@@ -105,10 +110,13 @@ export default function AdminTodayScreen() {
           accessibilityLabel={t('admin.shareLink')}
           onPress={onShare}
           hitSlop={8}
-          style={[styles.shareButton, { borderColor: theme.colors.border }]}
+          style={[
+            styles.shareButton,
+            { borderColor: theme.colors.primary, borderRadius: theme.shape.full },
+          ]}
         >
-          <Icon name="copy" size={18} color="brand.500" />
-          <Text variant="caption" color="brand.500">
+          <Icon name="link" size={18} color="primary" />
+          <Text variant="labelLg" color="primary">
             {t('admin.shareLink')}
           </Text>
         </Pressable>
@@ -116,31 +124,48 @@ export default function AdminTodayScreen() {
 
       <View style={styles.statsRow}>
         <StatsCard
+          tone="primary"
+          icon="calendar"
           label={t('admin.statTodayCount')}
           value={String(stats.data?.todayCount ?? 0)}
         />
         <StatsCard
+          tone="tertiary"
+          icon="calendar-clock"
           label={t('admin.statWeekConfirmed')}
           value={String(stats.data?.weekConfirmed ?? 0)}
         />
         <StatsCard
+          tone="secondary"
+          icon="triangle-alert"
           label={t('admin.statNoShowRate')}
           value={`${Math.round((stats.data?.noShowRate ?? 0) * 100)}%`}
         />
       </View>
 
+      <Text
+        variant="titleSm"
+        style={{
+          color: theme.colors.onSurfaceVariant,
+          textTransform: 'uppercase',
+          letterSpacing: 0.5,
+          marginTop: 12,
+        }}
+      >
+        {t('admin.todayScheduleEyebrow')}
+      </Text>
+
       {today.isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator color={theme.colors.brand[500]} />
+          <ActivityIndicator color={theme.colors.primary} />
         </View>
       ) : (today.data ?? []).length === 0 ? (
         <EmptyState icon="calendar" title={t('admin.todayEmpty')} />
       ) : (
-        <View style={styles.list}>
-          {(today.data ?? []).map((a) => (
-            <AppointmentRow key={a.id} appointment={a} tenantTimezone={tenantTz} />
-          ))}
-        </View>
+        <AppointmentTimeline
+          appointments={today.data ?? []}
+          tenantTimezone={tenantTz}
+        />
       )}
     </ScrollView>
   );
@@ -160,7 +185,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
   },
-  statsRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  statsRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   list: { gap: 8, marginTop: 8 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
 });

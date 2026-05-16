@@ -3,12 +3,12 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Pressable,
   RefreshControl,
   SectionList,
   StyleSheet,
   View,
 } from 'react-native';
+import { Chip } from '@/components/Chip';
 import { EmptyState } from '@/components/EmptyState';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
@@ -83,30 +83,16 @@ export default function UpcomingScreen() {
   }
 
   return (
-    <View style={styles.flex}>
-      <View style={[styles.tabs, { borderBottomColor: theme.colors.border }]}>
+    <View style={[styles.flex, { backgroundColor: theme.colors.surface }]}>
+      <View style={styles.tabs}>
         {(['upcoming', 'past'] as Bucket[]).map((b) => (
-          <Pressable
+          <Chip
             key={b}
-            accessibilityRole="button"
+            kind="filter"
+            label={t(`admin.bucket.${b}`)}
+            selected={bucket === b}
             onPress={() => setBucket(b)}
-            style={[
-              styles.tabButton,
-              {
-                borderBottomColor:
-                  bucket === b ? theme.colors.brand[500] : 'transparent',
-              },
-            ]}
-          >
-            <Text
-              variant="bodyStrong"
-              style={{
-                color: bucket === b ? theme.colors.brand[500] : theme.colors.muted,
-              }}
-            >
-              {t(`admin.bucket.${b}`)}
-            </Text>
-          </Pressable>
+          />
         ))}
       </View>
 
@@ -130,14 +116,29 @@ export default function UpcomingScreen() {
             <RefreshControl
               refreshing={active.isFetching}
               onRefresh={active.refetch}
-              tintColor={theme.colors.brand[500]}
+              tintColor={theme.colors.primary}
             />
           }
           renderSectionHeader={({ section }) => (
-            <View style={[styles.sectionHeader, { backgroundColor: theme.colors.bg }]}>
-              <Text variant="label" color="muted">
+            <View
+              style={[styles.sectionHeader, { backgroundColor: theme.colors.surface }]}
+            >
+              <Text
+                variant="labelLg"
+                style={{
+                  color: theme.colors.primary,
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                }}
+              >
                 {section.title}
               </Text>
+              <View
+                style={[
+                  styles.divider,
+                  { backgroundColor: theme.colors.outlineVariant },
+                ]}
+              />
             </View>
           )}
           renderItem={({ item }) => (
@@ -157,16 +158,13 @@ const styles = StyleSheet.create({
   tabs: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderBottomWidth: 2,
-    alignItems: 'center',
+    paddingTop: 12,
+    paddingBottom: 8,
+    gap: 8,
   },
   content: { padding: 16, gap: 8 },
-  sectionHeader: { paddingTop: 12, paddingBottom: 4 },
+  sectionHeader: { paddingTop: 16, paddingBottom: 8, gap: 8 },
+  divider: { height: StyleSheet.hairlineWidth, flex: 1 },
   itemWrap: { marginBottom: 8 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
 });

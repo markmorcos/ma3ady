@@ -23,6 +23,8 @@ type Props = {
     chooseSlot: string;
     tenantTimezone: string;
     yourTimezone: string;
+    /** Optional UI tip rendered under the slot grid. */
+    scanHint?: string;
   };
   /** Optional override; defaults to navigating to ?starts_at=<iso>. */
   onPick?: (slot: Slot) => void;
@@ -60,6 +62,12 @@ function bucketOf(iso: string, tz: string): 'morning' | 'afternoon' | 'evening' 
   if (h < 17) return 'afternoon';
   return 'evening';
 }
+
+const BUCKET_GLYPH = {
+  morning: '☀︎',
+  afternoon: '☼',
+  evening: '☾',
+} as const;
 
 export function SlotPicker({
   tenantSlug,
@@ -164,7 +172,7 @@ export function SlotPicker({
       <div className="empty-state">
         <p>{labels.noSlots}</p>
         <button
-          className="button secondary"
+          className="btn btn-tonal"
           type="button"
           onClick={() => {
             const next = new Date(windowStart);
@@ -191,7 +199,7 @@ export function SlotPicker({
         </p>
         <button
           type="button"
-          className={`tz-toggle ${showLocalTime ? 'active' : ''}`}
+          className={`tz-toggle${showLocalTime ? ' active' : ''}`}
           onClick={() => setShowLocalTime((v) => !v)}
         >
           {showLocalTime
@@ -203,20 +211,28 @@ export function SlotPicker({
       <div className="day-strip" role="tablist">
         {days.map((d) => {
           const date = new Date(`${d}T00:00:00`);
-          const has = !!grouped[d]?.length;
+          const free = grouped[d]?.length ?? 0;
+          const isClosed = free === 0;
           const active = day === d;
+          // Pressure indicator: 1-3 free → warning pill, 4+ → neutral dot,
+          // 0 → no glyph (and the cell is disabled).
+          let indicator: React.ReactNode = null;
+          if (free > 0) {
+            indicator = free <= 3 ? <span className="pill" /> : <span className="dot" />;
+          }
           return (
             <button
               key={d}
               type="button"
-              className={`day-button ${active ? 'active' : ''}`}
+              className="day-button"
               onClick={() => setSelectedDay(d)}
               role="tab"
               aria-selected={active}
+              disabled={isClosed && !active}
             >
               <span className="dow">{dayFormatter.format(date)}</span>
               <span className="num">{date.getDate()}</span>
-              <span className={`dot ${has ? '' : 'empty'}`} />
+              <span className="indicator">{indicator}</span>
             </button>
           );
         })}
@@ -227,13 +243,21 @@ export function SlotPicker({
         if (items.length === 0) return null;
         return (
           <div className="bucket" key={bucket}>
-            <h3 className="section-title">{labels[bucket]}</h3>
+            <div className="bucket-header">
+              <span className={`bucket-icon ${bucket}`} aria-hidden>
+                {BUCKET_GLYPH[bucket]}
+              </span>
+              <h3 className="bucket-title">{labels[bucket]}</h3>
+              <span className="bucket-counter">
+                {items.length} / {items.length}
+              </span>
+            </div>
             <div className="slot-grid">
               {items.map((s) => (
                 <button
                   key={s.starts_at}
                   type="button"
-                  className="slot-button"
+                  className={`slot-button ${bucket}`}
                   onClick={() => handlePick(s)}
                 >
                   {formatHour(s.starts_at, displayTz)}
@@ -247,7 +271,7 @@ export function SlotPicker({
       <div className="row between" style={{ marginBlockStart: 24 }}>
         <button
           type="button"
-          className="button ghost"
+          className="btn btn-text"
           onClick={() => {
             const prev = new Date(windowStart);
             prev.setDate(prev.getDate() - WINDOW_DAYS);
@@ -258,7 +282,7 @@ export function SlotPicker({
         </button>
         <button
           type="button"
-          className="button ghost"
+          className="btn btn-text"
           onClick={() => {
             const next = new Date(windowStart);
             next.setDate(next.getDate() + WINDOW_DAYS);
@@ -269,6 +293,13 @@ export function SlotPicker({
           ›
         </button>
       </div>
+
+      {labels.scanHint ? (
+        <div className="tip-card">
+          <span aria-hidden>☞</span>
+          <span>{labels.scanHint}</span>
+        </div>
+      ) : null}
     </div>
   );
 }

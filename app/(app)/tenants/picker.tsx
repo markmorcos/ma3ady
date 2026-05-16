@@ -1,7 +1,10 @@
 import { router, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
-import { Text } from '@/components/Text';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { Icon } from '@/components/Icon';
+import { ListItem } from '@/components/ListItem';
 import { useTheme } from '@/design/ThemeProvider';
 import { useTenantStore } from '@/state/tenantStore';
 import { type TenantWithRole } from '@/services/api/tenants';
@@ -20,11 +23,14 @@ export default function TenantPicker() {
 
   return (
     <>
-      <Stack.Screen options={{ title: t('onboarding.pickerTitle'), presentation: 'modal' }} />
-      <View style={[styles.container, { backgroundColor: theme.colors.bg }]}>
+      <Stack.Screen
+        options={{ title: t('onboarding.pickerTitle'), presentation: 'modal' }}
+      />
+      <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
         <FlatList
           data={tenants}
           keyExtractor={(tt) => tt.id}
+          contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <TenantRow
               tenant={item}
@@ -32,19 +38,17 @@ export default function TenantPicker() {
               onPress={() => onPick(item.id)}
             />
           )}
-          ItemSeparatorComponent={() => (
-            <View style={[styles.separator, { backgroundColor: theme.colors.border }]} />
-          )}
+          ItemSeparatorComponent={() => <View style={styles.gap} />}
         />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push('/(onboarding)/claim-slug')}
-          style={[styles.addAnother, { borderColor: theme.colors.border }]}
-        >
-          <Text variant="bodyStrong" color="brand.500">
-            {t('onboarding.addAnotherTenant')}
-          </Text>
-        </Pressable>
+        <View style={styles.footer}>
+          <Button
+            label={t('onboarding.addAnotherTenant')}
+            variant="tonal"
+            fullWidth
+            leadingIcon={<Icon name="plus" size={18} color="onSecondaryContainer" />}
+            onPress={() => router.push('/(onboarding)/claim-slug')}
+          />
+        </View>
       </View>
     </>
   );
@@ -62,35 +66,45 @@ function TenantRow({
   const { t } = useTranslation();
   const theme = useTheme();
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.row}>
-      <View
-        style={[
-          styles.swatch,
-          { backgroundColor: tenant.brand_color ?? theme.colors.brand[500] },
-        ]}
+    <Card kind="filled" padded={false}>
+      <ListItem
+        leading={
+          <View
+            style={[
+              styles.swatch,
+              {
+                backgroundColor: tenant.brand_color ?? theme.colors.primary,
+                borderRadius: theme.shape.md,
+              },
+            ]}
+          >
+            <Icon name="sparkles" size={18} colorHex={theme.colors.onPrimary} />
+          </View>
+        }
+        headline={tenant.name}
+        supporting={`${t(`onboarding.roleLabel.${tenant.role}`)} · ${tenant.slug}`}
+        trailing={
+          selected ? (
+            <Icon name="check" size={20} color="primary" />
+          ) : (
+            <Icon name="chevron-right" size={20} color="onSurfaceVariant" />
+          )
+        }
+        onPress={onPress}
       />
-      <View style={styles.rowText}>
-        <Text variant="bodyStrong">{tenant.name}</Text>
-        <Text variant="caption" color="muted">
-          {t(`onboarding.roleLabel.${tenant.role}`)} · {tenant.slug}
-        </Text>
-      </View>
-      {selected && <Text variant="caption" color="brand.500">✓</Text>}
-    </Pressable>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 },
-  swatch: { width: 32, height: 32, borderRadius: 16 },
-  rowText: { flex: 1, gap: 2 },
-  separator: { height: StyleSheet.hairlineWidth },
-  addAnother: {
-    margin: 16,
-    paddingVertical: 14,
+  list: { padding: 16, gap: 8 },
+  gap: { height: 8 },
+  swatch: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
+    justifyContent: 'center',
   },
+  footer: { padding: 16 },
 });

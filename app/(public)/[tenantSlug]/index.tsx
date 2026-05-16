@@ -4,13 +4,22 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { EmptyState } from '@/components/EmptyState';
 import { ServiceCard } from '@/components/ServiceCard';
+import { TenantHeader } from '@/components/TenantHeader';
+import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
 import { getActiveServices } from '@/services/api/services';
+import { getTenantBySlug } from '@/services/api/tenants';
 
 export default function ServicesIndex() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { tenantSlug } = useLocalSearchParams<{ tenantSlug: string }>();
+
+  const tenant = useQuery({
+    queryKey: ['tenant', tenantSlug],
+    queryFn: () => getTenantBySlug(tenantSlug ?? ''),
+    enabled: !!tenantSlug,
+  });
 
   const { data: services = [], isLoading } = useQuery({
     queryKey: ['services', tenantSlug],
@@ -18,21 +27,36 @@ export default function ServicesIndex() {
     enabled: !!tenantSlug,
   });
 
-  if (isLoading) {
+  if (isLoading || tenant.isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color={theme.colors.brand[500]} />
+      <View style={[styles.center, { backgroundColor: theme.colors.surface }]}>
+        <ActivityIndicator color={theme.colors.primary} />
       </View>
     );
   }
 
-  if (services.length === 0) {
-    return <EmptyState icon="calendar" title={t('booking.servicesEmpty')} />;
+  if (!tenant.data) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.colors.surface }]}>
+        <EmptyState icon="alert-triangle" title={t('booking.tenantNotFound')} body={t('booking.tenantNotFoundBody')} />
+      </View>
+    );
   }
 
   return (
     <FlatList
+      style={{ backgroundColor: theme.colors.surface }}
       contentContainerStyle={styles.list}
+      ListHeaderComponent={
+        <View>
+          <TenantHeader tenant={tenant.data} />
+          <View style={styles.titleRow}>
+            <Text variant="titleMd" style={{ color: theme.colors.onSurface }}>
+              {t('booking.pickServiceTitle')}
+            </Text>
+          </View>
+        </View>
+      }
       data={services}
       keyExtractor={(s) => s.id}
       renderItem={({ item }) => (
@@ -46,11 +70,28 @@ export default function ServicesIndex() {
           }
         />
       )}
+      ListEmptyComponent={
+        <EmptyState icon="calendar" title={t('booking.servicesEmpty')} />
+      }
+      ListFooterComponent={
+        <Text
+          variant="bodySm"
+          style={[styles.footer, { color: theme.colors.onSurfaceVariant }]}
+        >
+          {t('booking.poweredBy')}
+        </Text>
+      }
     />
   );
 }
 
 const styles = StyleSheet.create({
-  list: { padding: 16 },
+  list: { paddingBottom: 32 },
+  titleRow: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  footer: { textAlign: 'center', paddingVertical: 24 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
 });

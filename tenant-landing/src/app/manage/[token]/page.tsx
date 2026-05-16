@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { TenantHeader } from '@/components/TenantHeader';
 import { dirOf, resolveLocale, t, type Locale } from '@/lib/locale';
+import { paletteCss } from '@/lib/palette';
 import { getServiceClient } from '@/lib/supabase';
 import { type Tenant } from '@/lib/tenant';
 
@@ -45,7 +46,9 @@ async function loadTenantById(id: string): Promise<Tenant | null> {
   const sb = getServiceClient();
   const { data } = await sb
     .from('tenants')
-    .select('id, slug, name, timezone, default_locale, brand_color')
+    .select(
+      'id, slug, name, timezone, default_locale, brand_color, type, location, cancellation_policy',
+    )
     .eq('id', id)
     .maybeSingle();
   return (data as Tenant | null) ?? null;
@@ -91,48 +94,60 @@ export default async function ManagePage({
   }).format(new Date(appt.starts_at));
 
   const cancelled = appt.status === 'cancelled' || sp.cancelled === '1';
+  const css = paletteCss(tenant.brand_color ?? '#0B6BCB');
 
   return (
     <div dir={dir} lang={locale}>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
       <main className="container">
         <TenantHeader tenant={tenant} />
 
-        <h1 style={{ fontSize: 24, marginTop: 0 }}>{t(locale, 'manage.title')}</h1>
-        <p className="muted">{t(locale, 'manage.subtitle')}</p>
+        <h1 className="t-headline-sm" style={{ margin: '8px 0 4px' }}>
+          {t(locale, 'manage.title')}
+        </h1>
+        <p className="muted t-body-md" style={{ margin: '0 0 20px' }}>
+          {t(locale, 'manage.subtitle')}
+        </p>
 
         {sp.cancelled === '1' ? (
-          <div className="banner">{t(locale, 'manage.cancelled')}</div>
+          <div className="banner success">{t(locale, 'manage.cancelled')}</div>
         ) : null}
 
-        <section className="card">
-          <dl className="summary-grid">
-            <dt>{t(locale, 'confirm.service')}</dt>
-            <dd>{service?.name ?? '—'}</dd>
-            <dt>{t(locale, 'confirm.when')}</dt>
-            <dd>{display}</dd>
-            <dt>{t(locale, 'confirm.duration')}</dt>
-            <dd>{service?.duration_minutes ?? '—'} min</dd>
-          </dl>
+        <section className="card-primary">
+          <p
+            className="t-label-md"
+            style={{ margin: 0, opacity: 0.8, textTransform: 'uppercase', letterSpacing: 1 }}
+          >
+            {tenant.name}
+          </p>
+          <p className="t-headline-sm" style={{ margin: '4px 0 8px' }}>
+            {service?.name ?? '—'}
+          </p>
+          <p className="t-body-md" style={{ margin: 0, opacity: 0.9 }}>
+            {display}
+          </p>
         </section>
 
         {!cancelled ? (
-          <section className="card">
+          <div style={{ display: 'grid', gap: 12, marginBlockStart: 16 }}>
             <form method="post" action={`/manage/${token}/cancel`}>
-              <button type="submit" className="button danger full">
+              <button type="submit" className="btn btn-danger btn-full btn-lg">
                 {t(locale, 'manage.actions.cancel')}
               </button>
             </form>
-            {/* Reschedule on web is deferred — the email link points back to
-                 the app. Web reschedule UI lands as a follow-up to keep this
-                 surface focused. */}
-          </section>
-        ) : null}
-
-        <section className="card">
-          <a className="button secondary full" href={`ma3ady://manage/${token}`}>
+            <a className="btn btn-tonal btn-full" href={`ma3ady://manage/${token}`}>
+              {t(locale, 'confirm.openInApp')}
+            </a>
+          </div>
+        ) : (
+          <a
+            className="btn btn-tonal btn-full"
+            href={`ma3ady://manage/${token}`}
+            style={{ marginBlockStart: 16 }}
+          >
             {t(locale, 'confirm.openInApp')}
           </a>
-        </section>
+        )}
 
         <footer className="site-footer">
           <Link href="/">←</Link>

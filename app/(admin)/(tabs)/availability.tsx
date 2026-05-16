@@ -30,6 +30,7 @@ import {
   type AvailabilityExceptionKind,
   type Band,
 } from '@/services/api/availability';
+import { AvailabilityHeatmap } from '@/features/admin/AvailabilityHeatmap';
 import { useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
 
@@ -47,10 +48,6 @@ const DAY_KEYS = [
 const UI_TO_DOW = [1, 2, 3, 4, 5, 6, 0];
 
 const TEMPLATE_BANDS: Band[] = [{ start_time: '09:00:00', end_time: '17:00:00' }];
-
-function formatBand(b: Band): string {
-  return `${b.start_time.slice(0, 5)}–${b.end_time.slice(0, 5)}`;
-}
 
 function toLocalInput(d: Date): string {
   // Format as YYYY-MM-DDTHH:MM in local time for the datetime-style picker.
@@ -200,23 +197,43 @@ export default function AvailabilityScreen() {
 
   const totalBands = (rules.data ?? []).length;
 
+  const onHeatmapCommitBand = (uiDayIndex: number, startMinutes: number, endMinutes: number) => {
+    if (!canEdit) return;
+    const dow = UI_TO_DOW[uiDayIndex]!;
+    const existing = bandsByDay.get(dow) ?? [];
+    const toHHMMSS = (m: number): string =>
+      `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}:00`;
+    const next: Band[] = [
+      ...existing,
+      { start_time: toHHMMSS(startMinutes), end_time: toHHMMSS(endMinutes) },
+    ];
+    replace.mutate({ dow, bands: next });
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <Text variant="h2">{t('admin.availabilityTitle')}</Text>
-      <Text variant="caption" color="muted">
-        {t('admin.availabilitySubtitle', { tz: tenant.timezone })}
+    <ScrollView
+      contentContainerStyle={styles.content}
+      style={{ backgroundColor: theme.colors.surface }}
+    >
+      <Text variant="headlineSm" style={{ color: theme.colors.onSurface }}>
+        {t('admin.availabilityTitle')}
+      </Text>
+      <Text variant="bodyMd" style={{ color: theme.colors.onSurfaceVariant }}>
+        {t('admin.heatmapTimezone', { timezone: tenant.timezone })}
       </Text>
 
       {totalBands === 0 ? (
-        <Card>
-          <Text variant="bodyStrong">{t('admin.rulesEmptyTitle')}</Text>
-          <Text variant="caption" color="muted">
+        <Card kind="filled">
+          <Text variant="titleMd" style={{ color: theme.colors.onSurface }}>
+            {t('admin.rulesEmptyTitle')}
+          </Text>
+          <Text variant="bodySm" style={{ color: theme.colors.onSurfaceVariant }}>
             {t('admin.rulesEmptyBody')}
           </Text>
           {canEdit && (
             <Button
               label={t('admin.rulesApplyTemplate')}
-              variant="primary"
+              variant="filled"
               fullWidth
               onPress={seedTemplate}
             />
@@ -224,50 +241,30 @@ export default function AvailabilityScreen() {
         </Card>
       ) : null}
 
-      {[0, 1, 2, 3, 4, 5, 6].map((uiIndex) => {
-        const dow = UI_TO_DOW[uiIndex]!;
-        const bands = bandsByDay.get(dow) ?? [];
-        return (
-          <Card key={uiIndex}>
-            <View style={styles.dayHeader}>
-              <Text variant="bodyStrong">{t(DAY_KEYS[uiIndex]!)}</Text>
-              {canEdit && (
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => setEditing({ dayIndex: uiIndex, bands })}
-                  hitSlop={8}
-                >
-                  <Icon name="plus" size={18} color="brand.500" />
-                </Pressable>
-              )}
-            </View>
-            {bands.length === 0 ? (
-              <Text variant="caption" color="muted" style={styles.row}>
-                {t('admin.dayClosed')}
-              </Text>
-            ) : (
-              <View style={styles.bandRow}>
-                {bands.map((b, idx) => (
-                  <View
-                    key={`${b.start_time}-${b.end_time}-${idx}`}
-                    style={[
-                      styles.bandChip,
-                      {
-                        backgroundColor: theme.colors.brandTint,
-                        borderColor: theme.colors.brand[500],
-                      },
-                    ]}
-                  >
-                    <Text variant="caption" style={{ color: theme.colors.brand[500] }}>
-                      {formatBand(b)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </Card>
-        );
-      })}
+      <Card kind="filled">
+        <Text
+          variant="titleSm"
+          style={{
+            color: theme.colors.onSurfaceVariant,
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+            marginBottom: 12,
+          }}
+        >
+          {t('admin.heatmapEyebrow')}
+        </Text>
+        <AvailabilityHeatmap
+          rules={rules.data ?? []}
+          exceptions={exceptions.data ?? []}
+          onCommitBand={onHeatmapCommitBand}
+        />
+        <View style={styles.heatmapTip}>
+          <Icon name="hand" size={16} color="onSurfaceVariant" />
+          <Text variant="bodySm" style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}>
+            {t('admin.heatmapTip')}
+          </Text>
+        </View>
+      </Card>
 
       <Text variant="bodyStrong" style={styles.heading}>
         {t('admin.exceptionsHeading')}
@@ -537,8 +534,9 @@ function ExceptionEditorModal({
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16, gap: 12 },
+  content: { padding: 16, gap: 12, paddingBottom: 32 },
   flex: { flex: 1 },
+  heatmapTip: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
   row: { marginTop: 4 },
   exceptionTimes: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
   exceptionCtas: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
