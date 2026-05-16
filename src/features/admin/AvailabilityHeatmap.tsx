@@ -1,13 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  type GestureResponderEvent,
-} from 'react-native';
+import { useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/design/ThemeProvider';
 import { Text } from '@/components/Text';
 import { type AvailabilityException, type AvailabilityRule } from '@/types/db';
-import { createHeatmapGesture, type Cell } from './heatmapGesture';
 
 /**
  * 30-row × 7-column M3 weekly heatmap used on the admin Hours screen.
@@ -15,21 +10,24 @@ import { createHeatmapGesture, type Cell } from './heatmapGesture';
  * Rows are 30-minute steps from 07:00 → 22:00 (30 rows). Columns are days,
  * Mon → Sun (matching the UI order; Postgres day_of_week is 0=Sun..6=Sat).
  *
- * Interaction model
- * -----------------
- *  - **Tap** (quick touch + release, no drag) → `onToggleCell` for that
- *    one 30-minute slot. Caller decides add vs. remove.
- *  - **Long-press (~300ms) + drag** in a single column → `onCommitBand`
- *    with the painted band on release. Always additive.
- *  - **Long-press, then release without moving** → no-op.
- *  - **Quick swipe** (large move before the long-press timer fires) → the
- *    machine releases its state; the parent ScrollView keeps scrolling.
- *    The screen wires `onPaintingChange` to the wrapping ScrollView's
- *    `scrollEnabled` prop so once paint mode locks in, the page stops
- *    scrolling under your finger.
+ * Interaction
+ * -----------
+ * No drag-and-drop. Three previous attempts at gesture-based painting
+ * (PR #5, #7) all regressed something — scrolling, drag, or tap — because
+ * RN's responder system doesn't reliably negotiate between a PanResponder
+ * inside a ScrollView. Tap is the only direct interaction:
  *
- * The gesture state machine lives in `./heatmapGesture` and is tested in
- * isolation; this component just wires React's touch events to it.
+ *  - **Tap a cell** → `onCellPress(uiDayIndex, startMinutes)`. The screen
+ *    decides whether that means add a 30-min slot or remove one based on
+ *    the cell's current state.
+ *  - **Long-press a cell** → `onColumnLongPress(uiDayIndex)`. The screen
+ *    opens the per-day band editor sheet for that column so a multi-hour
+ *    shift is 3 taps (open → set times → save) rather than 16 taps on
+ *    individual cells.
+ *
+ * Pressable cooperates with the parent ScrollView automatically — the
+ * page scrolls if the user drags, presses fire only on a contained
+ * touch+release, long-press fires only after the OS-tuned hold delay.
  *
  * Cell states
  * -----------
@@ -51,7 +49,6 @@ const GUTTER = 36;
 const ROW_HEIGHT = 22;
 const ROW_GAP = 3;
 const COL_GAP = 3;
-const ROW_PITCH = ROW_HEIGHT + ROW_GAP;
 
 // UI Mon-first index → Postgres DOW (0=Sun..6=Sat)
 const UI_TO_DOW = [1, 2, 3, 4, 5, 6, 0];
@@ -61,17 +58,10 @@ type CellState = 'open' | 'closed' | 'block' | 'extra';
 type Props = {
   rules: AvailabilityRule[];
   exceptions: AvailabilityException[];
-  /** Called when a drag-painted band spanning multiple cells is released. */
-  onCommitBand?: (uiDayIndex: number, startMinutes: number, endMinutes: number) => void;
-  /** Called for a single-tap (no drag). Caller decides add vs. remove. */
-  onToggleCell?: (uiDayIndex: number, startMinutes: number) => void;
-  /**
-   * Fires when the long-press lock engages or releases. The screen should
-   * pipe this into the wrapping ScrollView's `scrollEnabled` so the page
-   * stops scrolling while a band is being painted. Outside of paint mode
-   * scroll is unaffected.
-   */
-  onPaintingChange?: (painting: boolean) => void;
+  /** Tap on a single cell — toggle that 30-minute slot. */
+  onCellPress?: (uiDayIndex: number, startMinutes: number) => void;
+  /** Long-press on any cell in a column — open the band editor for that day. */
+  onColumnLongPress?: (uiDayIndex: number) => void;
 };
 
 function minutesAtRow(row: number): number {
@@ -96,63 +86,10 @@ function isoToMinutes(iso: string, dayOfWeek: number): { match: boolean; minutes
 export function AvailabilityHeatmap({
   rules,
   exceptions,
-  onCommitBand,
-  onToggleCell,
-  onPaintingChange,
+  onCellPress,
+  onColumnLongPress,
 }: Props) {
   const theme = useTheme();
-
-  const gridWidthRef = useRef(0);
-  const callbacksRef = useRef({ onCommitBand, onToggleCell, onPaintingChange });
-  callbacksRef.current = { onCommitBand, onToggleCell, onPaintingChange };
-
-  // `paintTick` drives a re-render whenever the gesture mutates state. The
-  // gesture machine itself is ref-stable so we don't pay rebuild cost per
-  // touch event.
-  const [, setPaintTick] = useState(0);
-  const repaint = (): void => setPaintTick((t) => t + 1);
-
-  const cellFromXY = (x: number, y: number): Cell | null => {
-    const w = gridWidthRef.current;
-    if (w === 0) return null;
-    if (x < GUTTER) return null;
-    const inner = w - GUTTER;
-    if (inner <= 0) return null;
-    // Each cell shares the column pitch with the gap to its right; the
-    // last column absorbs the no-gap remainder. Good enough for hit
-    // detection — we don't need pixel-perfect alignment with the
-    // rendered cell boundaries.
-    const colPitch = inner / 7;
-    const col = Math.floor((x - GUTTER) / colPitch);
-    const row = Math.floor(y / ROW_PITCH);
-    if (col < 0 || col > 6 || row < 0 || row >= ROW_COUNT) return null;
-    return { ui: col, row };
-  };
-
-  const machine = useMemo(
-    () =>
-      createHeatmapGesture({
-        cellFromXY,
-        minutesAtRow,
-        onCommitBand: (ui, sm, em) => {
-          callbacksRef.current.onCommitBand?.(ui, sm, em);
-        },
-        onToggleCell: (ui, sm) => {
-          callbacksRef.current.onToggleCell?.(ui, sm);
-        },
-        onPaintingChange: (painting) => {
-          callbacksRef.current.onPaintingChange?.(painting);
-          repaint();
-        },
-      }),
-    // `cellFromXY` closes over `gridWidthRef` which is mutable; the machine
-    // re-reads it on every touch. We intentionally don't rebuild the
-    // machine across renders.
-    [],
-  );
-
-  // Clean up the long-press timer if the component unmounts mid-gesture.
-  useEffect(() => () => machine.cancel(), [machine]);
 
   const matrix = useMemo<CellState[][]>(() => {
     const out: CellState[][] = [];
@@ -183,32 +120,6 @@ export function AvailabilityHeatmap({
     return out;
   }, [rules, exceptions]);
 
-  const painted = machine.getPainted();
-
-  const onTouchStart = (e: GestureResponderEvent): void => {
-    const t = e.nativeEvent.touches[0];
-    if (!t) return;
-    machine.start(t.locationX, t.locationY);
-    repaint();
-  };
-
-  const onTouchMove = (e: GestureResponderEvent): void => {
-    const t = e.nativeEvent.touches[0];
-    if (!t) return;
-    machine.move(t.locationX, t.locationY);
-    repaint();
-  };
-
-  const onTouchEnd = (): void => {
-    machine.end();
-    repaint();
-  };
-
-  const onTouchCancel = (): void => {
-    machine.cancel();
-    repaint();
-  };
-
   const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
@@ -224,21 +135,7 @@ export function AvailabilityHeatmap({
         ))}
       </View>
 
-      <View
-        onLayout={(e) => {
-          gridWidthRef.current = e.nativeEvent.layout.width;
-        }}
-        style={styles.grid}
-        // Observe every touch on the grid without claiming the responder.
-        // ScrollView keeps ownership of the gesture by default; the screen
-        // disables ScrollView's scrollEnabled in response to
-        // onPaintingChange so the page only locks once the long-press
-        // engages paint mode.
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onTouchCancel={onTouchCancel}
-      >
+      <View style={styles.grid}>
         {Array.from({ length: ROW_COUNT }).map((_, row) => {
           const hour = Math.floor(minutesAtRow(row) / 60);
           const isHourBoundary = minutesAtRow(row) % 60 === 0;
@@ -261,10 +158,7 @@ export function AvailabilityHeatmap({
                   isFirstOfBand = prev !== state;
                   isLastOfBand = next !== state;
                 }
-                const isPainting =
-                  painted && painted.ui === ui && row >= painted.lo && row <= painted.hi;
                 const bg = (() => {
-                  if (isPainting) return theme.colors.primaryContainer;
                   switch (state) {
                     case 'open':
                       return theme.colors.primary;
@@ -278,9 +172,14 @@ export function AvailabilityHeatmap({
                   }
                 })();
                 return (
-                  <View
+                  <Pressable
                     key={ui}
-                    style={[
+                    accessibilityRole="button"
+                    accessibilityLabel={`${dayLabels[ui]} ${String(hour).padStart(2, '0')}:${String(minutesAtRow(row) % 60).padStart(2, '0')}`}
+                    onPress={() => onCellPress?.(ui, minutesAtRow(row))}
+                    onLongPress={() => onColumnLongPress?.(ui)}
+                    delayLongPress={350}
+                    style={({ pressed }) => [
                       styles.cell,
                       {
                         backgroundColor: bg,
@@ -288,6 +187,7 @@ export function AvailabilityHeatmap({
                         borderTopEndRadius: isFirstOfBand ? 6 : 0,
                         borderBottomStartRadius: isLastOfBand ? 6 : 0,
                         borderBottomEndRadius: isLastOfBand ? 6 : 0,
+                        opacity: pressed ? 0.7 : 1,
                       },
                     ]}
                   />

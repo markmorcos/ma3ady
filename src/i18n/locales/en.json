@@ -224,7 +224,7 @@
     "pastEmpty": "No past appointments yet",
     "now": "Now",
     "heatmapEyebrow": "Weekly pattern",
-    "heatmapTip": "Tap a cell to toggle it. Long-press, then drag to paint a band.",
+    "heatmapTip": "Tap a cell to toggle the half-hour. Long-press a column to edit that day's hours.",
     "heatmapLegendOpen": "Open",
     "heatmapLegendClosed": "Closed",
     "heatmapLegendBlock": "Blocked",
