@@ -7,10 +7,28 @@ import { Icon } from '@/components/Icon';
 import { Text } from '@/components/Text';
 import { TonalBlobs } from '@/components/TonalBlobs';
 import { useTheme } from '@/design/ThemeProvider';
+import { useAuthStore } from '@/state/authStore';
 
 export default function OnboardingWelcome() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const session = useAuthStore((s) => s.session);
+
+  // Welcome is the tenant-onboarding intro. The primary CTA needs to land
+  // the user on /claim-slug with a real Supabase session, otherwise the
+  // claim-slug Edge Function rejects the call as UNAUTHORIZED_INVALID_JWT
+  // (the supabase client falls back to the publishable key when there's no
+  // session). Route through /sign-in with a return_to when needed.
+  const onPrimary = () => {
+    if (session) {
+      router.push('/(onboarding)/claim-slug');
+    } else {
+      router.push({
+        pathname: '/(auth)/sign-in',
+        params: { return_to: '/(onboarding)/claim-slug' },
+      });
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
@@ -31,12 +49,16 @@ export default function OnboardingWelcome() {
 
       <View style={styles.actions}>
         <Button
-          label={t('onboarding.welcomeSignIn')}
+          label={
+            session
+              ? t('onboarding.welcomeContinue')
+              : t('onboarding.welcomeSignIn')
+          }
           variant="filled"
           size="lg"
           fullWidth
           leadingIcon={<Icon name="user" size={20} color="onPrimary" />}
-          onPress={() => router.push('/(onboarding)/claim-slug')}
+          onPress={onPrimary}
         />
         <Button
           label={t('onboarding.welcomeGuest')}

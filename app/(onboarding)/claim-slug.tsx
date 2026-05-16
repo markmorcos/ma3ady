@@ -15,6 +15,7 @@ import {
   SlugReservedError,
   SlugTakenError,
 } from '@/services/api/onboarding';
+import { useAuthStore } from '@/state/authStore';
 import { useTenantStore } from '@/state/tenantStore';
 import { type SlugAvailability, type TenantType } from '@/types/db';
 
@@ -34,6 +35,20 @@ export default function ClaimSlugScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const createTenant = useTenantStore((s) => s.createTenant);
+  const session = useAuthStore((s) => s.session);
+
+  // Defensive guard: claim-slug requires a real Supabase session. Without
+  // one the Edge Function call fails at the API gateway with
+  // UNAUTHORIZED_INVALID_JWT_FORMAT (publishable key in the Authorization
+  // header instead of a user JWT). Bounce to sign-in with a return_to.
+  useEffect(() => {
+    if (!session) {
+      router.replace({
+        pathname: '/(auth)/sign-in',
+        params: { return_to: '/(onboarding)/claim-slug' },
+      });
+    }
+  }, [session]);
 
   const [slug, setSlug] = useState('');
   const [name, setName] = useState('');
@@ -124,8 +139,14 @@ export default function ClaimSlugScreen() {
       } else if (err instanceof SlugReservedError) {
         setSubmitError(t('onboarding.slugReserved'));
       } else {
+        // Surface the Edge Function's `error: <code>` + `detail: <msg>` so
+        // setup issues (e.g. migration not applied, function not redeployed)
+        // are visible without needing to attach a debugger.
+        if (err instanceof Error) console.warn('[claim-slug]', err.message);
         setSubmitError(
-          __DEV__ && err instanceof Error ? err.message : t('errors.generic'),
+          err instanceof Error && err.message
+            ? `${t('errors.generic')} (${err.message})`
+            : t('errors.generic'),
         );
       }
     } finally {
