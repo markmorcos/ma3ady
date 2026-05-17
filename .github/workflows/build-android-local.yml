@@ -27,6 +27,16 @@ jobs:
       auth-redirect-uri: ma3ady://auth/callback
       default-locale: en
       preflight-script: scripts/assert-real-dispatchers.js
+      # Bind the build job inside the reusable workflow to the matching
+      # GitHub Environment so EXPO_PUBLIC_SUPABASE_URL / ANON_KEY (and
+      # any other env-scoped secrets) resolve to the right Supabase
+      # project. We can't set `environment:` on this `uses:` job
+      # directly — GitHub rejects it on caller jobs that call reusable
+      # workflows — so the input gets threaded through and the called
+      # workflow sets `environment:` on the actual build job. dev +
+      # preview profiles both target the preview env (no separate dev
+      # Supabase project exists; preview is the shared internal target).
+      environment: ${{ inputs.profile == 'production' && 'production' || 'preview' }}
       # Production mirrors eas.json's production block: real dispatchers
       # are already on for every CI-built APK (the preflight asserts it),
       # and the error sample rate drops from 1.0 (full capture for
@@ -36,10 +46,10 @@ jobs:
         EXPO_PUBLIC_WHATSAPP_DISPATCHER=real
         EXPO_PUBLIC_PUSH_DISPATCHER=real
         EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=${{ inputs.profile == 'production' && '0.1' || '1.0' }}
-    secrets:
-      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
-      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    # `inherit` propagates every caller secret (repo-level + the bound
+    # environment's secrets) to the reusable workflow. The called job's
+    # `environment:` binding then makes `${{ secrets.X }}` inside the
+    # workflow resolve env-scoped values first, with repo-level as
+    # fallback — which is what lets the production build see production
+    # Supabase config and the preview build see preview Supabase config.
+    secrets: inherit
