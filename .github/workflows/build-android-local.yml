@@ -1,4 +1,4 @@
-name: Build Android APK (local, no EAS)
+name: Build Android (local, no EAS)
 on:
   workflow_dispatch:
     inputs:
@@ -7,7 +7,13 @@ on:
         required: true
         default: preview
         type: choice
-        options: [development, preview]
+        options: [development, preview, production]
+      artifact-type:
+        description: 'Output: apk (sideload), aab (Play Console), or both'
+        required: true
+        default: apk
+        type: choice
+        options: [apk, aab, both]
 jobs:
   build:
     uses: markmorcos/build-tooling/.github/workflows/build-android.yml@v1
@@ -15,16 +21,21 @@ jobs:
       contents: write
     with:
       profile: ${{ inputs.profile }}
+      artifact-type: ${{ inputs.artifact-type }}
       app-slug: ma3ady
       enable-dev-tools: ${{ inputs.profile == 'development' }}
       auth-redirect-uri: ma3ady://auth/callback
       default-locale: en
       preflight-script: scripts/assert-real-dispatchers.js
+      # Production mirrors eas.json's production block: real dispatchers
+      # are already on for every CI-built APK (the preflight asserts it),
+      # and the error sample rate drops from 1.0 (full capture for
+      # internal preview/dev) to 0.1 (matches eas.json prod).
       extra-env: |
         EXPO_PUBLIC_EMAIL_DISPATCHER=real
         EXPO_PUBLIC_WHATSAPP_DISPATCHER=real
         EXPO_PUBLIC_PUSH_DISPATCHER=real
-        EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=1.0
+        EXPO_PUBLIC_CLIENT_ERROR_SAMPLE_RATE=${{ inputs.profile == 'production' && '0.1' || '1.0' }}
     secrets:
       EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
