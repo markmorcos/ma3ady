@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="LOCALE" dir="DIR">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="shared.css" />
+  <title>ma3ady · Reminders</title>
+</head>
+<body>
+  <div class="banner">
+    <span class="wordmark">ma3ady</span>
+    <span class="caption" data-i18n="caption">Reminders that arrive on time</span>
+  </div>
+
+  <div class="status-bar">
+    <span class="mono">9:41</span>
+    <span class="right">
+      <svg viewBox="0 0 24 24"><path d="M4 12h16v2H4zm0-4h16v2H4zm0 8h10v2H4z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M2 8h2v8H2zm4-3h2v14H6zm4 5h2v9h-2zm4-7h2v16h-2zm4 4h2v12h-2z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M17 6H7c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-1 8H8v-1h8v1zm0-3H8v-1h8v1z"/></svg>
+    </span>
+  </div>
+
+  <main class="screen bg-reminders">
+    <header>
+      <h1 class="h1" data-i18n="hi">Hi, Sara</h1>
+    </header>
+
+    <section class="next-card">
+      <span class="eyebrow" data-i18n="nextLabel">Your next appointment</span>
+      <span class="title" data-i18n="nextSvc">Colour &amp; cut</span>
+      <span class="meta" data-i18n="nextMeta">Cleo's Cut · Tue 19 May, 11:00</span>
+      <span class="pill" data-i18n="nextCountdown">in 21 hours</span>
+    </section>
+
+    <div>
+      <p class="section-label" data-i18n="earlier" style="margin-bottom: 20px;">Earlier today</p>
+      <ul class="notif-list" style="list-style:none">
+        <li class="notif kind-ok">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+          </span>
+          <div class="body">
+            <span class="title" data-i18n="n1Title">Booking confirmed</span>
+            <span class="desc" data-i18n="n1Desc">Cleo's Cut · Colour &amp; cut at 11:00 tomorrow.</span>
+            <span class="when" data-i18n="n1When">2h ago</span>
+          </div>
+        </li>
+        <li class="notif kind-info">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 6V2L8 6l4 4V7c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6H4c0 4.4 3.6 8 8 8s8-3.6 8-8-3.6-8-8-8z"/></svg>
+          </span>
+          <div class="body">
+            <span class="title" data-i18n="n2Title">Reminder · 24h</span>
+            <span class="desc" data-i18n="n2Desc">See you tomorrow at 11:00. Tap to manage.</span>
+            <span class="when" data-i18n="n2When">just now</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <p class="section-label" data-i18n="yesterday" style="margin-bottom: 20px;">Yesterday</p>
+      <ul class="notif-list" style="list-style:none">
+        <li class="notif kind-warn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          </span>
+          <div class="body">
+            <span class="title" data-i18n="n3Title">Reminder · 2h</span>
+            <span class="desc" data-i18n="n3Desc">Heading to Cleo's Cut? Bring your discount code.</span>
+            <span class="when" data-i18n="n3When">yesterday</span>
+          </div>
+        </li>
+        <li class="notif kind-rate">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 17.3 6.2 3.7-1.7-7 5.5-4.8-7.2-.6L12 1.8 9.2 8.6 2 9.2l5.5 4.8-1.7 7z"/></svg>
+          </span>
+          <div class="body">
+            <span class="title" data-i18n="n4Title">How did it go?</span>
+            <span class="desc" data-i18n="n4Desc">Tap to rate your last visit.</span>
+            <span class="when" data-i18n="n4When">yesterday</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </main>
+
+  <div class="fab">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5h6L11 22l8.5-11.5h-6L13 2z"/></svg>
+  </div>
+
+  <div class="gesture-bar"></div>
+
+  <script>
+    const i18n = {
+      en: {
+        caption: 'Reminders that arrive on time',
+        hi: 'Hi, Sara',
+        nextLabel: 'Your next appointment',
+        nextSvc: 'Colour & cut',
+        nextMeta: "Cleo's Cut · Tue 19 May, 11:00",
+        nextCountdown: 'in 21 hours',
+        earlier: 'Earlier today', yesterday: 'Yesterday',
+        n1Title: 'Booking confirmed',
+        n1Desc: "Cleo's Cut · Colour & cut at 11:00 tomorrow.",
+        n1When: '2h ago',
+        n2Title: 'Reminder · 24h',
+        n2Desc: 'See you tomorrow at 11:00. Tap to manage.',
+        n2When: 'just now',
+        n3Title: 'Reminder · 2h',
+        n3Desc: "Heading to Cleo's Cut? Bring your discount code.",
+        n3When: 'yesterday',
+        n4Title: 'How did it go?',
+        n4Desc: 'Tap to rate your last visit.',
+        n4When: 'yesterday',
+      },
+      ar: {
+        caption: 'تذكيرات في وقتها',
+        hi: 'أهلاً، سارة',
+        nextLabel: 'موعدك القادم',
+        nextSvc: 'صبغ وقص',
+        nextMeta: 'صالون كليو · الثلاثاء 19 مايو، 11:00',
+        nextCountdown: 'خلال 21 ساعة',
+        earlier: 'سابقاً اليوم', yesterday: 'أمس',
+        n1Title: 'تم تأكيد الحجز',
+        n1Desc: 'صالون كليو · صبغ وقص بكرة الساعة 11:00.',
+        n1When: 'من ساعتين',
+        n2Title: 'تذكير · 24 ساعة',
+        n2Desc: 'نشوفك بكرة الساعة 11:00. اضغط للإدارة.',
+        n2When: 'الآن',
+        n3Title: 'تذكير · ساعتين',
+        n3Desc: 'رايح صالون كليو؟ خد كود الخصم معاك.',
+        n3When: 'أمس',
+        n4Title: 'إيه رأيك؟',
+        n4Desc: 'اضغط لتقييم آخر زيارة.',
+        n4When: 'أمس',
+      },
+    };
+    const lang = document.documentElement.lang;
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const k = el.dataset.i18n;
+      if (i18n[lang] && i18n[lang][k]) el.textContent = i18n[lang][k];
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="LOCALE" dir="DIR">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="shared.css" />
+  <title>ma3ady · Today</title>
+</head>
+<body>
+  <div class="banner">
+    <span class="wordmark">ma3ady</span>
+    <span class="caption" data-i18n="caption">Your day, one screen</span>
+  </div>
+
+  <div class="status-bar">
+    <span class="mono">9:41</span>
+    <span class="right">
+      <svg viewBox="0 0 24 24"><path d="M4 12h16v2H4zm0-4h16v2H4zm0 8h10v2H4z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M2 8h2v8H2zm4-3h2v14H6zm4 5h2v9h-2zm4-7h2v16h-2zm4 4h2v12h-2z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M17 6H7c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-1 8H8v-1h8v1zm0-3H8v-1h8v1zm0-3H8V7h8v1zm5 3v2h1v-2h-1z"/></svg>
+    </span>
+  </div>
+
+  <main class="screen bg-app">
+    <header>
+      <h1 class="h1" data-i18n="tenant">Cleo's Cut</h1>
+      <p class="h-sub" data-i18n="subtitle">Today at a glance</p>
+    </header>
+
+    <section class="stat-tiles">
+      <div class="stat-tile tile-blue">
+        <span class="big">7</span>
+        <span class="label" data-i18n="today">Today</span>
+      </div>
+      <div class="stat-tile tile-pink">
+        <span class="big">23</span>
+        <span class="label" data-i18n="thisWeek">This week</span>
+      </div>
+      <div class="stat-tile tile-lav">
+        <span class="big">4%</span>
+        <span class="label" data-i18n="noShow">No-show</span>
+        <span class="sub" data-i18n="last30">last 30d</span>
+      </div>
+    </section>
+
+    <div>
+      <p class="section-label" data-i18n="schedule" style="margin-bottom: 24px;">Today's schedule</p>
+      <ul class="timeline" style="list-style:none">
+        <li class="timeline-row">
+          <span class="timeline-time mono">09:00</span>
+          <div class="timeline-card">
+            <div class="who">
+              <span class="name" data-i18n="r1Name">Yara H.</span>
+              <span class="service" data-i18n="r1Svc">Beard trim</span>
+            </div>
+            <span class="badge badge-success" data-i18n="done">Done</span>
+          </div>
+        </li>
+        <li class="timeline-row">
+          <span class="timeline-time mono">10:00</span>
+          <div class="timeline-card">
+            <div class="who">
+              <span class="name" data-i18n="r2Name">Adam S.</span>
+              <span class="service" data-i18n="r2Svc">Signature cut</span>
+            </div>
+            <span class="badge badge-success" data-i18n="done">Done</span>
+          </div>
+        </li>
+        <li class="timeline-row">
+          <span class="timeline-time mono now">11:00</span>
+          <div class="timeline-card is-now">
+            <div class="who">
+              <span class="name" data-i18n="r3Name">Maya R.</span>
+              <span class="service" data-i18n="r3Svc">Colour &amp; cut</span>
+            </div>
+            <span class="badge badge-now" data-i18n="now">Now</span>
+          </div>
+        </li>
+        <li class="timeline-row">
+          <span class="timeline-time mono">13:00</span>
+          <div class="timeline-card">
+            <div class="who">
+              <span class="name" data-i18n="r4Name">Omar K.</span>
+              <span class="service" data-i18n="r4Svc">Signature cut</span>
+            </div>
+            <span class="badge badge-warning" data-i18n="pending">Pending</span>
+          </div>
+        </li>
+        <li class="timeline-row">
+          <span class="timeline-time mono">14:00</span>
+          <div class="timeline-card">
+            <div class="who">
+              <span class="name" data-i18n="r5Name">Layla M.</span>
+              <span class="service" data-i18n="r5Svc">Kids' cut</span>
+            </div>
+            <span class="badge badge-info" data-i18n="confirmed">Confirmed</span>
+          </div>
+        </li>
+        <li class="timeline-row">
+          <span class="timeline-time mono">16:00</span>
+          <div class="timeline-card">
+            <div class="who">
+              <span class="name" data-i18n="r6Name">Hadi A.</span>
+              <span class="service" data-i18n="r6Svc">Signature cut</span>
+            </div>
+            <span class="badge badge-info" data-i18n="confirmed">Confirmed</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </main>
+
+  <div class="fab">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5h6L11 22l8.5-11.5h-6L13 2z"/></svg>
+  </div>
+
+  <div class="gesture-bar"></div>
+
+  <script>
+    const i18n = {
+      en: {
+        caption: 'Your day, one screen',
+        tenant: "Cleo's Cut", subtitle: 'Today at a glance',
+        today: 'Today', thisWeek: 'This week', noShow: 'No-show', last30: 'last 30d',
+        schedule: "Today's schedule",
+        done: 'Done', now: 'Now', pending: 'Pending', confirmed: 'Confirmed',
+        r1Name: 'Yara H.', r1Svc: 'Beard trim',
+        r2Name: 'Adam S.', r2Svc: 'Signature cut',
+        r3Name: 'Maya R.', r3Svc: 'Colour & cut',
+        r4Name: 'Omar K.', r4Svc: 'Signature cut',
+        r5Name: 'Layla M.', r5Svc: "Kids' cut",
+        r6Name: 'Hadi A.', r6Svc: 'Signature cut',
+      },
+      ar: {
+        caption: 'يومك في شاشة واحدة',
+        tenant: 'صالون كليو', subtitle: 'يومك في لمحة',
+        today: 'اليوم', thisWeek: 'الأسبوع', noShow: 'عدم حضور', last30: 'آخر 30 يوم',
+        schedule: 'جدول اليوم',
+        done: 'تم', now: 'الآن', pending: 'قيد التأكيد', confirmed: 'مؤكد',
+        r1Name: 'يارا ح.', r1Svc: 'تهذيب لحية',
+        r2Name: 'آدم س.', r2Svc: 'قصة شعر',
+        r3Name: 'مايا ر.', r3Svc: 'صبغ وقص',
+        r4Name: 'عمر ك.', r4Svc: 'قصة شعر',
+        r5Name: 'ليلى م.', r5Svc: 'قصة أطفال',
+        r6Name: 'هادي أ.', r6Svc: 'قصة شعر',
+      },
+    };
+    const lang = document.documentElement.lang;
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const k = el.dataset.i18n;
+      if (i18n[lang] && i18n[lang][k]) el.textContent = i18n[lang][k];
+    });
+  </script>
+</body>
+</html>
