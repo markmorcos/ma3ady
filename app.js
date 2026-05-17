@@ -176,7 +176,7 @@
 
     // Always include the buckets that are present, plus "all" pinned first.
     const buckets = ['all'].concat(
-      ['preview', 'development', 'other'].filter(function (k) {
+      ['production', 'preview', 'development', 'other'].filter(function (k) {
         return counts[k] > 0;
       }),
     );
@@ -238,7 +238,7 @@
     const profile = document.createElement('span');
     profile.className =
       'card-profile card-profile-' +
-      (['preview', 'development'].indexOf(b.profile) >= 0
+      (['preview', 'development', 'production'].indexOf(b.profile) >= 0
         ? b.profile
         : 'other');
     profile.textContent = b.profile;

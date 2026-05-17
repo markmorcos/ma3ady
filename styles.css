@@ -27,6 +27,8 @@
   --chip-preview-fg: #0969da;
   --chip-development-bg: #fff8c5;
   --chip-development-fg: #7d4e00;
+  --chip-production-bg: #dafbe1;
+  --chip-production-fg: #116329;
   --chip-other-bg: #eaeef2;
   --chip-other-fg: #59636e;
 
@@ -66,6 +68,8 @@
     --chip-preview-fg: #79c0ff;
     --chip-development-bg: #3d2e00;
     --chip-development-fg: #f0b15a;
+    --chip-production-bg: #0f2e1a;
+    --chip-production-fg: #56d364;
     --chip-other-bg: #21262d;
     --chip-other-fg: #9198a1;
 
@@ -249,6 +253,11 @@ main {
 .card-profile-development {
   background: var(--chip-development-bg);
   color: var(--chip-development-fg);
+}
+
+.card-profile-production {
+  background: var(--chip-production-bg);
+  color: var(--chip-production-fg);
 }
 
 .card-profile-other {
