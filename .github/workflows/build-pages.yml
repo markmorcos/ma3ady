@@ -13,6 +13,16 @@ name: Publish build pages
 on:
   workflow_dispatch: {}
 
+# Required by the reusable workflow: it commits the rendered dashboard to
+# this repo's `gh-pages` branch. Reusable workflows inherit at most the
+# caller's permissions, so declaring `contents: write` here is mandatory
+# even though the called workflow also declares it on its own job — repos
+# whose default GITHUB_TOKEN is `contents: read` (the GitHub default
+# since 2023) otherwise fail with "is only allowed 'contents: read'"
+# before the job even starts.
+permissions:
+  contents: write
+
 jobs:
   publish:
     uses: markmorcos/build-tooling/.github/workflows/publish-build-pages.yml@v1
