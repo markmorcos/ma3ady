@@ -50,14 +50,19 @@ already depends on playwright.
 Output paths (overwritten on each run):
 
 ```
-assets/store/play-feature-graphic.png         (1024×500)
-assets/store/screenshots/play/en/01-today.png
-assets/store/screenshots/play/en/02-booking.png
-assets/store/screenshots/play/en/03-reminders.png
-assets/store/screenshots/play/ar/01-today.png
-assets/store/screenshots/play/ar/02-booking.png
-assets/store/screenshots/play/ar/03-reminders.png
+assets/store/play-feature-graphic.png                 (1024×500)
+assets/store/screenshots/play/{en,ar}/0N-*.png         (1080×2160, phone)
+assets/store/screenshots/play/{en,ar}/tablet-7/0N-*.png   (1200×1920, 7" tablet)
+assets/store/screenshots/play/{en,ar}/tablet-10/0N-*.png  (1600×2560, 10" tablet)
 ```
+
+Tablet variants composite the rendered phone screenshot onto a
+cream-with-soft-teal-gradient canvas with a drop shadow. The app is
+mobile-first (`openspec/project.md §2`) — there's no separate tablet
+UI to capture — so this composite honestly represents "your phone app
+on a tablet". Skip the tablet slots in Play Console and Play pillarboxes
+the phone shots on tablet previews with grey bars; supplying these
+keeps the listing looking deliberate on tablet form factors.
 
 ## Adding a fourth screenshot
 
