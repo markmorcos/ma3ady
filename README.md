@@ -4,6 +4,8 @@ Multi-tenant appointment booking, mobile-first. Built with Expo + Supabase.
 
 > **Source of truth**: see [`openspec/project.md`](openspec/project.md) before reading code or proposing changes. Pending change proposals live under `openspec/changes/`.
 
+> **Builds dashboard**: every Android release lives at <https://markmorcos.github.io/ma3ady/> — scan the QR with an Android device to install the latest preview build straight from GitHub Releases.
+
 ## Status
 
 All v1 capabilities have landed. Daily development now runs on an **Expo dev client** (`expo-notifications` and other native modules require it; the legacy Expo Go path no longer boots the full feature set).

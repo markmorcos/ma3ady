@@ -1,0 +1,20 @@
+name: Publish build pages
+
+# Publishes the build dashboard from markmorcos/build-tooling to this
+# repo's `gh-pages` branch. The page is fully client-side (queries the
+# public Releases API on every load), so this workflow only needs to run
+# when the template in build-tooling changes — not on every release.
+#
+# One-time setup after the first successful run:
+#   Settings → Pages → Source = Deploy from a branch
+#                      Branch = gh-pages, folder = / (root)
+# The dashboard then lives at https://markmorcos.github.io/ma3ady/
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  publish:
+    uses: markmorcos/build-tooling/.github/workflows/publish-build-pages.yml@v1
+    with:
+      app-slug: ma3ady
