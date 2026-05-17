@@ -170,147 +170,114 @@ The source SVG marks are in `assets/branding/`:
 
 ## 5. Feature graphic (Play Store)
 
-**Required by Play:** 1024×500 PNG/JPG, no alpha. No text rendered
-inside (Play overlays the title), but a hero illustration is expected.
+**Required by Play:** 1024×500 PNG, no alpha.
 
-**Not produced yet.** Recommended composition (matches the marketing
-hero on `ma3ady.com`):
-
-- Background: `brand.500` teal gradient → light teal bottom-right
-- Left third: white clock mark from `assets/branding/mark.svg`, scaled
-  to ~340px tall
-- Right two-thirds: cropped phone frame showing the **Today** screen
-  (`tenant-landing/public/marketing-shots/today.png`) at 9:19, angled
-  ~10° clockwise, drop shadow
-- No copy in-image (Play adds the title overlay)
-
-Deliverable path: `assets/store/play-feature-graphic.png`
+**Done:** `assets/store/play-feature-graphic.png` — white clock mark +
+`ma3ady` wordmark + "Booking, simplified." tagline on the teal brand
+gradient. Generated from `scripts/store-assets/feature-graphic.html`
+via headless Chromium; re-run `node scripts/store-assets/capture.mjs`
+to regenerate if the brand mark or tagline changes.
 
 ---
 
 ## 6. Phone screenshots
 
-### Play Store (Android)
+**Done.** Six 1080×2160 PNGs under
+`assets/store/screenshots/play/{en,ar}/`. Each combines a teal
+marketing banner with caption + wordmark on top, the device status
+bar, and a content mock of the named screen. Generated from the HTML
+templates in `scripts/store-assets/` — re-run
+`node scripts/store-assets/capture.mjs` after editing copy or layout.
 
-- **Spec:** 2–8 screenshots, **9:19** portrait, 1080×2400 recommended,
-  PNG or JPG, max 8 MB each.
-- **What exists:** three pure-mockup shots at 412×870 under
-  `tenant-landing/public/marketing-shots/`. These are content mocks, not
-  device frames, and the resolution is below Play's minimum 1080px
-  short edge.
+| # | File                  | Screen                       | EN caption                       | AR caption                  |
+| - | --------------------- | ---------------------------- | -------------------------------- | --------------------------- |
+| 1 | `01-today.png`        | Today (admin)                | "Your day, one screen"           | "يومك في شاشة واحدة"        |
+| 2 | `02-booking.png`      | Public booking — slot picker | "Customers book in two taps"     | "العملاء يحجزون بنقرتين"     |
+| 3 | `03-reminders.png`    | Customer reminders feed      | "Reminders that arrive on time"  | "تذكيرات في وقتها"           |
 
-**Two ways forward (pick one):**
+**Why 1080×2160 and not 1080×2400 / 1080×2280:** Play Console rejects
+screenshots where the longer side is more than 2× the shorter side.
+1080×2160 sits exactly at the 1:2 limit and renders large enough on
+modern phone-shaped previews in Play search results without losing
+content to crop.
 
-1. **Re-render the existing mockups at device size** (cheapest):
-   the marketing shots were generated via Playwright/Chromium at
-   `clip: { 0, 0, 412, 870 }` per the commit message of #6 in the git
-   log. Re-run with `clip: { 0, 0, 1080, 2280 }` and
-   `deviceScaleFactor: 2` to land the right pixel dimensions. The HTML
-   source for those routes was deleted before commit — needs to be
-   recreated under `tenant-landing/src/app/marketing-shots/` with the
-   same M3 markup, then captured.
-
-2. **Capture real screenshots from a release APK** (highest quality):
-   install the production APK on a 1080×2400 Pixel emulator, navigate
-   to representative screens, capture via `adb exec-out screencap`, run
-   each through a device-frame compositor (e.g. `device-frame` or
-   Figma frames). Slower but the shots look real, not mocked.
-
-**Recommended six-shot story (same order for both stores):**
-
-| # | Screen                         | Caption (en, ≤30 chars)        | Caption (ar)            |
-| - | ------------------------------ | ------------------------------ | ----------------------- |
-| 1 | Today, admin view              | `Your day, one screen`         | `يومك في شاشة واحدة`    |
-| 2 | Public booking — slot picker   | `Customers book in two taps`   | `العملاء يحجزون بنقرتين` |
-| 3 | Heatmap availability editor    | `Set hours by tapping cells`   | `حدد ساعاتك بالنقر`     |
-| 4 | Reminders / notifications      | `Reminders arrive on time`     | `تذكيرات في الوقت`      |
-| 5 | Manage booking (guest view)    | `Cancel without an account`    | `إلغاء بدون حساب`       |
-| 6 | Arabic-RTL admin Today         | `Bilingual, RTL-first`         | `ثنائي اللغة، RTL`      |
-
-Deliverable folder: `assets/store/screenshots/play/{en,ar}/01..06.png`
-
-### App Store (iOS)
-
-- **Spec:** required at 6.7" iPhone (1290×2796) and 6.5" iPhone
-  (1242×2688). 5.5" 1242×2208 is no longer mandatory but is still
-  accepted as a fallback. Apple uses the 6.7" set on iPad listings too
-  if no iPad-specific shots are supplied.
-- **Source same six screens as Play** but render at 1290×2796 with the
-  iOS status bar (notch-aware).
-
-Deliverable folder: `assets/store/screenshots/appstore/{en,ar}/01..06.png`
+Three screenshots is the floor Play accepts (min 2, max 8) and it's
+enough for a strong v1 listing. To expand the carousel later — a
+heatmap availability shot, a manage-booking shot, a tablet split-view
+— add a new HTML template under `scripts/store-assets/`, register it
+in `capture.mjs`'s `SCREENS` array, and re-run.
 
 ---
 
 ## 7. Optional but valuable
 
 - **Promo video (Play Store)** — 30 s YouTube link. Skip for v1.
-- **App preview video (App Store)** — 15–30 s, no audio. Skip for v1.
-- **iPad screenshots** — Apple uses the iPhone 6.7" set as fallback.
-  Skip until tablet UI lands.
 
 ---
 
 ## 8. Store-listing metadata that's not copy
 
-These are checkbox / dropdown answers you'll fill in the Console / App
-Store Connect forms. Stating my best guesses so you can correct them.
+Checkbox / dropdown answers you'll fill in the Play Console. Stating
+my best guesses so you can correct them.
 
-| Field                       | Play Store answer                                 | App Store answer                                       |
-| --------------------------- | ------------------------------------------------- | ------------------------------------------------------ |
-| Category (primary)          | Productivity                                      | Productivity                                           |
-| Category (secondary)        | Business                                          | Business                                               |
-| Content rating              | Everyone (no UGC, no ads, no in-app purchase yet) | 4+ (same reasoning)                                    |
-| Contains ads                | No                                                | No                                                     |
-| In-app purchases            | No (yet — flat monthly later)                     | No                                                     |
-| Target audience             | 18+ (business tool)                               | 4+ functionally; positioned at business owners         |
-| Privacy policy URL          | `https://ma3ady.com/privacy`                      | `https://ma3ady.com/privacy`                           |
-| Support email               | `<TBD: support@ma3ady.com>`                       | `<TBD: support@ma3ady.com>`                            |
-| Marketing URL               | `https://ma3ady.com`                              | `https://ma3ady.com`                                   |
-| Developer name              | `<TBD: legal entity that owns the app>`           | `<TBD: same — must match Apple Developer enrollment>`  |
-| Data safety / privacy nutrition | See §3 — collects name, email, optional phone, no trackers | Same                                                   |
+| Field                       | Play Store answer                                 |
+| --------------------------- | ------------------------------------------------- |
+| Category (primary)          | Productivity                                      |
+| Category (secondary)        | Business                                          |
+| Content rating              | Everyone (no UGC, no ads, no in-app purchase yet) |
+| Contains ads                | No                                                |
+| In-app purchases            | No (yet — flat monthly later)                     |
+| Target audience             | 18+ (business tool)                               |
+| Privacy policy URL          | `https://ma3ady.com/privacy`                      |
+| Support email               | `<TBD: support@ma3ady.com>`                       |
+| Marketing URL               | `https://ma3ady.com`                              |
+| Developer name              | `<TBD: legal entity that owns the app>`           |
+| Data safety                 | See §3 — collects name, email, optional phone, no trackers |
 
 ---
 
 ## 9. Deliverables checklist
 
-Status of every artifact a submission needs.
+Status of every artifact a Play submission needs.
 
-| Artifact                                    | Status        |
-| ------------------------------------------- | ------------- |
-| App icon 512×512 (Play)                     | ✅ `assets/store/icon-512.png` |
-| App icon 1024×1024 (App Store)              | ❌ Re-export from `assets/branding/mark.svg` |
-| Adaptive icon foreground (Android, in app)  | ✅ `assets/adaptive-icon.png` (already in `app.json`) |
-| Splash image (in app)                       | ✅ `assets/splash.png` |
-| App name (en + ar)                          | ✅ §1          |
-| Short description (en + ar)                 | ✅ §1          |
-| Full description (en + ar)                  | ✅ §2, §3      |
-| Promotional text (iOS, en + ar)             | ✅ §1          |
-| Keywords (App Store)                        | ✅ §1          |
-| Play feature graphic 1024×500               | ❌ See §5      |
-| Phone screenshots × 6 × 2 locales (Play)    | ❌ See §6      |
-| Phone screenshots × 6 × 2 locales (App Store) | ❌ See §6   |
-| Privacy policy URL                          | ⚠️ Page exists at `ma3ady.com/privacy` (per marketing-site spec); confirm it's reachable in prod |
-| Support email                               | ❌ `<TBD>`     |
-| Developer / publisher entity                | ❌ `<TBD>`     |
-| Apple Team ID wired into `apple-app-site-association` | ❌ Currently `REPLACE_TEAM_ID` in `tenant-landing/src/app/apple-app-site-association/route.ts` — replace before App Store submission so Universal Links actually verify |
-| Play App Signing fingerprint added to `assetlinks.json` | ⚠️ Only the local-keystore fingerprint is in `tenant-landing/src/app/.well-known/assetlinks.json` today. After uploading the first AAB, Play generates its own signing key — grab that SHA-256 from Play Console → App integrity → App signing and append it as a second entry |
+| Artifact                                                 | Status |
+| -------------------------------------------------------- | ------ |
+| App icon 512×512 (Play hi-res)                           | ✅ `assets/store/icon-512.png` |
+| Adaptive icon foreground (Android in-app, ships in APK)  | ✅ `assets/adaptive-icon.png` (wired in `app.json`) |
+| Splash image (in-app)                                    | ✅ `assets/splash.png` |
+| App name (en + ar)                                       | ✅ §1 |
+| Short description (en + ar)                              | ✅ §1 |
+| Full description (en + ar)                               | ✅ §2, §3 |
+| Play feature graphic 1024×500                            | ✅ `assets/store/play-feature-graphic.png` |
+| Phone screenshots × 3 × 2 locales (1080×2160 each)       | ✅ `assets/store/screenshots/play/{en,ar}/0{1,2,3}-*.png` |
+| Privacy policy URL                                       | ⚠️ Page exists at `ma3ady.com/privacy` per marketing-site spec; confirm it's reachable in prod before submission |
+| Support email                                            | ❌ `<TBD>` |
+| Developer / publisher entity                             | ❌ `<TBD>` |
+| Play App Signing fingerprint added to `assetlinks.json`  | ⚠️ Only the local-keystore fingerprint is in `tenant-landing/src/app/.well-known/assetlinks.json` today. After uploading the first AAB, Play generates its own upload-key SHA-256 — grab it from Play Console → App integrity → App signing and append as a second entry so Android App Links keep verifying for Play-installed users |
 
 ---
 
-## 10. What I'd do next, in order
+## 10. What's left for you to do
 
-1. Decide on publisher entity + support email — both stores ask up-front
-   and you can't ship without them.
-2. Re-export icon at 1024×1024 from `assets/branding/mark.svg`.
-3. Recreate the three preview routes under
-   `tenant-landing/src/app/marketing-shots/` (HTML mocks that were
-   deleted in commit eb348797), re-run Playwright at 1080×2400 to
-   produce device-sized PNGs for the six-screen story in §6. Capture
-   each in both `en` and `ar` (RTL adds the Arabic-first variant).
-4. Compose the Play feature graphic per §5 (Figma / single-file
-   one-shot is fine — it's static).
-5. Replace `REPLACE_TEAM_ID` in `apple-app-site-association` once Apple
-   Developer enrollment is finalized.
-6. Submit. Expect Play review in ~1–3 days, App Store in ~1–2 days
-   first review.
+1. Decide on publisher entity + support email — Play asks for both
+   up-front and you can't submit without them. Fill the `<TBD>`s in §1
+   and §8.
+2. Confirm `https://ma3ady.com/privacy` is reachable in production (or
+   tell me what URL to point Play at).
+3. Submit through Play Console:
+   - Upload the AAB (current production build flow already produces
+     it via `build-android-local.yml` with `artifact-type: both`).
+   - Paste app name / short / full description from §1–§3.
+   - Upload `assets/store/icon-512.png` as the hi-res icon.
+   - Upload `assets/store/play-feature-graphic.png` as the feature
+     graphic.
+   - Upload the three screenshots under
+     `assets/store/screenshots/play/en/` in order.
+   - In the localizations panel, add Arabic and upload the matching
+     three from `assets/store/screenshots/play/ar/` plus the Arabic
+     copy from §3.
+4. After Play approves the upload key, append the upload-key SHA-256
+   to `tenant-landing/src/app/.well-known/assetlinks.json` and
+   redeploy tenant-landing so Android App Links keep verifying for
+   Play-installed users.
+5. Submit for review. First review usually takes 1–3 days.
