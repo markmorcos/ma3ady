@@ -1,11 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Text } from '@/components/Text';
 import { Logo } from '@/branding/Logo';
 import { useTheme } from '@/design/ThemeProvider';
+import { ReviewAccessSheet, type ReviewAccessSheetHandle } from '@/auth/ReviewAccessSheet';
 import { supabase } from '@/services/api/supabase';
 import { routeAfterSignIn } from '@/services/auth/postSignIn';
 import { useAuthStore } from '@/state/authStore';
@@ -32,6 +33,10 @@ export default function SignInScreen() {
   const signIn = useAuthStore((s) => s.signInWithGoogle);
   const showToast = useToastStore((s) => s.show);
   const [busy, setBusy] = useState(false);
+  // Hidden long-press handle for the app-store review backdoor. See
+  // ReviewAccessSheet for the rationale; deliberately unlabelled so the
+  // gesture isn't discoverable to end users.
+  const reviewAccessRef = useRef<ReviewAccessSheetHandle>(null);
 
   const onSignIn = async () => {
     setBusy(true);
@@ -60,7 +65,16 @@ export default function SignInScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.bg }]}>
       <View style={styles.brand}>
-        <Logo height={40} />
+        <Pressable
+          onLongPress={() => reviewAccessRef.current?.present()}
+          delayLongPress={2000}
+          // Stay in the existing accessibility tree as the wordmark itself
+          // — no hint about the gesture, since this path is reserved for
+          // store-review accounts that get explicit instructions out of band.
+          accessibilityRole="text"
+        >
+          <Logo height={40} />
+        </Pressable>
         <Text variant="caption" color="muted">
           {t('common.tagline')}
         </Text>
@@ -81,6 +95,11 @@ export default function SignInScreen() {
           onPress={() => router.replace('/')}
         />
       </View>
+
+      <ReviewAccessSheet
+        ref={reviewAccessRef}
+        onSignedIn={() => routeAfterSignIn(return_to)}
+      />
     </View>
   );
 }

@@ -1,4 +1,4 @@
-.PHONY: help install dev-up dev-down migrate-new migrate-up seed test-db expo-start expo-start-dev-client build-dev-ios build-dev-android build-preview build-prod lint typecheck test test-coverage secrets-validate secrets-sync-supabase secrets-sync-eas secrets-sync secrets-audit deploy-migrations deploy-functions deploy-supabase dns-check
+.PHONY: help install dev-up dev-down migrate-new migrate-up seed test-db expo-start expo-start-dev-client build-dev-ios build-dev-android build-preview build-prod lint typecheck test test-coverage secrets-validate secrets-sync-supabase secrets-sync-eas secrets-sync secrets-audit deploy-migrations deploy-functions deploy-supabase dns-check dev-users create-review-user
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}'
@@ -34,6 +34,9 @@ seed: ## Seed local DB (supabase/seed.sql)
 
 dev-users: ## Create the dev test users (dev-owner / dev-admin / dev-staff / dev-customer @example.com, password: devpassword)
 	bash scripts/dev/setup-dev-users.sh
+
+create-review-user: ## Provision/rotate the Play Store review account (needs SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY for the target env)
+	bash scripts/store/create-review-user.sh
 
 test-db: ## Run all SQL-based DB tests. Requires local Supabase to be up.
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/tenancy.test.sql
