@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--
+    Config baked in by publish-build-pages.yml. Defaults below let the page
+    render in local preview without the workflow having run yet.
+  -->
+  <meta name="x-build-repo" content="markmorcos/ma3ady" />
+  <meta name="x-app-slug" content="ma3ady" />
+  <title>ma3ady · builds</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <!-- qrcode-generator: pure JS, ~5kB, no DOM deps. Pin to a specific version. -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header class="hdr">
+    <h1>
+      <span class="hdr-app" id="app-name">ma3ady</span>
+      <span class="hdr-sep">/</span>
+      <span class="hdr-section">builds</span>
+    </h1>
+    <p class="hdr-meta">
+      Pulled live from
+      <a id="hdr-repo-link" href="#" target="_blank" rel="noopener">github.com/markmorcos/ma3ady/releases</a>
+    </p>
+  </header>
+
+  <nav class="filters" id="filters" aria-label="Filter builds by profile">
+    <!-- chips injected by app.js once releases are loaded -->
+  </nav>
+
+  <main id="main">
+    <p class="state state-loading" id="state-loading">Loading…</p>
+    <p class="state state-error" id="state-error" hidden></p>
+    <p class="state state-empty" id="state-empty" hidden>No releases yet.</p>
+    <ul class="grid" id="grid" hidden></ul>
+  </main>
+
+  <footer class="ftr">
+    <span>ma3ady build dashboard</span>
+    <span class="ftr-sep">·</span>
+    <a href="https://github.com/markmorcos/build-tooling" target="_blank" rel="noopener">
+      build-tooling
+    </a>
+  </footer>
+</body>
+</html>
