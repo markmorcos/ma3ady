@@ -16,6 +16,7 @@ import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
 import { AppointmentTimeline } from '@/features/admin/AppointmentTimeline';
 import { StatsCard } from '@/features/admin/StatsCard';
+import { appHost } from '@/services/appHost';
 import {
   getTenantStats,
   getTodayAppointments,
@@ -52,7 +53,7 @@ export default function AdminTodayScreen() {
 
   const onShare = async () => {
     if (!tenant) return;
-    const url = `https://app.ma3ady.com/t/${tenant.slug}`;
+    const url = `${appHost()}/t/${tenant.slug}`;
     try {
       await Share.share({
         message: t('admin.shareLinkMessage', { tenantName: tenant.name, url }),
