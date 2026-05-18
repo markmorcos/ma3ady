@@ -6,6 +6,7 @@ import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
+import { appHost } from '@/services/appHost';
 import { copyToClipboard } from '@/services/clipboard';
 import { useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
@@ -16,16 +17,19 @@ export default function JoinedScreen() {
   const tenant = useTenantStore((s) => s.tenants.find((tt) => tt.id === s.currentTenantId));
   const showToast = useToastStore((s) => s.show);
 
-  const url = tenant ? `app.ma3ady.com/t/${tenant.slug}` : 'ma3ady.com';
+  const shareUrl = tenant ? `${appHost()}/t/${tenant.slug}` : appHost();
+  // The pill in the hero shows the link without the `https://` prefix for
+  // visual density; share / copy actions get the full URL.
+  const displayUrl = shareUrl.replace(/^https?:\/\//, '');
 
   const onCopy = async () => {
-    await copyToClipboard(`https://${url}`);
+    await copyToClipboard(shareUrl);
     showToast({ kind: 'success', message: t('onboarding.joinedLinkCopied') });
   };
 
   const onShare = async () => {
     try {
-      await Share.share({ message: `https://${url}` });
+      await Share.share({ message: shareUrl });
     } catch {
       // user cancelled or sheet failed; nothing to do
     }
@@ -58,7 +62,7 @@ export default function JoinedScreen() {
           >
             <Icon name="globe" size={16} color="onPrimaryContainer" />
             <Text variant="labelLg" style={{ color: theme.colors.onPrimaryContainer }}>
-              {url}
+              {displayUrl}
             </Text>
           </View>
         </View>

@@ -13,6 +13,7 @@ import { Icon } from '@/components/Icon';
 import { Text } from '@/components/Text';
 import { TonalBlobs } from '@/components/TonalBlobs';
 import { useTheme } from '@/design/ThemeProvider';
+import { appHost } from '@/services/appHost';
 import { getService } from '@/services/api/services';
 import { getTenantBySlug } from '@/services/api/tenants';
 import { copyToClipboard } from '@/services/clipboard';
@@ -69,7 +70,7 @@ export default function ConfirmationScreen() {
   });
   const countdown = useCountdown(startsAt ?? '');
 
-  const manageUrl = token ? `https://app.ma3ady.com/manage/${token}` : null;
+  const manageUrl = token ? `${appHost()}/manage/${token}` : null;
 
   if (!tenant || !service || !startsAt) return null;
 
