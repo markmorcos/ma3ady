@@ -16,7 +16,7 @@ type Props = TextInputProps & {
   leadingIcon?: ReactNode;
   /** Trailing icon node — rendered inside the field on the end edge. */
   trailingIcon?: ReactNode;
-  /** Inline prefix text (e.g. `ma3ady.com/t/` for the slug input). */
+  /** Inline prefix text (e.g. `app.ma3ady.com/t/` for the slug input). */
   prefix?: string;
 };
 
