@@ -1,4 +1,4 @@
-.PHONY: help install dev-up dev-down migrate-new migrate-up seed test-db expo-start expo-start-dev-client build-dev-ios build-dev-android build-preview build-prod lint typecheck test test-coverage secrets-validate secrets-sync-supabase secrets-sync-eas secrets-sync secrets-audit deploy-migrations deploy-functions deploy-supabase dns-check dev-users create-review-user
+.PHONY: help install dev-up dev-down migrate-new migrate-up seed test-db expo-start expo-start-dev-client build-dev-ios build-dev-android build-preview build-prod lint typecheck test test-coverage secrets-validate secrets-sync-supabase secrets-sync-eas secrets-sync secrets-audit deploy-migrations deploy-functions deploy-supabase dns-check dev-users create-review-user seed-play-review
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}'
@@ -37,6 +37,14 @@ dev-users: ## Create the dev test users (dev-owner / dev-admin / dev-staff / dev
 
 create-review-user: ## Provision/rotate the Play Store review account (needs SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY for the target env)
 	bash scripts/store/create-review-user.sh
+
+seed-play-review: _require-ref ## Seed the play-review tenant w/ services + appointments. Run AFTER create-review-user. Usage: SUPABASE_PROJECT_REF=<prod-ref> make seed-play-review
+	@if [ -t 0 ] && [ "$$ASSUME_YES" != "1" ]; then \
+		read -p "Seed the play-review tenant in project $(SUPABASE_PROJECT_REF)? [y/N] " ans; \
+		if [ "$$ans" != "y" ] && [ "$$ans" != "Y" ]; then echo "Aborted."; exit 1; fi; \
+	fi
+	@pnpm exec supabase link --project-ref $(SUPABASE_PROJECT_REF) >/dev/null
+	@pnpm exec supabase db query --linked --file supabase/play-review-seed.sql
 
 test-db: ## Run all SQL-based DB tests. Requires local Supabase to be up.
 	psql "$(LOCAL_DB_URL)" -v ON_ERROR_STOP=1 -f supabase/tests/tenancy.test.sql
