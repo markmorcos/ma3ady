@@ -13,7 +13,7 @@ import { BrandColorPicker } from '@/design/BrandColorPicker';
 import { useTheme } from '@/design/ThemeProvider';
 import { supabase } from '@/services/api/supabase';
 import { useAuthStore } from '@/state/authStore';
-import { useTenantStore } from '@/state/tenantStore';
+import { isAdminRole, useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
 
 export default function AdminSettingsScreen() {
@@ -80,7 +80,7 @@ export default function AdminSettingsScreen() {
   });
 
   const role = tenant?.role;
-  const canEdit = role === 'owner' || role === 'admin';
+  const canEdit = isAdminRole(role);
 
   return (
     <ScrollView

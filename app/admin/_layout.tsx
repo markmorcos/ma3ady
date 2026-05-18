@@ -4,7 +4,7 @@ import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import { useTheme } from '@/design/ThemeProvider';
 import { useBootGate } from '@/hooks/useBootGate';
 import { useAuthStore } from '@/state/authStore';
-import { useCurrentRole } from '@/state/tenantStore';
+import { isStaffRole, useCurrentRole } from '@/state/tenantStore';
 
 export default function AdminLayout() {
   const theme = useTheme();
@@ -31,7 +31,7 @@ export default function AdminLayout() {
       <Redirect href={{ pathname: '/sign-in', params: { return_to: pathname } }} />
     );
   }
-  if (role && role !== 'owner' && role !== 'admin' && role !== 'staff') {
+  if (role && !isStaffRole(role)) {
     return <Redirect href="/" />;
   }
 

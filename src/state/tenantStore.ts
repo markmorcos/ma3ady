@@ -95,3 +95,29 @@ export function useCurrentRole(): TenantRole | null {
   if (!currentTenantId) return null;
   return tenants.find((t) => t.id === currentTenantId)?.role ?? null;
 }
+
+/**
+ * Role classification helpers. Single source of truth so callsites
+ * don't enumerate `role === 'owner' || role === 'admin' || ...` inline
+ * and drift apart when a new role lands.
+ *
+ * - `isStaffRole`  → can enter the /admin surface (owner / admin / staff).
+ * - `isAdminRole`  → can edit tenant config (owner / admin only).
+ * - `homeRouteForRole` → where the user should land after sign-in or
+ *   tenant switch given their role. Staff land on /admin; everyone
+ *   else (customer or unknown) lands on /.
+ */
+const STAFF_ROLES: ReadonlySet<TenantRole> = new Set(['owner', 'admin', 'staff']);
+const ADMIN_ROLES: ReadonlySet<TenantRole> = new Set(['owner', 'admin']);
+
+export function isStaffRole(role: TenantRole | null | undefined): boolean {
+  return role != null && STAFF_ROLES.has(role);
+}
+
+export function isAdminRole(role: TenantRole | null | undefined): boolean {
+  return role != null && ADMIN_ROLES.has(role);
+}
+
+export function homeRouteForRole(role: TenantRole | null | undefined): '/admin' | '/' {
+  return isStaffRole(role) ? '/admin' : '/';
+}

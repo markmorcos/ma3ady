@@ -17,7 +17,7 @@ import { useTheme } from '@/design/ThemeProvider';
 import { overlay } from '@/design/tokens';
 import { useAppStore } from '@/state/appStore';
 import { useAuthStore } from '@/state/authStore';
-import { useCurrentRole, useTenantStore } from '@/state/tenantStore';
+import { isStaffRole, useCurrentRole, useTenantStore } from '@/state/tenantStore';
 
 const SHOW_DEV_TOOLS = process.env.EXPO_PUBLIC_SHOW_DEV_TOOLS === '1';
 
@@ -49,7 +49,7 @@ export default function Home() {
     if (userId) void refreshTenants();
   }, [userId, refreshTenants]);
 
-  const isStaff = role === 'owner' || role === 'admin' || role === 'staff';
+  const isStaff = isStaffRole(role);
 
   // Gate the UI on boot completion so admins don't flash the customer
   // landing for a frame while their tenants + role resolve. The boot
