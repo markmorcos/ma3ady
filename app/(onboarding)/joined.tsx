@@ -1,4 +1,3 @@
-import * as Clipboard from 'expo-clipboard';
 import { router, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Share, StyleSheet, View } from 'react-native';
@@ -7,6 +6,7 @@ import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
+import { copyToClipboard } from '@/services/clipboard';
 import { useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
 
@@ -19,7 +19,7 @@ export default function JoinedScreen() {
   const url = tenant ? `ma3ady.com/t/${tenant.slug}` : 'ma3ady.com';
 
   const onCopy = async () => {
-    await Clipboard.setStringAsync(`https://${url}`);
+    await copyToClipboard(`https://${url}`);
     showToast({ kind: 'success', message: t('onboarding.joinedLinkCopied') });
   };
 

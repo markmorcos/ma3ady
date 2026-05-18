@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import * as Clipboard from 'expo-clipboard';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +15,7 @@ import { TonalBlobs } from '@/components/TonalBlobs';
 import { useTheme } from '@/design/ThemeProvider';
 import { getService } from '@/services/api/services';
 import { getTenantBySlug } from '@/services/api/tenants';
+import { copyToClipboard } from '@/services/clipboard';
 import { useToastStore } from '@/state/toastStore';
 
 const MS_MINUTE = 60_000;
@@ -84,7 +84,7 @@ export default function ConfirmationScreen() {
 
   const onCopyLink = async () => {
     if (!manageUrl) return;
-    await Clipboard.setStringAsync(manageUrl);
+    await copyToClipboard(manageUrl);
     showToast({ kind: 'success', message: t('booking.linkCopied') });
   };
 
