@@ -21,9 +21,13 @@ type TenantState = {
 function deriveCurrent(tenants: TenantWithRole[], stored: string | null): string | null {
   if (tenants.length === 0) return null;
   if (stored && tenants.some((t) => t.id === stored)) return stored;
-  if (tenants.length === 1) return tenants[0]?.id ?? null;
-  // Multiple memberships: don't auto-pick; the picker resolves it.
-  return null;
+  // First-load fallback. Without this, multi-tenant users land on the
+  // home screen with `currentTenantId=null` → `useCurrentRole()` returns
+  // null → `isStaff` evaluates false → the customer view renders even
+  // though the user is an owner of three tenants. They can still switch
+  // via the picker later; persisting the choice is handled by
+  // `selectTenant`, so the auto-pick only fires on the very first load.
+  return tenants[0]?.id ?? null;
 }
 
 export const useTenantStore = create<TenantState>((set, get) => ({
@@ -36,6 +40,13 @@ export const useTenantStore = create<TenantState>((set, get) => ({
       const tenants = await getMyMemberships();
       const stored = await AsyncStorage.getItem(STORAGE_KEY_TENANT_ID);
       const currentTenantId = deriveCurrent(tenants, stored);
+      // Persist the derived choice so the next refresh is deterministic
+      // even if the memberships query returns rows in a different order
+      // (the API has no explicit ORDER BY). Skip if the derived value
+      // matches what was already stored.
+      if (currentTenantId && currentTenantId !== stored) {
+        await AsyncStorage.setItem(STORAGE_KEY_TENANT_ID, currentTenantId);
+      }
       set({ tenants, currentTenantId, loading: false });
     } catch (err) {
       set({ loading: false });
