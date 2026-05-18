@@ -6,7 +6,8 @@ How code reaches production. Every workflow lives in `.github/workflows/`.
 
 | Surface         | Build                              | Deployer                                                 | URL                                                        |
 | --------------- | ---------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------- |
-| Tenant landing  | `tenant-landing/Dockerfile`        | `deploy-tenant-landing.yml` → infra repo dispatch        | `ma3ady.com`, `preview.ma3ady.com`                         |
+| Marketing       | `marketing/Dockerfile`              | `deploy-marketing.yml` → infra repo dispatch             | `ma3ady.com`, `preview.ma3ady.com`                         |
+| Web app         | `web/Dockerfile`                    | `deploy-web.yml` → infra repo dispatch                   | `app.ma3ady.com`, `preview-app.ma3ady.com`                 |
 | Supabase DB     | migrations under `supabase/`        | `deploy-supabase.yml` (preview → production)             | Supabase project (preview, prod refs in env)               |
 | Edge Functions  | `supabase/functions/<name>`         | same workflow                                            | `https://<ref>.supabase.co/functions/v1/<name>`            |
 | Mobile          | `eas.json` profiles                 | `build-mobile.yml` (manual)                              | EAS build pipeline → TestFlight + Play Store               |
@@ -21,33 +22,42 @@ How code reaches production. Every workflow lives in `.github/workflows/`.
 
 A PR cannot merge until all four jobs pass.
 
-## Tenant-landing deploy
+## Marketing deploy
 
-Push to `main` touching `tenant-landing/**` triggers the workflow:
+Push to `main` touching `marketing/**` triggers the workflow:
 
-1. `deploy-preview` job — dispatches `tenant-landing/deployment.preview.yaml` to `markmorcos/infrastructure` (host `preview.ma3ady.com`, namespace `ma3ady-preview`).
-2. `deploy-production` job — runs only if preview succeeded; dispatches `tenant-landing/deployment.yaml` (host `ma3ady.com`, namespace `ma3ady`).
+1. `deploy-preview` job — dispatches `marketing/deployment.preview.yaml` to `markmorcos/infrastructure` (host `preview.ma3ady.com`, namespace `ma3ady-preview`).
+2. `deploy-production` job — runs only if preview succeeded; dispatches `marketing/deployment.yaml` (host `ma3ady.com`, namespace `ma3ady`).
 
-Manual run: `gh workflow run deploy-tenant-landing.yml -f target=preview|production|both`.
+Manual run: `gh workflow run deploy-marketing.yml -f target=preview|production|both`.
 
-Both pods read the same Supabase URL/anon/service-role secrets from k8s Secrets named `supabase-url`, `supabase-anon-key`, `supabase-service-role-key`. Populate per-environment with:
-
-```bash
-./scripts/k8s/apply-tenant-landing-secrets.sh production
-./scripts/k8s/apply-tenant-landing-secrets.sh preview
-```
+The marketing pods don't read Supabase secrets — they're a static / locale-aware content site only. The public booking surface and the rest of the product live on `app.ma3ady.com`.
 
 ### Rollback
 
 Re-dispatch the previous SHA:
 
 ```bash
-gh workflow run deploy-tenant-landing.yml \
+gh workflow run deploy-marketing.yml \
   --ref <previous-sha-or-tag> \
   -f target=production
 ```
 
 If a bad deploy is already serving traffic, pin the image tag in the infra repo to the previous good SHA and apply that.
+
+## Web app deploy
+
+Push to `main` touching `app/**`, `src/**`, `assets/**`, `web/**`, `app.json`, `package.json`, `pnpm-lock.yaml`, or the babel/metro/tsconfig triggers `deploy-web.yml`:
+
+1. `deploy-preview` job — dispatches `web/deployment.preview.yaml` (host `preview-app.ma3ady.com`, namespace `ma3ady-preview`).
+2. `deploy-production` job — runs only if preview succeeded; dispatches `web/deployment.yaml` (host `app.ma3ady.com`, namespace `ma3ady`).
+
+`EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` are baked into the static bundle at build time from the same k8s Secrets the rest of the stack uses (`supabase-url`, `supabase-anon-key`). Populate per-environment with:
+
+```bash
+./scripts/k8s/apply-marketing-secrets.sh production
+./scripts/k8s/apply-marketing-secrets.sh preview
+```
 
 ## Supabase deploy
 
@@ -82,7 +92,7 @@ Cloudflare is the source of truth. See `docs/dns-setup.md` for the record list. 
 ## Initial bootstrap (one-time, per env)
 
 1. Provision the Supabase project; copy the project ref into `secrets/secrets.local.toml` and run `make secrets-sync ENV=<env>`.
-2. Add the namespace + base secrets to the infra cluster: `./scripts/k8s/apply-tenant-landing-secrets.sh <env>`.
+2. Add the namespace + base secrets to the infra cluster: `./scripts/k8s/apply-marketing-secrets.sh <env>`.
 3. Push to `main`: the deploy workflows fire automatically.
 4. Configure Cloudflare DNS per `docs/dns-setup.md` and run `make dns-check`.
 5. In Resend dashboard, verify the domain (paste the DKIM key returned in step 4 if not auto-detected).

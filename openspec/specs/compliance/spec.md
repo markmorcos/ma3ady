@@ -98,11 +98,11 @@ The `store/apple/` and `store/google/` directories SHALL contain title, descript
 
 ### Requirement: Final brand assets SHALL replace placeholders before store submission
 
-A pre-submit check SHALL grep `assets/branding/`, `marketing/public/`, and `tenant-landing/public/` for the string `PLACEHOLDER` and MUST fail if any match remains; the final SVG/PNG masters (app icon, adaptive icon, themed Android icon, OG image) must be in place and signed off by the brand designer.
+A pre-submit check SHALL grep `assets/branding/` and `marketing/public/` for the string `PLACEHOLDER` and MUST fail if any match remains; the final SVG/PNG masters (app icon, adaptive icon, themed Android icon, OG image) must be in place and signed off by the brand designer.
 
 #### Scenario: placeholder asset detection
-- **GIVEN** any file in `assets/branding/`, `marketing/public/`, or `tenant-landing/public/`
-- **WHEN** the placeholder check (`grep -r "PLACEHOLDER" assets/ marketing/public/ tenant-landing/public/`) runs
+- **GIVEN** any file in `assets/branding/` or `marketing/public/`
+- **WHEN** the placeholder check (`grep -r "PLACEHOLDER" assets/ marketing/public/`) runs
 - **THEN** zero matches are returned
 - **AND** the corresponding final SVG/PNG masters are present and signed off by the brand designer
 

@@ -1,0 +1,68 @@
+name: deploy-ma3ady-web
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Which environment(s) to deploy
+        required: true
+        default: both
+        type: choice
+        options: [preview, production, both]
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'web/**'
+      - 'app.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'babel.config.js'
+      - 'metro.config.js'
+      - 'tsconfig.json'
+      - '.github/workflows/deploy-web.yml'
+
+jobs:
+  deploy-preview:
+    if: github.event_name == 'push' || inputs.target != 'production'
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - name: Trigger infrastructure deployment (preview)
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.INFRASTRUCTURE_PAT }}
+          repository: markmorcos/infrastructure
+          event-type: deploy-ma3ady
+          client-payload: |-
+            {
+              "repository": "markmorcos/ma3ady",
+              "token": "${{ secrets.DEPLOYMENT_TOKEN }}",
+              "version": "${{ github.sha }}",
+              "config_file": "web/deployment.preview.yaml"
+            }
+
+  deploy-production:
+    needs: deploy-preview
+    if: |-
+      always() &&
+      (needs.deploy-preview.result == 'success' || needs.deploy-preview.result == 'skipped') &&
+      (github.event_name == 'push' || inputs.target != 'preview')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger infrastructure deployment (production)
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.INFRASTRUCTURE_PAT }}
+          repository: markmorcos/infrastructure
+          event-type: deploy-ma3ady
+          client-payload: |-
+            {
+              "repository": "markmorcos/ma3ady",
+              "token": "${{ secrets.DEPLOYMENT_TOKEN }}",
+              "version": "${{ github.sha }}",
+              "config_file": "web/deployment.yaml"
+            }

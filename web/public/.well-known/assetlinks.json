@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ma3ady",
+      "sha256_cert_fingerprints": [
+        "A5:31:B3:AF:3B:96:B1:A1:6E:8B:CC:B9:D0:2D:A8:D7:02:39:4B:B8:EE:7C:14:F3:C3:CF:0D:56:7C:88:D0:F6"
+      ]
+    }
+  }
+]

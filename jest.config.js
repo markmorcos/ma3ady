@@ -46,9 +46,21 @@ module.exports = {
       },
     },
     {
-      displayName: 'tenant-landing',
+      displayName: 'web',
+      preset: 'jest-expo/web',
+      roots: ['<rootDir>/tests/web'],
+      testMatch: ['<rootDir>/tests/web/**/*.test.{ts,tsx}'],
+      transformIgnorePatterns: [
+        'node_modules/(?!\\.pnpm/)(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg))',
+      ],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+    },
+    {
+      displayName: 'marketing',
       testEnvironment: 'node',
-      testMatch: ['<rootDir>/tenant-landing/src/**/*.test.{ts,tsx}'],
+      testMatch: ['<rootDir>/marketing/src/**/*.test.{ts,tsx}'],
       transform: {
         '^.+\\.tsx?$': [
           'ts-jest',
@@ -58,14 +70,14 @@ module.exports = {
               jsx: 'react-jsx',
               esModuleInterop: true,
               moduleResolution: 'node',
-              baseUrl: './tenant-landing',
+              baseUrl: './marketing',
               paths: { '@/*': ['./src/*'] },
             },
           },
         ],
       },
       moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/tenant-landing/src/$1',
+        '^@/(.*)$': '<rootDir>/marketing/src/$1',
       },
     },
   ],

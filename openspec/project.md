@@ -72,17 +72,18 @@ Every table that holds tenant-owned data (`services`, `availability_rules`, `ava
 
 This project deliberately defers the cost of cutting custom dev clients. Daily development must work in **Expo Go** for as long as possible. Capabilities that require native modules are deferred behind feature flags or mocked behind dispatcher interfaces:
 
-| Capability | Phase 1 (Expo Go) | Later (dev client) |
-|---|---|---|
-| Auth | Supabase Google OAuth via `expo-auth-session` + `WebBrowser.openAuthSessionAsync` | Native `@react-native-google-signin/google-signin` |
-| Push notifications | `EXPO_PUBLIC_NOTIFICATION_DISPATCHER=mock` (in-app toasts only, log to `notifications` table) | `expo-notifications` with APNs/FCM |
-| WhatsApp send | `WHATSAPP_DISPATCHER=mock` (Edge Function logs payload, no API call) | Real Meta Cloud API call |
-| Email send | `EMAIL_DISPATCHER=mock` (Edge Function logs to `notifications`) | Resend live keys |
-| Splash / app icon | Expo defaults | Native splash, adaptive icon, themed Android icon |
-| Deep linking | `exp://` in Expo Go | `ma3ady://` + universal links via `apple-app-site-association` and Android Asset Links |
-| Mobile crash reports | console.error → in-app `client_errors` reporter via Edge Function | Native crash hooks (Sentry, deferred) |
+| Capability | Phase 1 (Expo Go) | Web build (`app.ma3ady.com`) | Later (dev client) |
+|---|---|---|---|
+| Auth | Supabase Google OAuth via `expo-auth-session` + `WebBrowser.openAuthSessionAsync` | Browser redirect via `supabase.auth.signInWithOAuth({ provider: 'google' })` + `detectSessionInUrl` | Native `@react-native-google-signin/google-signin` |
+| Push notifications | `EXPO_PUBLIC_NOTIFICATION_DISPATCHER=mock` (in-app toasts only, log to `notifications` table) | No-op (`registerForPush.web.ts` returns null; Web Push is a deferred capability) | `expo-notifications` with APNs/FCM |
+| WhatsApp send | `WHATSAPP_DISPATCHER=mock` (Edge Function logs payload, no API call) | Same as mobile (server-side dispatcher, platform-agnostic) | Real Meta Cloud API call |
+| Email send | `EMAIL_DISPATCHER=mock` (Edge Function logs to `notifications`) | Same as mobile | Resend live keys |
+| Splash / app icon | Expo defaults | Static `<title>` + CSS-backed initial paint (no native splash on web) | Native splash, adaptive icon, themed Android icon |
+| Deep linking | `exp://` in Expo Go | `https://app.ma3ady.com/*` paths (Expo Router web export); universal-link interception via `applinks:app.ma3ady.com` opens the mobile app where installed | `ma3ady://` + universal links via `apple-app-site-association` and Android Asset Links |
+| Mobile crash reports | console.error → in-app `client_errors` reporter via Edge Function | `<RootErrorBoundary>` / `<RouteErrorBoundary>` same flow; `reloadApp.web.ts` does `window.location.reload` instead of `Updates.reloadAsync` | Native crash hooks (Sentry, deferred) |
+| Session storage | `expo-secure-store` | Supabase JS default = browser `localStorage` | unchanged |
 
-**Rule**: a change proposal that adds capability requiring a dev client MUST mark itself as "Phase: dev-client required" in `proposal.md` and explain why a mock is insufficient. Default mode is `mock` for all dispatchers; production builds must set every dispatcher to `real`.
+**Rule**: a change proposal that adds capability requiring a dev client MUST mark itself as "Phase: dev-client required" in `proposal.md` and explain why a mock is insufficient. Default mode is `mock` for all dispatchers; production builds must set every dispatcher to `real`. Every native-only module the web build does not support MUST be wrapped behind a `.native.ts(x)` / `.web.ts(x)` platform-extension pair so feature code never `Platform.OS`-branches.
 
 ## 3. Tenancy Model
 
@@ -151,7 +152,7 @@ Race conditions resolve at insert time — the loser gets a constraint violation
 
 ### Cookie / session scope
 
-Session is mobile-only in v1 — no web app to log into. Marketing site is fully unauthenticated. The `auth.ma3ady.com` callback exists purely as a single registered Google redirect URI; it does not host any user-facing surface beyond the redirect bounce.
+Sessions exist on both mobile and the web app at `app.ma3ady.com`. The mobile client persists the Supabase session via `expo-secure-store`; the web client uses the browser's `localStorage` (Supabase JS default) with `detectSessionInUrl: true` so the OAuth code is auto-exchanged on return to `/auth/callback`. The marketing site at `ma3ady.com` (and `preview.ma3ady.com`) is fully unauthenticated. The `auth.ma3ady.com` callback is the mobile bounce only — the web flow registers `https://app.ma3ady.com/auth/callback` (and `preview-app.ma3ady.com/auth/callback`) as additional authorized Google redirect URIs and does not pass through the auth subdomain.
 
 ## 6. Capabilities Map
 
@@ -174,8 +175,9 @@ Each capability gets one folder under `openspec/specs/<capability>/spec.md` once
 | `notifications` | dispatcher pattern (mock\|real) for email/whatsapp/push, `notifications` audit table, reminder cron |
 | `audit-log` | `tenant_audit_events` for memberships, services, rules, tenants; admin viewer; retention |
 | `observability` | Supabase logs as backend source of truth, `client_errors` table, structured logging conventions |
-| `marketing-site` | static HTML marketing site at ma3ady.com, per-tenant landing pages on subdomains |
-| `deployment` | Dockerfiles, deployment.yaml, GH Actions for marketing/supabase/mobile, email deliverability (SPF/DKIM/DMARC) |
+| `marketing-site` | Next.js marketing site at `ma3ady.com` (en + ar homepages, legal pages, sitemap/robots) |
+| `web-app` | Authenticated + public-booking web surface at `app.ma3ady.com`, exported from the Expo Router tree via React Native for Web |
+| `deployment` | Dockerfiles, deployment.yaml, GH Actions for marketing/web/supabase/mobile, email deliverability (SPF/DKIM/DMARC) |
 | `compliance` | privacy policy + terms renderer (en/ar), data retention jobs, deletion flows, brand assets finalization |
 
 Deferred capabilities (no change folder yet, will land as separate proposals when scheduled):
@@ -185,22 +187,22 @@ Deferred capabilities (no change folder yet, will land as separate proposals whe
 - `paid-bookings` — Stripe / payment intents.
 - `native-push` — `expo-notifications` with APNs/FCM and `expo_push_tokens` table.
 - `native-google-signin` — `@react-native-google-signin/google-signin` for one-tap.
-- `web-booking-surface` — booking from a browser, not the app.
+- `web-push` — Service Worker + Web Push API on `app.ma3ady.com` (mobile pushes are tracked under `native-push`).
 - `additional-locales` — de, fr, etc.
 
 ## 7. Environments
 
-- **Local**: `make dev-up` boots local Supabase (Docker). Mobile app talks to `http://127.0.0.1:54321` from Expo Go on the LAN. Dispatchers all `mock`.
-- **Preview**: shared Supabase preview project (one ref). PR previews of marketing site. Mobile preview builds via `eas build --profile preview` (later phase). Dispatchers `mock` except auth.
-- **Production**: separate Supabase production project. Marketing site at `ma3ady.com`. Mobile app on App Store + Play Store. Dispatchers all `real`.
+- **Local**: `make dev-up` boots local Supabase (Docker). Mobile app talks to `http://127.0.0.1:54321` from Expo Go on the LAN. Web app boots via `pnpm expo start --web` and points at the same local Supabase. Dispatchers all `mock`.
+- **Preview**: shared Supabase preview project (one ref). PR previews of the marketing site at `preview.ma3ady.com` and of the web app at `preview-app.ma3ady.com`. Mobile preview builds via `eas build --profile preview` (later phase). Dispatchers `mock` except auth.
+- **Production**: separate Supabase production project. Marketing site at `ma3ady.com`. Web app at `app.ma3ady.com`. Mobile app on App Store + Play Store. Dispatchers all `real`.
 
 ## 8. Deployment
 
 - **Mobile**: EAS Build + EAS Submit, profiles `development | preview | production`. `build-prod` target gated by interactive confirmation. Manual `workflow_dispatch` only — no auto-build on push.
 - **Supabase**: GH Actions on push to `supabase/migrations/**` or `supabase/functions/**`. `deploy-preview` job → `deploy-production` job, sequential. `supabase link` → `supabase db push` → `supabase functions deploy <list>`.
 - **Marketing site**: Docker image built and pushed to `ghcr.io/markmorcos/ma3ady-marketing` on push to `marketing/**`, then `repository-dispatch` to `markmorcos/infrastructure` carrying `marketing/deployment.yaml`.
-- **Tenant landing app** (single image serving all `<slug>.ma3ady.com`): same pattern as marketing — Docker → GHCR → infrastructure dispatch with `tenant-landing/deployment.yaml`.
-- **DNS**: Cloudflare, wildcard `*.ma3ady.com` to the infrastructure ingress, `auth.ma3ady.com` separately.
+- **Web app**: Docker image (Expo Router web export → nginx) built and pushed to `ghcr.io/markmorcos/ma3ady-web` on push to `app/**`, `src/**`, `assets/**`, `web/**`, or the root build config files. Same `repository-dispatch` pattern carrying `web/deployment.yaml`. `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` are baked into the static bundle at build time from k8s Secrets.
+- **DNS**: Cloudflare. `ma3ady.com` + `preview.ma3ady.com` → marketing. `app.ma3ady.com` + `preview-app.ma3ady.com` → web app. `auth.ma3ady.com` → Supabase OAuth bounce (mobile only).
 
 ## 9. Roadmap
 
@@ -214,7 +216,7 @@ Phases are advisory, not contractual. Each phase is one or more `openspec/change
 - **Phase 5 — Admin mobile mode**: `implement-admin-mobile-dashboard`, `implement-availability-rules-grid`. Today screen, services CRUD, team management, rules grid.
 - **Phase 6 — Lifecycle + comms**: `implement-reschedule-and-cancel`, `implement-notifications-pipeline`. State machine, dispatcher pattern (mock), `pg_cron` reminders, audit trail.
 - **Phase 7 — Observability**: `setup-observability`. Supabase logs configured, `client_errors` reporter live, structured logging conventions enforced.
-- **Phase 8 — Marketing surfaces**: `setup-marketing-site`, `setup-tenant-landing-app`. Static HTML, en+ar, per-tenant landing, universal-link bouncer.
+- **Phase 8 — Marketing + web app**: `setup-marketing-site` (Next.js marketing at `ma3ady.com`, en+ar, legal pages), `web-app-full-parity` (Expo Router web export at `app.ma3ady.com` with full mobile-parity customer + admin surfaces and the public booking flow).
 - **Phase 9 — Deployment**: `setup-deployment-pipelines`. GH Actions, deployment.yamls, infrastructure dispatch, email deliverability DNS.
 - **Phase 10 — Compliance & launch**: `setup-compliance-and-launch`. Privacy + terms (en+ar), retention jobs, account deletion, brand assets finalization, dev client cut, store submission.
 

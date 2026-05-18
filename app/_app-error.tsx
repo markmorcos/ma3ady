@@ -1,11 +1,11 @@
-import * as Updates from 'expo-updates';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/design/colors';
+import { reloadApp } from '@/services/reloadApp';
 
 async function restart() {
   try {
-    await Updates.reloadAsync();
+    await reloadApp();
   } catch {
     // no-op in Expo Go / dev
   }

@@ -1,0 +1,21 @@
+version: 0.4.7
+
+namespace: ma3ady-preview
+project: ma3ady
+
+services:
+  - name: marketing
+    context: marketing
+    image: ghcr.io/markmorcos/ma3ady-marketing
+    port: 8080
+
+    env:
+      - name: APEX_HOST
+        value: preview.ma3ady.com
+      - name: NODE_ENV
+        value: production
+
+    ingress:
+      host: preview.ma3ady.com
+      path: /
+      pathType: Prefix

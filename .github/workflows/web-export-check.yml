@@ -1,0 +1,45 @@
+name: Web export check
+
+# Catches metro-web bundling regressions on PRs that touch the source
+# tree or web deployment artifacts. A `.native.ts(x)`-only import slipping
+# into a platform-agnostic file would break `expo export --platform web`
+# and reach production only via deploy; gating PRs on the export keeps
+# main green.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'web/**'
+      - 'app.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'babel.config.js'
+      - 'metro.config.js'
+      - 'tsconfig.json'
+      - '.github/workflows/web-export-check.yml'
+
+concurrency:
+  group: web-export-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Placeholders so `assertSupabaseConfig` doesn't trip during the
+      # export's static analysis. The bundle that ships to production
+      # gets the real values via the deployment manifest's `buildArgs`.
+      EXPO_PUBLIC_SUPABASE_URL: http://placeholder.invalid
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: markmorcos/build-tooling/.github/actions/setup-expo@main
+        with:
+          setup-android: 'false'
+      - name: Expo export (web)
+        run: pnpm expo export --platform web --output-dir dist

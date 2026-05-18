@@ -1,9 +1,9 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Updates from 'expo-updates';
 import { i18next } from '@/i18n';
 import { colors } from '@/design/colors';
 import { logError } from '@/services/observability/logError';
+import { reloadApp } from '@/services/reloadApp';
 
 type State = { error: Error | null };
 
@@ -23,9 +23,9 @@ async function reportError(error: Error, info: ErrorInfo) {
 
 async function restart() {
   try {
-    await Updates.reloadAsync();
+    await reloadApp();
   } catch {
-    // In Expo Go / dev, Updates.reloadAsync() is unavailable — fall back to no-op.
+    // In Expo Go / dev, reloadApp is unavailable on native — fall back to no-op.
   }
 }
 

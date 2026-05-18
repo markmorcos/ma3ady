@@ -27,6 +27,7 @@ capabilities:
   - deployment
   - compliance
   - web-booking
+  - web-app
 
 # Deferred capabilities (will land via separate change folders when scheduled)
 deferred_capabilities:
@@ -35,4 +36,5 @@ deferred_capabilities:
   - paid-bookings
   - native-push
   - native-google-signin
+  - web-push
   - additional-locales

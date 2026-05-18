@@ -6,8 +6,10 @@ All DNS for `ma3ady.com` is on Cloudflare. This is a one-time bootstrap; ongoing
 
 | Type  | Name                       | Target                                | TTL   | Notes                                              |
 | ----- | -------------------------- | ------------------------------------- | ----- | -------------------------------------------------- |
-| A     | `@` (apex)                 | `<infra ingress IP>`                  | Auto  | Production tenant-landing                          |
-| A     | `preview`                  | `<infra ingress IP>`                  | Auto  | Preview tenant-landing                             |
+| A     | `@` (apex)                 | `<infra ingress IP>`                  | Auto  | Production marketing                               |
+| A     | `preview`                  | `<infra ingress IP>`                  | Auto  | Preview marketing                                  |
+| A     | `app`                      | `<infra ingress IP>`                  | Auto  | Production web app (`app.ma3ady.com`)              |
+| A     | `preview-app`              | `<infra ingress IP>`                  | Auto  | Preview web app (`preview-app.ma3ady.com`)         |
 | CNAME | `www`                      | `ma3ady.com`                          | Auto  | Redirect handled at the app/ingress layer         |
 | CNAME | `auth`                     | `<supabase project ref>.supabase.co` | Auto  | Used for OAuth callback domains                    |
 | CNAME | `*` (wildcard)             | `ma3ady.com`                          | Auto  | Reserves future per-tenant subdomain pivots        |
