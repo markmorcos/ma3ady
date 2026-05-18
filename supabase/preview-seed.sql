@@ -8,7 +8,8 @@
 --
 -- Apply with the Supabase CLI once linked to the project:
 --
---   pnpm exec supabase db execute --project-ref <ref> -f supabase/preview-seed.sql
+--   pnpm exec supabase link --project-ref <ref>
+--   pnpm exec supabase db query --linked --file supabase/preview-seed.sql
 --
 -- or via psql / Studio query editor with the same SQL.
 --
