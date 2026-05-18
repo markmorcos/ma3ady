@@ -1,0 +1,34 @@
+version: 0.4.7
+
+namespace: ma3ady-preview
+project: ma3ady
+
+services:
+  - name: web
+    # Build context is the repo root because the Expo export needs the full
+    # app/, src/, assets/ tree plus the root package.json.
+    context: .
+    dockerfile: web/Dockerfile
+    image: ghcr.io/markmorcos/ma3ady-web
+    port: 8080
+
+    buildArgs:
+      - name: EXPO_PUBLIC_SUPABASE_URL
+        valueFrom:
+          secretKeyRef:
+            name: supabase-url
+            key: SUPABASE_URL
+      - name: EXPO_PUBLIC_SUPABASE_ANON_KEY
+        valueFrom:
+          secretKeyRef:
+            name: supabase-anon-key
+            key: SUPABASE_ANON_KEY
+
+    env:
+      - name: NODE_ENV
+        value: production
+
+    ingress:
+      host: preview-app.ma3ady.com
+      path: /
+      pathType: Prefix

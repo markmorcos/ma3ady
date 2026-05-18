@@ -12,7 +12,9 @@
       "bundleIdentifier": "com.ma3ady",
       "associatedDomains": [
         "applinks:ma3ady.com",
-        "applinks:preview.ma3ady.com"
+        "applinks:preview.ma3ady.com",
+        "applinks:app.ma3ady.com",
+        "applinks:preview-app.ma3ady.com"
       ]
     },
     "android": {
@@ -33,6 +35,14 @@
             {
               "scheme": "https",
               "host": "preview.ma3ady.com"
+            },
+            {
+              "scheme": "https",
+              "host": "app.ma3ady.com"
+            },
+            {
+              "scheme": "https",
+              "host": "preview-app.ma3ady.com"
             }
           ],
           "category": [
