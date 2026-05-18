@@ -1,10 +1,16 @@
 // claim-bookings Edge Function (Deno).
 //
-// Invoked by the mobile client right after the auth callback when
-// `profiles.first_signed_in_at` is null. Walks `guest_contacts` rows by the
-// caller's email, sets `claimed_by_user_id`, promotes matching `appointments`
-// to `user_id`, and stamps `profiles.first_signed_in_at = now()` so subsequent
-// sign-ins skip this entirely.
+// Invoked by the auth callback on every sign-in. Walks `guest_contacts`
+// rows by the caller's email, sets `claimed_by_user_id`, promotes matching
+// `appointments` to `user_id`. The update filters
+// `claimed_by_user_id is null` so already-attached bookings are skipped —
+// re-running on every sign-in is idempotent and just attaches anything
+// new since last time (e.g. the user booked anonymously between sessions).
+//
+// `profiles.first_signed_in_at` is still stamped on the first run, but
+// it's analytical now — it does NOT gate the claim. The client invokes
+// this from `app/auth/callback.tsx` after every successful session
+// exchange.
 //
 // The function uses the service role key for the privileged updates AFTER
 // validating the caller's JWT and reading the email from there. The body is

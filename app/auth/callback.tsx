@@ -6,6 +6,7 @@ import { Button } from '@/components/Button';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
 import { supabase } from '@/services/api/supabase';
+import { claimBookings } from '@/services/api/claimBookings';
 import { exchangeCodeForSession } from '@/services/auth/googleSignIn';
 import { routeAfterSignIn } from '@/services/auth/postSignIn';
 import { useAuthStore } from '@/state/authStore';
@@ -58,6 +59,19 @@ export default function AuthCallback() {
       }
     };
 
+    // Walk guest_contacts by the signed-in user's verified email and
+    // attach matching appointments to their account. Server-side is
+    // idempotent (filters `claimed_by_user_id is null`), so running on
+    // every sign-in just attaches anything new since last time. Swallow
+    // errors — failure mustn't block sign-in.
+    const runClaim = async () => {
+      try {
+        await claimBookings();
+      } catch (err) {
+        if (__DEV__) console.warn('[auth/callback] claim-bookings failed', err);
+      }
+    };
+
     (async () => {
       // If the sign-in screen path already minted a session (it races against
       // this deep-link route on Android once App Links is on), skip the
@@ -65,6 +79,8 @@ export default function AuthCallback() {
       // throw invalid_grant.
       const { data } = await supabase.auth.getSession();
       if (data.session) {
+        if (cancelled) return;
+        await runClaim();
         if (cancelled) return;
         await loadTenants();
         if (cancelled) return;
@@ -83,6 +99,8 @@ export default function AuthCallback() {
         if (cancelled) return;
         await refresh();
         if (cancelled) return;
+        await runClaim();
+        if (cancelled) return;
         await loadTenants();
         if (cancelled) return;
         routeAfterSignIn(params.return_to);
@@ -91,6 +109,8 @@ export default function AuthCallback() {
         // The other path may have minted a session while we were exchanging.
         const { data: after } = await supabase.auth.getSession();
         if (after.session) {
+          await runClaim();
+          if (cancelled) return;
           await loadTenants();
           if (cancelled) return;
           routeAfterSignIn(params.return_to);
