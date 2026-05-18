@@ -56,8 +56,8 @@ google-services.json
 service-account.json
 
 # Web workspaces build outputs
-tenant-landing/.next
-tenant-landing/tsconfig.tsbuildinfo
+marketing/.next
+marketing/tsconfig.tsbuildinfo
 marketing/dist
 
 # git worktrees created locally for parallel branches (e.g. via `git worktree add .worktrees/<name>`)
