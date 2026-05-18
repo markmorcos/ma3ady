@@ -12,7 +12,7 @@ export async function GET() {
       applinks: {
         details: [
           {
-            appIDs: ['REPLACE_TEAM_ID.com.ma3ady.app'],
+            appIDs: ['REPLACE_TEAM_ID.com.ma3ady'],
             components: [{ '/': '/manage/*' }, { '/': '/t/*' }, { '/': '/' }],
           },
         ],

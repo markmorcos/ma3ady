@@ -9,14 +9,14 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ma3ady.app",
+      "bundleIdentifier": "com.ma3ady",
       "associatedDomains": [
         "applinks:ma3ady.com",
         "applinks:preview.ma3ady.com"
       ]
     },
     "android": {
-      "package": "com.ma3ady.app",
+      "package": "com.ma3ady",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0F766E"

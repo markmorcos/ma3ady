@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Href, router } from 'expo-router';
 
 /**
  * Returns a safe internal path or undefined. Rejects anything that could
@@ -30,12 +30,12 @@ export function sanitizeReturnTo(raw: unknown): string | undefined {
 export function routeAfterSignIn(returnTo: unknown, fallback: string = '/'): void {
   const sanitized = sanitizeReturnTo(returnTo);
   if (sanitized) {
-    router.replace(sanitized);
+    router.replace(sanitized as Href);
     return;
   }
   if (router.canGoBack()) {
     router.back();
   } else {
-    router.replace(fallback);
+    router.replace(fallback as Href);
   }
 }

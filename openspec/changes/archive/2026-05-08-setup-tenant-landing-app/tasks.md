@@ -26,7 +26,7 @@
 - [x] 1.7 Write `tenant-landing/deployment.yaml` — schema version pinned, `host: '*.ma3ady.com'`, port 8080, env: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
 - [x] 1.8 Write `tenant-landing/public/apple-app-site-association` (no extension, served as JSON):
   ```json
-  {"applinks":{"details":[{"appIDs":["TEAMID.com.ma3ady.app"],"components":[{"/":"/manage/*"},{"/":"/t/*"}]}]}}
+  {"applinks":{"details":[{"appIDs":["TEAMID.com.ma3ady"],"components":[{"/":"/manage/*"},{"/":"/t/*"}]}]}}
   ```
 - [x] 1.9 Write `tenant-landing/public/.well-known/assetlinks.json` for Android — populated in the `setup-compliance-and-launch` change when SHA-256 fingerprint is known; placeholder file present here
 - [x] 1.10 Configure mobile app `app.json` with `associatedDomains: ["applinks:ma3ady.com", "applinks:*.ma3ady.com"]` (declared; effective only in dev client / prod build)

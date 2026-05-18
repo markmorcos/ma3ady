@@ -16,6 +16,10 @@
 
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
+import { mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Playwright is installed globally on the build-tooling container but
 // not as a workspace dep — find it via `npm root -g` and require it
@@ -25,10 +29,6 @@ import { execSync } from 'node:child_process';
 const globalRoot = execSync('npm root -g', { encoding: 'utf8' }).trim();
 const require = createRequire(`${globalRoot}/_/`);
 const { chromium } = require('playwright');
-import { mkdir, readFile, writeFile, copyFile, unlink } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..', '..');
@@ -113,7 +113,7 @@ async function main() {
         omitBackground: false,
       });
       console.log(`✓ ${outFile.replace(REPO_ROOT + '/', '')}`);
-      await unlink(tmp).catch(() => {});
+      await unlink(tmp).catch(() => { });
     }
 
     await context.close();
@@ -203,7 +203,7 @@ async function main() {
           omitBackground: false,
         });
         console.log(`✓ ${outFile.replace(REPO_ROOT + '/', '')}`);
-        await unlink(tmpWrap).catch(() => {});
+        await unlink(tmpWrap).catch(() => { });
       }
 
       await context.close();

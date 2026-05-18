@@ -5,7 +5,7 @@
 - [x] 1.3 Install Expo SDK 55 + RN 0.83 + TypeScript 5.9 (versions actually installed; SDK 55's pinned peer set): `pnpm add expo` then `pnpm exec expo install react react-native @types/react typescript`
 - [x] 1.4 Install Expo Router v5: `pnpm add expo-router expo-linking expo-constants react-native-screens react-native-safe-area-context`
 - [x] 1.5 Install dev tooling: `pnpm add -D eslint prettier husky lint-staged jest jest-expo @testing-library/react-native @types/jest`
-- [x] 1.6 Write `app.json` with `name`, `slug`, `scheme: "ma3ady"`, `ios.bundleIdentifier: "com.ma3ady.app"`, `android.package: "com.ma3ady.app"`, splash + icon paths
+- [x] 1.6 Write `app.json` with `name`, `slug`, `scheme: "ma3ady"`, `ios.bundleIdentifier: "com.ma3ady"`, `android.package: "com.ma3ady"`, splash + icon paths
 - [x] 1.7 Write `eas.json` with `development`, `preview`, `production` profiles; production profile requires `EXPO_PUBLIC_*_DISPATCHER=real`
 - [x] 1.8 Write `tsconfig.json` extending `expo/tsconfig.base`, paths `{"@/*": ["src/*"]}`
 - [x] 1.9 Write `babel.config.js` with `babel-preset-expo` only (the `expo-router/babel` plugin was merged into the preset in SDK 50; adding it explicitly emits a deprecation warning)
