@@ -61,7 +61,7 @@ export default function BookScreen() {
       });
       router.replace({
         pathname:
-          '/(public)/[tenantSlug]/[serviceId]/confirmation/[appointmentId]',
+          '/(public)/t/[tenantSlug]/[serviceId]/confirmation/[appointmentId]',
         params: {
           tenantSlug,
           serviceId,
