@@ -84,7 +84,7 @@ export default function SlotsScreen() {
 
   const onPick = (slot: AvailableSlot) => {
     router.push({
-      pathname: '/(public)/[tenantSlug]/[serviceId]/book',
+      pathname: '/(public)/t/[tenantSlug]/[serviceId]/book',
       params: { tenantSlug, serviceId, starts_at: slot.starts_at },
     });
   };

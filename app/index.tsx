@@ -29,7 +29,7 @@ const DEV_LINKS: { href: string; label: string }[] = [
   { href: '/sign-in', label: '/sign-in' },
   { href: '/welcome', label: '/welcome (onboarding)' },
   { href: '/tenants/picker', label: '/tenants/picker' },
-  { href: '/(public)/demo', label: '/demo (public booking)' },
+  { href: '/(public)/t/demo', label: '/t/demo (public booking)' },
   { href: '/manage/invalid-token', label: '/manage/invalid-token' },
 ];
 

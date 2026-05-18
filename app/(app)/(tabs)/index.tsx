@@ -174,7 +174,7 @@ export default function CustomerHomeScreen() {
               accessibilityRole="button"
               onPress={() =>
                 router.push({
-                  pathname: '/(public)/[tenantSlug]',
+                  pathname: '/(public)/t/[tenantSlug]',
                   params: { tenantSlug: tt.slug },
                 })
               }

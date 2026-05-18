@@ -47,7 +47,7 @@ export default function ServicesIndex() {
       style={{ backgroundColor: theme.colors.surface }}
       contentContainerStyle={styles.list}
       ListHeaderComponent={
-        // The TenantHeader is rendered by the parent (public)/[tenantSlug]
+        // The TenantHeader is rendered by the parent (public)/t/[tenantSlug]
         // /_layout.tsx — don't duplicate it here. Just the section title.
         <View style={styles.titleRow}>
           <Text variant="titleMd" style={{ color: theme.colors.onSurface }}>
@@ -62,7 +62,7 @@ export default function ServicesIndex() {
           service={item}
           onPress={() =>
             router.push({
-              pathname: '/(public)/[tenantSlug]/[serviceId]/slots',
+              pathname: '/(public)/t/[tenantSlug]/[serviceId]/slots',
               params: { tenantSlug, serviceId: item.id },
             })
           }
