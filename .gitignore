@@ -59,3 +59,11 @@ service-account.json
 tenant-landing/.next
 tenant-landing/tsconfig.tsbuildinfo
 marketing/dist
+
+# Local-only git worktrees. Convention is to keep them under .worktrees/
+# inside the main checkout (the path the host signing server accepts);
+# anything under there is by definition a working copy, never authored
+# content. Without this entry, `git worktree add .worktrees/<name>` leaves
+# .worktrees/ as an untracked directory in the parent checkout and the
+# stop hook fires.
+.worktrees/
