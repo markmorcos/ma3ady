@@ -10,6 +10,7 @@ import { MisconfiguredScreen } from '@/components/MisconfiguredScreen';
 import { RootErrorBoundary } from '@/components/RootErrorBoundary';
 import { ToastViewport } from '@/components/Toast';
 import { ThemeProvider, useTheme } from '@/design/ThemeProvider';
+import { useDocumentBackground } from '@/design/useDocumentBackground';
 import { setupGlobalHandlers } from '@/services/observability/setupGlobalHandlers';
 import { useAppStore } from '@/state/appStore';
 
@@ -23,6 +24,11 @@ function I18nProvider({ children }: { children: ReactNode }) {
 
 function ThemedSafeArea({ children }: { children: ReactNode }) {
   const theme = useTheme();
+  // On web, the centered max-width screen wrappers in each route group
+  // expose the browser's default white html/body background on either
+  // side of the column — looks especially wrong in dark mode. Paint
+  // the document with the theme bg so the canvas is seamless.
+  useDocumentBackground(theme.colors.bg);
   return (
     <SafeAreaView
       edges={['top', 'bottom']}
