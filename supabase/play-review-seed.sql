@@ -22,7 +22,11 @@
 --
 --   SUPABASE_PROJECT_REF=<prod-ref> make seed-play-review
 
-\set ON_ERROR_STOP on
+-- Note: no `\set ON_ERROR_STOP on` — that's a psql meta-command and the
+-- Management API endpoint behind `supabase db query --linked` rejects it
+-- with `syntax error at or near "\"`. The wrapping BEGIN/COMMIT plus the
+-- exception semantics of the `do $$` block give the same fail-and-
+-- rollback guarantee.
 
 begin;
 
