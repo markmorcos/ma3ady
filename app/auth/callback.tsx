@@ -9,6 +9,7 @@ import { supabase } from '@/services/api/supabase';
 import { exchangeCodeForSession } from '@/services/auth/googleSignIn';
 import { routeAfterSignIn } from '@/services/auth/postSignIn';
 import { useAuthStore } from '@/state/authStore';
+import { useTenantStore } from '@/state/tenantStore';
 
 const EXCHANGE_TIMEOUT_MS = 10_000;
 
@@ -43,6 +44,20 @@ export default function AuthCallback() {
     const controller = new AbortController();
     let cancelled = false;
 
+    // Refresh tenants right after the session is established so a fresh
+    // sign-in that lands directly on /admin (or routeAfterSignIn picks
+    // the admin path) sees the staff role on first render instead of
+    // racing through the customer view. Swallow errors — anonymous /
+    // brand-new accounts have no memberships, and the screens handle
+    // that gracefully.
+    const loadTenants = async () => {
+      try {
+        await useTenantStore.getState().refresh();
+      } catch (err) {
+        if (__DEV__) console.warn('[auth/callback] tenant refresh failed', err);
+      }
+    };
+
     (async () => {
       // If the sign-in screen path already minted a session (it races against
       // this deep-link route on Android once App Links is on), skip the
@@ -50,6 +65,8 @@ export default function AuthCallback() {
       // throw invalid_grant.
       const { data } = await supabase.auth.getSession();
       if (data.session) {
+        if (cancelled) return;
+        await loadTenants();
         if (cancelled) return;
         routeAfterSignIn(params.return_to);
         return;
@@ -65,12 +82,17 @@ export default function AuthCallback() {
         await timeout(exchangeCodeForSession(code), EXCHANGE_TIMEOUT_MS, controller.signal);
         if (cancelled) return;
         await refresh();
+        if (cancelled) return;
+        await loadTenants();
+        if (cancelled) return;
         routeAfterSignIn(params.return_to);
       } catch (err) {
         if (cancelled) return;
         // The other path may have minted a session while we were exchanging.
         const { data: after } = await supabase.auth.getSession();
         if (after.session) {
+          await loadTenants();
+          if (cancelled) return;
           routeAfterSignIn(params.return_to);
           return;
         }
