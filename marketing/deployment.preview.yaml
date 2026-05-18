@@ -9,11 +9,13 @@ services:
     image: ghcr.io/markmorcos/ma3ady-marketing
     port: 8080
 
+    buildArgs:
+      - name: NEXT_PUBLIC_WEB_APP_HOST
+        value: preview-app.ma3ady.com
+
     env:
       - name: APEX_HOST
         value: preview.ma3ady.com
-      - name: WEB_APP_HOST
-        value: preview-app.ma3ady.com
       - name: NODE_ENV
         value: production
 

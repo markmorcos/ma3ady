@@ -11,7 +11,13 @@ RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-# Env vars consumed at build are not required (everything is dynamic at runtime).
+# NEXT_PUBLIC_WEB_APP_HOST gets inlined by `next build` into the static
+# HTML for the home pages, so the demo CTA points at the right host per
+# environment (app.ma3ady.com on prod, preview-app.ma3ady.com on preview).
+# Without an override, defaults to prod — the manifest's `buildArgs:`
+# block supplies the preview value.
+ARG NEXT_PUBLIC_WEB_APP_HOST=app.ma3ady.com
+ENV NEXT_PUBLIC_WEB_APP_HOST=$NEXT_PUBLIC_WEB_APP_HOST
 RUN pnpm next build
 
 FROM node:22-alpine AS runner
