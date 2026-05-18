@@ -1,7 +1,7 @@
 version: 0.4.7
 
 namespace: ma3ady-preview
-project: ma3ady
+project: ma3ady-web
 
 services:
   - name: web
