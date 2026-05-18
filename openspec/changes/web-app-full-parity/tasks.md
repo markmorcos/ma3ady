@@ -65,9 +65,7 @@
 - [ ] 7.2 Add `web/nginx.conf` — serves `dist/`, SPA fallback `try_files $uri $uri/ /index.html;`, security headers (CSP, X-Frame-Options, etc.).
 - [ ] 7.3 Add `web/deployment.yaml` and `web/deployment.preview.yaml` patterned on `tenant-landing/deployment{,.preview}.yaml`; hosts `app.ma3ady.com` / `preview-app.ma3ady.com`; namespaces `ma3ady` / `ma3ady-preview`.
 - [ ] 7.4 Add `.github/workflows/deploy-web.yml` — path filters on `app/**`, `src/**`, `assets/**`, `web/**`, `app.json`, `package.json`, `pnpm-lock.yaml`. Build + push to GHCR. Dispatch to infra repo. Preview → production gated by preview success. Manual `workflow_dispatch` input with `target=preview|production|both`.
-- [ ] 7.5 Add `app.ma3ady.com` and `preview-app.ma3ady.com` DNS records (Cloudflare) pointing at the cluster ingress.
-- [ ] 7.6 Add k8s `Ingress` TLS entries for the two new hostnames.
-- [ ] 7.7 Confirm `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` are injected at build time in the new workflow (same secret names as mobile build).
+- [ ] 7.5 Confirm `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` are injected at build time in the new workflow (same secret names as mobile build). (DNS records + k8s Ingress TLS entries for `app.ma3ady.com` / `preview-app.ma3ady.com` are handled out-of-band in the infrastructure repo, not by this change.)
 
 ## Phase 8 — Tests
 
