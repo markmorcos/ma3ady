@@ -4,7 +4,7 @@
 # Build context MUST be the repo root (not `web/`) because `pnpm expo export`
 # needs `app/`, `src/`, `assets/`, and the root `package.json` / `app.json`.
 
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 RUN corepack enable
 
