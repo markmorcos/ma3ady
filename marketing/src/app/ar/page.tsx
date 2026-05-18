@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { MarketingHome } from '@/components/MarketingHome';
 import { env } from '@/lib/env';
 
-export const dynamic = 'force-static';
+// See marketing/src/app/page.tsx for the rationale. WEB_APP_HOST is a
+// runtime env var; force-dynamic ensures it's read on each request.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'ma3ady — الحجز ببساطة',
