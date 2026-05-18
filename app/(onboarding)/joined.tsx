@@ -96,7 +96,7 @@ export default function JoinedScreen() {
             size="lg"
             fullWidth
             trailingIcon={<Icon name="chevron-right" size={20} color="onPrimary" />}
-            onPress={() => router.replace('/(admin)/(tabs)')}
+            onPress={() => router.replace('/admin')}
           />
         </View>
       </View>

@@ -123,7 +123,7 @@ export default function Home() {
               label={t('home.openAdmin')}
               variant="primary"
               fullWidth
-              onPress={() => router.push('/(admin)/(tabs)')}
+              onPress={() => router.push('/admin')}
             />
           ) : (
             <Button

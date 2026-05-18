@@ -148,7 +148,7 @@ export default function AppointmentDetailScreen() {
             fullWidth
             onPress={() =>
               router.push({
-                pathname: '/(admin)/appointment/[id]/reschedule',
+                pathname: '/admin/appointment/[id]/reschedule',
                 params: { id: a.id },
               })
             }

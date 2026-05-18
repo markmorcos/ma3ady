@@ -25,7 +25,7 @@ export function AppointmentRow({ appointment, tenantTimezone }: Props) {
       accessibilityRole="button"
       onPress={() =>
         router.push({
-          pathname: '/(admin)/appointment/[id]',
+          pathname: '/admin/appointment/[id]',
           params: { id: appointment.id },
         })
       }

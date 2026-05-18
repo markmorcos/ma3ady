@@ -62,7 +62,7 @@ export default function ServicesScreen() {
           <Pressable
             onPress={() =>
               router.push({
-                pathname: '/(admin)/service/[id]',
+                pathname: '/admin/service/[id]',
                 params: { id: item.id },
               })
             }
@@ -107,7 +107,7 @@ export default function ServicesScreen() {
             icon={<Icon name="plus" size={20} color="onPrimaryContainer" />}
             label={t('admin.newService')}
             accessibilityLabel={t('admin.newService')}
-            onPress={() => router.push('/(admin)/service/new')}
+            onPress={() => router.push('/admin/service/new')}
           />
         </View>
       )}
