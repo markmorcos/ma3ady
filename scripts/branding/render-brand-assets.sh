@@ -2,12 +2,12 @@
 # Render PNG raster assets for the ma3ady mark + wordmark.
 #
 # Outputs:
-#   tenant-landing/public/favicon.ico
-#   tenant-landing/public/favicon-32.png
-#   tenant-landing/public/icon-192.png
-#   tenant-landing/public/icon-512.png
-#   tenant-landing/public/apple-touch-icon.png
-#   tenant-landing/public/og-image.png
+#   marketing/public/favicon.ico
+#   marketing/public/favicon-32.png
+#   marketing/public/icon-192.png
+#   marketing/public/icon-512.png
+#   marketing/public/apple-touch-icon.png
+#   marketing/public/og-image.png
 #   assets/store/icon-512.png   (Play Store)
 #   assets/icon.png             (Expo: iOS app icon, 1024x1024)
 #   assets/adaptive-icon.png    (Expo: Android adaptive foreground, 1024x1024)
@@ -25,7 +25,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
-OUT_TENANT="$ROOT/tenant-landing/public"
+OUT_TENANT="$ROOT/marketing/public"
 OUT_STORE="$ROOT/assets/store"
 OUT_EXPO="$ROOT/assets"
 mkdir -p "$OUT_TENANT" "$OUT_STORE" "$OUT_EXPO"

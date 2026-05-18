@@ -17,7 +17,6 @@ module.exports = [
       // Edge Functions are Deno code; don't lint them with the RN/Expo config.
       'supabase/functions/**',
       // Web workspaces are Next.js / static; they ship their own configs.
-      'tenant-landing/**',
       'marketing/**',
     ],
   },

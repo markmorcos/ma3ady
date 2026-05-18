@@ -46,9 +46,9 @@ module.exports = {
       },
     },
     {
-      displayName: 'tenant-landing',
+      displayName: 'marketing',
       testEnvironment: 'node',
-      testMatch: ['<rootDir>/tenant-landing/src/**/*.test.{ts,tsx}'],
+      testMatch: ['<rootDir>/marketing/src/**/*.test.{ts,tsx}'],
       transform: {
         '^.+\\.tsx?$': [
           'ts-jest',
@@ -58,14 +58,14 @@ module.exports = {
               jsx: 'react-jsx',
               esModuleInterop: true,
               moduleResolution: 'node',
-              baseUrl: './tenant-landing',
+              baseUrl: './marketing',
               paths: { '@/*': ['./src/*'] },
             },
           },
         ],
       },
       moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/tenant-landing/src/$1',
+        '^@/(.*)$': '<rootDir>/marketing/src/$1',
       },
     },
   ],

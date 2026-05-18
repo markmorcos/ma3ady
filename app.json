@@ -11,8 +11,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ma3ady",
       "associatedDomains": [
-        "applinks:ma3ady.com",
-        "applinks:preview.ma3ady.com",
         "applinks:app.ma3ady.com",
         "applinks:preview-app.ma3ady.com"
       ]
@@ -28,14 +26,6 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            {
-              "scheme": "https",
-              "host": "ma3ady.com"
-            },
-            {
-              "scheme": "https",
-              "host": "preview.ma3ady.com"
-            },
             {
               "scheme": "https",
               "host": "app.ma3ady.com"

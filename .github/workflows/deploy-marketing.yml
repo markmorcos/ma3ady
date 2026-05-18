@@ -1,4 +1,4 @@
-name: deploy-ma3ady-landing
+name: deploy-ma3ady-marketing
 
 on:
   workflow_dispatch:
@@ -12,8 +12,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tenant-landing/**'
-      - '.github/workflows/deploy-tenant-landing.yml'
+      - 'marketing/**'
+      - '.github/workflows/deploy-marketing.yml'
 
 jobs:
   deploy-preview:
@@ -32,7 +32,7 @@ jobs:
               "repository": "markmorcos/ma3ady",
               "token": "${{ secrets.DEPLOYMENT_TOKEN }}",
               "version": "${{ github.sha }}",
-              "config_file": "tenant-landing/deployment.preview.yaml"
+              "config_file": "marketing/deployment.preview.yaml"
             }
 
   deploy-production:
@@ -55,5 +55,5 @@ jobs:
               "repository": "markmorcos/ma3ady",
               "token": "${{ secrets.DEPLOYMENT_TOKEN }}",
               "version": "${{ github.sha }}",
-              "config_file": "tenant-landing/deployment.yaml"
+              "config_file": "marketing/deployment.yaml"
             }

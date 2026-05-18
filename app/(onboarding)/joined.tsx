@@ -16,7 +16,7 @@ export default function JoinedScreen() {
   const tenant = useTenantStore((s) => s.tenants.find((tt) => tt.id === s.currentTenantId));
   const showToast = useToastStore((s) => s.show);
 
-  const url = tenant ? `ma3ady.com/t/${tenant.slug}` : 'ma3ady.com';
+  const url = tenant ? `app.ma3ady.com/t/${tenant.slug}` : 'ma3ady.com';
 
   const onCopy = async () => {
     await copyToClipboard(`https://${url}`);

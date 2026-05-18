@@ -10,9 +10,9 @@ RUN corepack enable
 
 # Workspace manifests first for layer caching.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY tenant-landing/package.json ./tenant-landing/package.json
+COPY marketing/package.json ./marketing/package.json
 
-# Lock-aware install; we don't need to install tenant-landing's deps here
+# Lock-aware install; we don't need to install marketing's deps here
 # but the workspace root install also resolves the child manifests.
 RUN pnpm install --frozen-lockfile --filter ma3ady...
 

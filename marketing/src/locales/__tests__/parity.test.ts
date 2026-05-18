@@ -16,7 +16,7 @@ function leafKeys(tree: Tree, prefix: string[] = []): string[] {
   return out;
 }
 
-describe('tenant-landing locale parity', () => {
+describe('marketing locale parity', () => {
   const enKeys = leafKeys(en as Tree).sort();
   const arKeys = leafKeys(ar as Tree).sort();
 

@@ -272,7 +272,7 @@ Status of every artifact a Play submission needs.
 | Privacy policy URL                                       | ⚠️ Page exists at `ma3ady.com/privacy` per marketing-site spec; confirm it's reachable in prod before submission |
 | Support email                                            | ❌ `<TBD>` |
 | Developer / publisher entity                             | ❌ `<TBD>` |
-| Play App Signing fingerprint added to `assetlinks.json`  | ⚠️ Only the local-keystore fingerprint is in `tenant-landing/src/app/.well-known/assetlinks.json` today. After uploading the first AAB, Play generates its own upload-key SHA-256 — grab it from Play Console → App integrity → App signing and append as a second entry so Android App Links keep verifying for Play-installed users |
+| Play App Signing fingerprint added to `assetlinks.json`  | ⚠️ Only the local-keystore fingerprint is in `marketing/src/app/.well-known/assetlinks.json` today. After uploading the first AAB, Play generates its own upload-key SHA-256 — grab it from Play Console → App integrity → App signing and append as a second entry so Android App Links keep verifying for Play-installed users |
 
 ---
 
@@ -299,7 +299,7 @@ Status of every artifact a Play submission needs.
      `assets/store/screenshots/play/ar/...` plus the Arabic copy
      from §3.
 4. After Play approves the upload key, append the upload-key SHA-256
-   to `tenant-landing/src/app/.well-known/assetlinks.json` and
-   redeploy tenant-landing so Android App Links keep verifying for
+   to `marketing/src/app/.well-known/assetlinks.json` and
+   redeploy marketing so Android App Links keep verifying for
    Play-installed users.
 5. Submit for review. First review usually takes 1–3 days.

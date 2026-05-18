@@ -52,7 +52,7 @@ export default function AdminTodayScreen() {
 
   const onShare = async () => {
     if (!tenant) return;
-    const url = `https://ma3ady.com/t/${tenant.slug}`;
+    const url = `https://app.ma3ady.com/t/${tenant.slug}`;
     try {
       await Share.share({
         message: t('admin.shareLinkMessage', { tenantName: tenant.name, url }),

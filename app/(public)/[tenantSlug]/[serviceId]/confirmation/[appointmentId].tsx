@@ -69,7 +69,7 @@ export default function ConfirmationScreen() {
   });
   const countdown = useCountdown(startsAt ?? '');
 
-  const manageUrl = token ? `https://ma3ady.com/manage/${token}` : null;
+  const manageUrl = token ? `https://app.ma3ady.com/manage/${token}` : null;
 
   if (!tenant || !service || !startsAt) return null;
 

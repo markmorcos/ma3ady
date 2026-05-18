@@ -1,6 +1,6 @@
 packages:
   - .
-  - tenant-landing
+  - marketing
 allowBuilds:
   esbuild: true
   sharp: true

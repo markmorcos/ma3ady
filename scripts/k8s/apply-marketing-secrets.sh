@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Read tenant-landing's runtime secrets from secrets/secrets.local.toml and
-# apply them as Kubernetes Secrets so the deployment.yaml
-# `valueFromSecret: <name>` references resolve.
+# Read Supabase secrets from secrets/secrets.local.toml and apply them as
+# Kubernetes Secrets in the target namespace, so any service that
+# references them (currently web/deployment.yaml's buildArgs) resolves
+# correctly. The marketing service no longer needs Supabase keys, but
+# the secrets remain useful in the namespace for app.ma3ady.com builds.
 #
 # Usage:
-#   ./scripts/k8s/apply-tenant-landing-secrets.sh production
-#   ./scripts/k8s/apply-tenant-landing-secrets.sh preview
+#   ./scripts/k8s/apply-marketing-secrets.sh production
+#   ./scripts/k8s/apply-marketing-secrets.sh preview
 #
 # Reads from:
 #   secrets/secrets.local.toml → [k8s.<env>] section
@@ -148,7 +150,7 @@ if [ "$DRY_RUN" = "1" ]; then
   echo "(DRY_RUN=1) no changes applied"
 else
   echo
-  echo "Done. Roll the deploy + verify env reaches the pod:"
-  echo "  ${KCTL[*]} -n $NAMESPACE rollout restart deploy tenant-landing"
-  echo "  ${KCTL[*]} -n $NAMESPACE exec deploy/tenant-landing -- printenv | grep SUPABASE"
+  echo "Done. Secrets now available to any service in '$NAMESPACE' that"
+  echo "references them via secretKeyRef (e.g. web/deployment.yaml's"
+  echo "EXPO_PUBLIC_SUPABASE_URL build arg)."
 fi
