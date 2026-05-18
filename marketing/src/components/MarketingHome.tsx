@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { env } from '@/lib/env';
 import { dirOf, t, type Locale } from '@/lib/locale';
 
 type Props = {
@@ -12,7 +13,11 @@ export function MarketingHome({ locale }: Props) {
   const altHome = isAr ? '/' : '/ar/';
   const privacyHref = isAr ? '/ar/privacy/' : '/en/privacy/';
   const termsHref = isAr ? '/ar/terms/' : '/en/terms/';
-  const demoUrl = isAr ? '/t/demo?lang=ar' : '/t/demo';
+  // Public booking lives on the web app host (app.ma3ady.com /
+  // preview-app.ma3ady.com), not on the marketing apex. Build an
+  // absolute URL so the CTA crosses hosts correctly in every env.
+  const demoPath = isAr ? '/t/demo?lang=ar' : '/t/demo';
+  const demoUrl = `https://${env.WEB_APP_HOST}${demoPath}`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'MobileApplication',
