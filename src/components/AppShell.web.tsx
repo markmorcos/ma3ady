@@ -10,6 +10,14 @@ import { ADMIN_TABS, CUSTOMER_TABS, type TabDescriptor } from '@/navigation/getT
 const RAIL_BREAKPOINT = 768;
 const RAIL_WIDTH = 240;
 
+// Customer screens are list-y but not data-dense; 720px is comfortable.
+// Admin gets 1280px so the upcoming list, audit log, and the 30×7
+// availability heatmap have room to breathe.
+const CONTENT_MAX_WIDTH: Record<Role, number> = {
+  customer: 720,
+  admin: 1280,
+};
+
 type Role = 'customer' | 'admin';
 
 type Props = {
@@ -20,8 +28,9 @@ type Props = {
 /**
  * Responsive shell for the web build.
  *
- * - viewport width >= 768px → 240px left rail beside the route content.
- * - viewport width <  768px → bottom tab bar below the route content.
+ * - viewport width >= 768px → 240px left rail beside a max-width centered
+ *   main column (customer 720px, admin 1280px).
+ * - viewport width <  768px → bottom tab bar; main column is full-width.
  *
  * Destinations come from `getTabs.ts` so the rail and the bottom bar can
  * never drift from each other or from the native `<Tabs>` config.
@@ -34,12 +43,15 @@ export function AppShell({ role, children }: Props) {
   const { width } = useWindowDimensions();
   const theme = useTheme();
   const basePath = role === 'admin' ? '/admin' : '/';
+  const maxWidth = CONTENT_MAX_WIDTH[role];
 
   if (width >= RAIL_BREAKPOINT) {
     return (
       <View style={[styles.row, { backgroundColor: theme.colors.bg }]}>
         <Rail tabs={tabs} basePath={basePath} />
-        <View style={styles.main}>{children}</View>
+        <View style={styles.mainArea}>
+          <View style={[styles.centered, { maxWidth }]}>{children}</View>
+        </View>
       </View>
     );
   }
@@ -154,6 +166,11 @@ const styles = StyleSheet.create({
   row: { flex: 1, flexDirection: 'row' },
   col: { flex: 1, flexDirection: 'column' },
   main: { flex: 1 },
+  // mainArea fills the remaining width beside the rail; the centered
+  // child constrains the actual content. The empty space on either
+  // side keeps showing the theme bg color.
+  mainArea: { flex: 1, alignItems: 'center' },
+  centered: { flex: 1, width: '100%' },
   rail: {
     width: RAIL_WIDTH,
     borderEndWidth: 1,
