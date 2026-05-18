@@ -10,7 +10,7 @@ import { Switch } from '@/components/Switch';
 import { Text } from '@/components/Text';
 import { useTheme } from '@/design/ThemeProvider';
 import { getAllServices, setServiceActive } from '@/services/api/services';
-import { useTenantStore } from '@/state/tenantStore';
+import { isAdminRole, useTenantStore } from '@/state/tenantStore';
 import { type Service } from '@/types/db';
 
 export default function ServicesScreen() {
@@ -21,7 +21,7 @@ export default function ServicesScreen() {
     s.tenants.find((tt) => tt.id === s.currentTenantId),
   );
   const role = tenant?.role;
-  const canEdit = role === 'owner' || role === 'admin';
+  const canEdit = isAdminRole(role);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-services', tenant?.id],

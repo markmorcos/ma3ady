@@ -6,7 +6,7 @@ import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { ListItem } from '@/components/ListItem';
 import { useTheme } from '@/design/ThemeProvider';
-import { useTenantStore } from '@/state/tenantStore';
+import { homeRouteForRole, useTenantStore } from '@/state/tenantStore';
 import { type TenantWithRole } from '@/services/api/tenants';
 
 export default function TenantPicker() {
@@ -17,8 +17,9 @@ export default function TenantPicker() {
   const currentTenantId = useTenantStore((s) => s.currentTenantId);
 
   const onPick = async (tenantId: string) => {
+    const picked = tenants.find((tt) => tt.id === tenantId);
     await selectTenant(tenantId);
-    router.replace('/');
+    router.replace(homeRouteForRole(picked?.role));
   };
 
   return (

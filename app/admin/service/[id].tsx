@@ -14,7 +14,7 @@ import {
   ServiceInUseError,
   upsertService,
 } from '@/services/api/services';
-import { useTenantStore } from '@/state/tenantStore';
+import { isAdminRole, useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
 
 export default function EditServiceScreen() {
@@ -26,7 +26,7 @@ export default function EditServiceScreen() {
     s.tenants.find((tt) => tt.id === s.currentTenantId),
   );
   const role = tenant?.role;
-  const canEdit = role === 'owner' || role === 'admin';
+  const canEdit = isAdminRole(role);
   const showToast = useToastStore((s) => s.show);
   const [saving, setSaving] = useState(false);
 

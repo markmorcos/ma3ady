@@ -37,7 +37,7 @@ import {
   removeSlot,
   toHHMMSS,
 } from '@/features/admin/bandOps';
-import { useTenantStore } from '@/state/tenantStore';
+import { isAdminRole, useTenantStore } from '@/state/tenantStore';
 import { useToastStore } from '@/state/toastStore';
 
 const DAY_KEYS = [
@@ -69,7 +69,7 @@ export default function AvailabilityScreen() {
     s.tenants.find((tt) => tt.id === s.currentTenantId),
   );
   const role = tenant?.role;
-  const canEdit = role === 'owner' || role === 'admin';
+  const canEdit = isAdminRole(role);
   const showToast = useToastStore((s) => s.show);
 
   const [editing, setEditing] = useState<{
