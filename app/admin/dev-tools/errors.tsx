@@ -140,7 +140,7 @@ function ErrorRow({ item }: { item: ClientError }) {
     <Pressable
       onPress={() =>
         router.push({
-          pathname: '/(admin)/dev-tools/error/[id]',
+          pathname: '/admin/dev-tools/error/[id]',
           params: { id: item.id },
         })
       }

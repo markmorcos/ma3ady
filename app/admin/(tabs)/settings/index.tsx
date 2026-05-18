@@ -153,13 +153,13 @@ export default function AdminSettingsScreen() {
                 : ` · ${t('admin.tzBadgeTenantDefault')}`)
             }
             trailing={<Icon name="chevron-right" size={20} color="onSurfaceVariant" />}
-            onPress={() => router.push('/(admin)/(tabs)/settings/timezone')}
+            onPress={() => router.push('/admin/settings/timezone')}
           />
           <ListItem
             leading={<Icon name="list-checks" size={20} color="onSurfaceVariant" />}
             headline={t('admin.settingsAuditLog')}
             trailing={<Icon name="chevron-right" size={20} color="onSurfaceVariant" />}
-            onPress={() => router.push('/(admin)/(tabs)/audit-log')}
+            onPress={() => router.push('/admin/audit-log')}
           />
           <ListItem
             leading={<Icon name="users" size={20} color="onSurfaceVariant" />}
